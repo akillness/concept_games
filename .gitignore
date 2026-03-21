@@ -1,0 +1,57 @@
+# OMU / local orchestration state
+.omc/
+.omx/
+.survey/
+plan.md
+
+# macOS
+.DS_Store
+
+# Unity generated folders
+[Ll]ibrary/
+[Tt]emp/
+[Oo]bj/
+[Bb]uild/
+[Bb]uilds/
+[Ll]ogs/
+[Mm]emoryCaptures/
+[Rr]ecordings/
+[Uu]ser[Ss]ettings/
+
+# Unity generated files
+*.csproj
+*.sln
+*.suo
+*.tmp
+*.user
+*.userprefs
+*.pidb
+*.booproj
+*.svd
+*.pdb
+*.mdb
+*.opendb
+*.VC.db
+
+# JetBrains / VS Code
+.idea/
+.vs/
+.vscode/*
+concept_game/.vscode/
+!.vscode/extensions.json
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+
+# Test / coverage
+TestResults/
+coverage/
+
+# Media build scratch
+media/tmp/
+
+# Optional package samples/docs not used by runtime
+concept_game/Assets/TextMesh Pro/Documentation/
+concept_game/Assets/TextMesh Pro/Examples & Extras/
+concept_game/Assets/TextMesh Pro/Documentation.meta
+concept_game/Assets/TextMesh Pro/Examples & Extras.meta

@@ -1,0 +1,24 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8f5f50c4d2ac47f1b2d2550608a84f4b, type: 3}
+  m_Name: Upgrade_RouteScanner
+  m_EditorClassIdentifier: 
+  upgradeId: route_scanner
+  displayName: Route Scanner
+  description: Predicts cleaner routes to extend runs and increase BloomDust efficiency.
+  costType: 0
+  costAmount: 60
+  entryCostReduction: 0
+  cleanWaterBonus: 0
+  timerBonusSeconds: 25
+  bloomMultiplier: 1.2
+  memoryPearlBonus: 0

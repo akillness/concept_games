@@ -1,0 +1,155 @@
+using System.Collections.Generic;
+using MossHarbor.Data;
+using NUnit.Framework;
+using UnityEngine;
+
+namespace MossHarbor.Tests.EditMode
+{
+    public sealed class SerializableDictionaryTests
+    {
+        [Test]
+        public void RoundTrip_PreservesValues()
+        {
+            var data = new SerializableDictionary<ResourceType, int>();
+            data.FromDictionary(new Dictionary<ResourceType, int>
+            {
+                { ResourceType.BloomDust, 10 },
+                { ResourceType.Scrap, 3 },
+            });
+
+            var roundTrip = data.ToDictionary();
+
+            Assert.AreEqual(10, roundTrip[ResourceType.BloomDust]);
+            Assert.AreEqual(3, roundTrip[ResourceType.Scrap]);
+        }
+
+        [Test]
+        public void RunSummary_DefaultLabel_IsNotEmpty()
+        {
+            var summary = new RunSummary();
+
+            Assert.IsFalse(string.IsNullOrWhiteSpace(summary.resultLabel));
+        }
+
+        [Test]
+        public void RunSummary_DefaultDistrictId_IsNotEmpty()
+        {
+            var summary = new RunSummary();
+
+            Assert.IsFalse(string.IsNullOrWhiteSpace(summary.districtId));
+        }
+
+        [Test]
+        public void RunSummary_GetObjectiveSummary_UsesStoredObjectiveStrings()
+        {
+            var summary = new RunSummary
+            {
+                objectiveDescription = "Recover 12 Scrap from Reed Fields before returning.",
+                objectiveProgressText = "Scrap: 6 / 12",
+            };
+
+            Assert.AreEqual(
+                "Recover 12 Scrap from Reed Fields before returning.\nScrap: 6 / 12",
+                summary.GetObjectiveSummary());
+        }
+
+        [Test]
+        public void RunSummary_GetObjectiveSummary_FallsBackToHoldoutFormatting()
+        {
+            var summary = new RunSummary
+            {
+                objectiveType = ExpeditionObjectiveType.HoldOut,
+                objectiveTargetSeconds = 5f,
+                objectiveElapsedSeconds = 5f,
+            };
+
+            Assert.AreEqual(
+                "Hold the route until the beacon stabilizes.\nHoldout: 5 / 5s",
+                summary.GetObjectiveSummary());
+        }
+
+        [Test]
+        public void RunSummary_GetObjectiveSummary_UsesBundleForLegacyResourceObjective()
+        {
+            var district = ScriptableObject.CreateInstance<DistrictDef>();
+            district.displayName = "Reed Fields";
+            district.objectiveType = ExpeditionObjectiveType.CollectResource;
+            district.objectiveResourceType = ResourceType.Scrap;
+            district.objectiveTargetAmount = 12;
+
+            var summary = new RunSummary
+            {
+                districtId = "reed_fields",
+                scrapCollected = 6,
+            };
+
+            Assert.AreEqual(
+                "Recover 12 Scrap from Reed Fields before returning.\nScrap: 6 / 12",
+                summary.GetObjectiveSummary(new DistrictContentBundle(1, district, null, null)));
+        }
+
+        [Test]
+        public void RunSummary_GetObjectiveSummary_UsesBundleForLegacyHoldoutObjective()
+        {
+            var district = ScriptableObject.CreateInstance<DistrictDef>();
+            district.displayName = "Tidal Vault";
+            district.objectiveType = ExpeditionObjectiveType.HoldOut;
+            district.objectiveHoldSeconds = 15f;
+
+            var summary = new RunSummary
+            {
+                districtId = "tidal_vault",
+                durationSeconds = 9.6f,
+            };
+
+            Assert.AreEqual(
+                "Hold the route in Tidal Vault for 15 seconds, then fall back to the beacon.\nHoldout: 10 / 15s",
+                summary.GetObjectiveSummary(new DistrictContentBundle(2, district, null, null)));
+        }
+
+        [Test]
+        public void ContentPaths_GetDistrictPath_ClampsAndWraps()
+        {
+            Assert.AreEqual(ContentPaths.DefaultDistrict, ContentPaths.GetDistrictPath(-1));
+            Assert.AreEqual(ContentPaths.DefaultDistrict, ContentPaths.GetDistrictPath(0));
+            Assert.AreEqual(ContentPaths.ReedDistrict, ContentPaths.GetDistrictPath(1));
+            Assert.AreEqual(ContentPaths.VaultDistrict, ContentPaths.GetDistrictPath(2));
+            Assert.AreEqual(ContentPaths.DefaultDistrict, ContentPaths.GetDistrictPath(6));
+        }
+
+        [Test]
+        public void ContentPaths_GetHubZonePath_ClampsAndWraps()
+        {
+            Assert.AreEqual(ContentPaths.DefaultHubZone, ContentPaths.GetHubZonePath(-1));
+            Assert.AreEqual(ContentPaths.DefaultHubZone, ContentPaths.GetHubZonePath(0));
+            Assert.AreEqual(ContentPaths.ReedHubZone, ContentPaths.GetHubZonePath(1));
+            Assert.AreEqual(ContentPaths.VaultHubZone, ContentPaths.GetHubZonePath(2));
+            Assert.AreEqual(ContentPaths.DefaultHubZone, ContentPaths.GetHubZonePath(6));
+        }
+
+        [Test]
+        public void ContentPaths_GetQuestPath_ClampsAndWraps()
+        {
+            Assert.AreEqual(ContentPaths.DefaultQuest, ContentPaths.GetQuestPath(-1));
+            Assert.AreEqual(ContentPaths.DefaultQuest, ContentPaths.GetQuestPath(0));
+            Assert.AreEqual(ContentPaths.ReedQuest, ContentPaths.GetQuestPath(1));
+            Assert.AreEqual(ContentPaths.VaultQuest, ContentPaths.GetQuestPath(2));
+            Assert.AreEqual(ContentPaths.NarrowsQuest, ContentPaths.GetQuestPath(3));
+            Assert.AreEqual(ContentPaths.ArcadeQuest, ContentPaths.GetQuestPath(4));
+            Assert.AreEqual(ContentPaths.CrownQuest, ContentPaths.GetQuestPath(5));
+            Assert.AreEqual(ContentPaths.DefaultQuest, ContentPaths.GetQuestPath(6));
+        }
+
+        [Test]
+        public void ContentPaths_GetDistrictPath_WrapsAcrossAllDistricts()
+        {
+            Assert.AreEqual(ContentPaths.DefaultDistrict, ContentPaths.GetDistrictPath(0));
+            Assert.AreEqual(ContentPaths.ReedDistrict, ContentPaths.GetDistrictPath(1));
+            Assert.AreEqual(ContentPaths.VaultDistrict, ContentPaths.GetDistrictPath(2));
+            Assert.AreEqual(ContentPaths.NarrowsDistrict, ContentPaths.GetDistrictPath(3));
+            Assert.AreEqual(ContentPaths.ArcadeDistrict, ContentPaths.GetDistrictPath(4));
+            Assert.AreEqual(ContentPaths.CrownDistrict, ContentPaths.GetDistrictPath(5));
+            Assert.AreEqual(ContentPaths.DefaultDistrict, ContentPaths.GetDistrictPath(6));
+        }
+    }
+}

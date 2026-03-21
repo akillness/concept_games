@@ -1,0 +1,24 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8f5f50c4d2ac47f1b2d2550608a84f4b, type: 3}
+  m_Name: Upgrade_PearlResonator
+  m_EditorClassIdentifier: 
+  upgradeId: pearl_resonator
+  displayName: Pearl Resonator
+  description: Tunes the harbor grid to reveal MemoryPearls in advanced districts.
+  costType: 3
+  costAmount: 20
+  entryCostReduction: 0
+  cleanWaterBonus: 0
+  timerBonusSeconds: 0
+  bloomMultiplier: 1
+  memoryPearlBonus: 1
