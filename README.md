@@ -35,6 +35,8 @@
 - 픽업 오브젝트 bob/proximity scale/수집 shrink 애니메이션
 - 비콘 pulse 애니메이션 (목표 달성 시 활성화)
 - 씬 전환 이벤트 시스템과 비동기 페이드 효과
+- 6개 지구별 맵 레이아웃과 기믹 동선 설계 (기획 문서)
+- 10개 시스템 구현 상태 추적 및 기획-코드 매핑 문서
 
 ## Controls
 
@@ -53,6 +55,19 @@
 | Easy | +30% | -30% | 85% | 완화 |
 | Normal | 기본값 | 기본값 | 70% | 기본값 |
 | Hard | -20% | +30% | 50% | 강화 |
+
+## District Progression
+
+6개 지구를 순차적으로 해금하며 진행합니다.
+
+| 지구 | 해금 조건 | 목표 유형 | 예상 세션 |
+|------|-----------|-----------|-----------|
+| Dock (안개 부두) | 즉시 | 픽업 수집 | ~3.5분 |
+| Reed Fields (갈대 습지) | 1★ | 자원 수집 (SeedPod) | ~3.3분 |
+| Tidal Vault (조수 금고) | 2★ | 자원 수집 (CleanWater) | ~3분 |
+| Glass Narrows (유리 해협) | 3★ | 거점 방어 (75초) | ~3분 |
+| Sunken Arcade (침수 아케이드) | 4★ | 픽업 수집 | ~2.8분 |
+| Lighthouse Crown (등대 왕관) | 5★ | 거점 방어 (90초) | ~2.5분 |
 
 ## Open In Unity
 
@@ -96,6 +111,8 @@ media/
 - Unity 기술 스펙: [design/09_unity_technical_spec.md](design/09_unity_technical_spec.md)
 - 게임플레이 시스템 통합 명세: [design/15_gameplay_systems_spec.md](design/15_gameplay_systems_spec.md)
 - 게임성 강화 변경 이력: [design/16_gameplay_enhancement_changelog.md](design/16_gameplay_enhancement_changelog.md)
+- 지구별 맵 레이아웃: [design/17_district_map_layouts.md](design/17_district_map_layouts.md)
+- 통합 기술 레퍼런스: [design/18_consolidated_technical_reference.md](design/18_consolidated_technical_reference.md)
 
 ## Notes
 

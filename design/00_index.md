@@ -23,6 +23,11 @@
 11. [11_task_estimation.md](/Users/jangyoung/.superset/projects/concept_games/design/11_task_estimation.md)
 12. [12_sprint_alpha_1_backlog.md](/Users/jangyoung/.superset/projects/concept_games/design/12_sprint_alpha_1_backlog.md)
 13. [13_wrapper_followup_plan.md](/Users/jangyoung/.superset/projects/concept_games/design/13_wrapper_followup_plan.md)
+- [14. Scene Improvement Progress](14_scene_improvement_progress.md)
+- [15. Gameplay Systems Specification](15_gameplay_systems_spec.md)
+- [16. Gameplay Enhancement Changelog](16_gameplay_enhancement_changelog.md)
+- [17. District Map Layouts](17_district_map_layouts.md)
+- [18. Consolidated Technical Reference](18_consolidated_technical_reference.md)
 
 ## 제품 원칙
 

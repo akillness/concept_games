@@ -160,57 +160,182 @@ timeRatio      = durationSeconds / runTimerSeconds  (runTimerSeconds == 0이면 
 
 ---
 
-## 7. User Story Scenarios (Difficulty Test Cases — Normal)
+## 7. User Story Scenarios (Difficulty Test Matrix)
 
-Normal 난이도, 디스트릭트별 기대 경험을 플레이어 시점으로 기술한 시나리오. 수치는 `DistrictBalanceDefaults` 기준이다.
+> 6개 지구 × 3 난이도 = 18개 시나리오. 각 시나리오는 예상 플레이 경험을 구체화한 유저 스토리 형태.
 
-### Scenario 1 — Dock (튜토리얼)
+### 7.1 Dock (안개 부두)
 
-> As a player on **Normal**, entering **Dock**, I expect **210s** timer, **3 pickup targets** to collect, costing **5 BloomDust**.
->
-> - 2성 기준: 4개 이상 픽업 수집 (총 4개 중 80% = 3.2 → 4개)
-> - 3성 기준: 2성 달성 + 136초 이내 완료 (210s × 0.65)
-> - 입문자도 1성 달성이 쉽고, 3성은 동선 최적화를 요구한다.
+**Easy**
+> "초보 플레이어로서, Dock에 4 BloomDust를 내고 진입하면, 273초 동안 2개 픽업을 수집하고 비콘을 활성화한다. 실패해도 자원의 85%를 보존한다."
+- 타이머: 210 × 1.3 = 273초
+- 픽업 목표: 3 - 1 = 2개
+- 입장 비용: round(5 × 0.7) = 4 BloomDust
+- 2성 기준: pickupRatio ≥ 0.70 (기본 0.80 - 0.10)
+- 3성 기준: timeRatio ≤ 0.75 (기본 0.65 + 0.10)
 
-### Scenario 2 — Reed Fields (첫 자원 목표)
+**Normal**
+> "일반 플레이어로서, Dock에 5 BloomDust를 내고 진입하면, 210초 동안 3개 픽업을 수집하고 비콘을 활성화한다."
+- 타이머: 210초
+- 픽업 목표: 3개
+- 입장 비용: 5 BloomDust
+- 2성 기준: pickupRatio ≥ 0.80
+- 3성 기준: timeRatio ≤ 0.65
 
-> As a player on **Normal**, entering **Reed Fields**, I expect **195s** timer, **4 pickup targets**, costing **10 BloomDust**. 메인 목표는 SeedPod 5개 수집.
->
-> - 2성 기준: 4개 중 3개 이상 픽업 수집 (75%)
-> - 3성 기준: 2성 달성 + 117초 이내 완료 (195s × 0.60)
-> - 자원 목표와 픽업 목표를 병행하는 첫 경험.
+**Hard**
+> "숙련 플레이어로서, Dock에 7 BloomDust를 내고 진입하면, 168초 동안 4개 픽업을 수집한다. 실패 시 자원의 50%만 보존된다."
+- 타이머: 210 × 0.8 = 168초
+- 픽업 목표: 3 + 1 = 4개
+- 입장 비용: round(5 × 1.3) = 7 BloomDust
+- 2성 기준: pickupRatio ≥ 0.85 (기본 0.80 + 0.05)
+- 3성 기준: timeRatio ≤ 0.60 (기본 0.65 - 0.05)
 
-### Scenario 3 — Tidal Vault (CleanWater 경제 입문)
+### 7.2 Reed Fields (갈대 습지)
 
-> As a player on **Normal**, entering **Tidal Vault**, I expect **180s** timer, **4 pickup targets**, costing **15 BloomDust**. 메인 목표는 CleanWater 3개 수집.
->
-> - 2성 기준: 5개 중 3.75 → 4개 이상 픽업 수집 (75%)
-> - 3성 기준: 2성 달성 + 99초 이내 완료 (180s × 0.55)
-> - Harbor Pump 업그레이드 시 CleanWater 보너스 확보 가능.
+**Easy**
+> "초보 플레이어로서, Reed Fields에 7 BloomDust를 내고 진입하면, 254초 동안 SeedPod 4개를 수집한다. 실패해도 자원의 85%를 보존한다."
+- 타이머: 195 × 1.3 = 253.5 → 254초
+- 픽업 목표: 5 - 1 = 4개 (SeedPod 기준)
+- 입장 비용: round(10 × 0.7) = 7 BloomDust
+- 2성 기준: pickupRatio ≥ 0.65 (기본 0.75 - 0.10)
+- 3성 기준: timeRatio ≤ 0.70 (기본 0.60 + 0.10)
 
-### Scenario 4 — Glass Narrows (지구력 목표)
+**Normal**
+> "일반 플레이어로서, Reed Fields에 10 BloomDust를 내고 진입하면, 195초 동안 SeedPod 5개를 수집한다. 총 6개의 픽업(2B+2S+2SP)이 배치되어 있다."
+- 타이머: 195초
+- 픽업 목표: 5개 (SeedPod)
+- 입장 비용: 10 BloomDust
+- 2성 기준: pickupRatio ≥ 0.75 (총 픽업 6개 중 4.5개 이상)
+- 3성 기준: timeRatio ≤ 0.60 (195s × 0.60 = 117초 이내)
 
-> As a player on **Normal**, entering **Glass Narrows**, I expect **180s** timer, **5 pickup targets**, costing **20 BloomDust**. 메인 목표는 75초 버티기 (HoldOut).
->
-> - 2성 기준: 5개 중 3.5 → 4개 이상 픽업 수집 (70%)
-> - 3성 기준: 2성 달성 + 90초 이내 완료 (180s × 0.50)
-> - HoldOut 목표는 정화 루트를 유지하면서 타이머를 관리해야 한다.
+**Hard**
+> "숙련 플레이어로서, Reed Fields에 13 BloomDust를 내고 진입하면, 156초 동안 SeedPod 6개를 수집한다. 실패 시 자원의 50%만 보존된다."
+- 타이머: 195 × 0.8 = 156초
+- 픽업 목표: 5 + 1 = 6개
+- 입장 비용: round(10 × 1.3) = 13 BloomDust
+- 2성 기준: pickupRatio ≥ 0.80 (기본 0.75 + 0.05)
+- 3성 기준: timeRatio ≤ 0.55 (기본 0.60 - 0.05)
 
-### Scenario 5 — Sunken Arcade (고밀도 픽업)
+### 7.3 Tidal Vault (조수 금고)
 
-> As a player on **Normal**, entering **Sunken Arcade**, I expect **165s** timer, **5 pickup targets**, costing **25 BloomDust**. 메인 목표는 픽업 5개 수집.
->
-> - 2성 기준: 7개 중 4.9 → 5개 이상 픽업 수집 (70%)
-> - 3성 기준: 2성 달성 + 82.5초 이내 완료 (165s × 0.50)
-> - 좁은 공간에 픽업이 집중되어 동선 효율이 핵심이다.
+**Easy**
+> "초보 플레이어로서, Tidal Vault에 11 BloomDust를 내고 진입하면, 234초 동안 CleanWater 2개를 수집한다. 실패해도 자원의 85%를 보존한다."
+- 타이머: 180 × 1.3 = 234초
+- 픽업 목표: 3 - 1 = 2개 (CleanWater 기준)
+- 입장 비용: round(15 × 0.7) = 11 BloomDust
+- 2성 기준: pickupRatio ≥ 0.65 (기본 0.75 - 0.10)
+- 3성 기준: timeRatio ≤ 0.65 (기본 0.55 + 0.10)
 
-### Scenario 6 — Lighthouse Crown (최종 챌린지)
+**Normal**
+> "일반 플레이어로서, Tidal Vault에 15 BloomDust를 내고 진입하면, 180초 동안 CleanWater 3개를 수집한다. 총 5개의 픽업(2B+2S+1SP)이 배치되어 있다."
+- 타이머: 180초
+- 픽업 목표: 3개 (CleanWater)
+- 입장 비용: 15 BloomDust
+- 2성 기준: pickupRatio ≥ 0.75 (총 픽업 5개 중 3.75개 이상)
+- 3성 기준: timeRatio ≤ 0.55 (180s × 0.55 = 99초 이내)
 
-> As a player on **Normal**, entering **Lighthouse Crown**, I expect **150s** timer, **6 pickup targets**, costing **30 BloomDust**. 메인 목표는 90초 버티기 (HoldOut).
->
-> - 2성 기준: 8개 중 5.2 → 6개 이상 픽업 수집 (65%)
-> - 3성 기준: 2성 달성 + 67.5초 이내 완료 (150s × 0.45)
-> - 가장 타이트한 타이머와 복합 목표. Pearl Resonator 업그레이드 효과가 극대화.
+**Hard**
+> "숙련 플레이어로서, Tidal Vault에 20 BloomDust를 내고 진입하면, 144초 동안 CleanWater 4개를 수집한다. 실패 시 자원의 50%만 보존된다."
+- 타이머: 180 × 0.8 = 144초
+- 픽업 목표: 3 + 1 = 4개
+- 입장 비용: round(15 × 1.3) = 20 BloomDust
+- 2성 기준: pickupRatio ≥ 0.80 (기본 0.75 + 0.05)
+- 3성 기준: timeRatio ≤ 0.50 (기본 0.55 - 0.05)
+
+### 7.4 Glass Narrows (유리 해협)
+
+**Easy**
+> "초보 플레이어로서, Glass Narrows에 14 BloomDust를 내고 진입하면, 234초 동안 75초를 버티며 픽업을 수집한다. 실패해도 자원의 85%를 보존한다."
+- 타이머: 180 × 1.3 = 234초
+- 목표: HoldOut 75초 (난이도 무관 동일)
+- 입장 비용: round(20 × 0.7) = 14 BloomDust
+- 2성 기준: pickupRatio ≥ 0.60 (기본 0.70 - 0.10)
+- 3성 기준: timeRatio ≤ 0.60 (기본 0.50 + 0.10)
+
+**Normal**
+> "일반 플레이어로서, Glass Narrows에 20 BloomDust를 내고 진입하면, 180초 동안 75초를 버티며 픽업을 수집한다. 총 5개의 픽업(2B+2S+1SP)이 배치되어 있다."
+- 타이머: 180초
+- 목표: HoldOut 75초
+- 입장 비용: 20 BloomDust
+- 2성 기준: pickupRatio ≥ 0.70 (총 픽업 5개 중 3.5개 이상)
+- 3성 기준: timeRatio ≤ 0.50 (180s × 0.50 = 90초 이내)
+
+**Hard**
+> "숙련 플레이어로서, Glass Narrows에 26 BloomDust를 내고 진입하면, 144초 동안 75초를 버티며 픽업을 수집한다. 실패 시 자원의 50%만 보존된다."
+- 타이머: 180 × 0.8 = 144초
+- 목표: HoldOut 75초
+- 입장 비용: round(20 × 1.3) = 26 BloomDust
+- 2성 기준: pickupRatio ≥ 0.75 (기본 0.70 + 0.05)
+- 3성 기준: timeRatio ≤ 0.45 (기본 0.50 - 0.05)
+
+### 7.5 Sunken Arcade (침수 아케이드)
+
+**Easy**
+> "초보 플레이어로서, Sunken Arcade에 18 BloomDust를 내고 진입하면, 215초 동안 픽업 4개를 수집한다. 실패해도 자원의 85%를 보존한다."
+- 타이머: 165 × 1.3 = 214.5 → 215초
+- 픽업 목표: 5 - 1 = 4개
+- 입장 비용: round(25 × 0.7) = 18 BloomDust
+- 2성 기준: pickupRatio ≥ 0.60 (기본 0.70 - 0.10)
+- 3성 기준: timeRatio ≤ 0.60 (기본 0.50 + 0.10)
+
+**Normal**
+> "일반 플레이어로서, Sunken Arcade에 25 BloomDust를 내고 진입하면, 165초 동안 픽업 5개를 수집한다. 총 7개의 픽업(3B+3S+1SP)이 배치되어 있다."
+- 타이머: 165초
+- 픽업 목표: 5개
+- 입장 비용: 25 BloomDust
+- 2성 기준: pickupRatio ≥ 0.70 (총 픽업 7개 중 4.9개 이상)
+- 3성 기준: timeRatio ≤ 0.50 (165s × 0.50 = 82.5초 이내)
+
+**Hard**
+> "숙련 플레이어로서, Sunken Arcade에 33 BloomDust를 내고 진입하면, 132초 동안 픽업 6개를 수집한다. 실패 시 자원의 50%만 보존된다."
+- 타이머: 165 × 0.8 = 132초
+- 픽업 목표: 5 + 1 = 6개
+- 입장 비용: round(25 × 1.3) = 33 BloomDust
+- 2성 기준: pickupRatio ≥ 0.75 (기본 0.70 + 0.05)
+- 3성 기준: timeRatio ≤ 0.45 (기본 0.50 - 0.05)
+
+### 7.6 Lighthouse Crown (등대 왕관)
+
+**Easy**
+> "초보 플레이어로서, Lighthouse Crown에 21 BloomDust를 내고 진입하면, 195초 동안 90초를 버티며 픽업을 수집한다. 실패해도 자원의 85%를 보존한다."
+- 타이머: 150 × 1.3 = 195초
+- 목표: HoldOut 90초 (난이도 무관 동일)
+- 입장 비용: round(30 × 0.7) = 21 BloomDust
+- 2성 기준: pickupRatio ≥ 0.55 (기본 0.65 - 0.10)
+- 3성 기준: timeRatio ≤ 0.55 (기본 0.45 + 0.10)
+
+**Normal**
+> "일반 플레이어로서, Lighthouse Crown에 30 BloomDust를 내고 진입하면, 150초 동안 90초를 버티며 픽업을 수집한다. 총 8개의 픽업(3B+3S+2SP)이 배치되어 있다."
+- 타이머: 150초
+- 목표: HoldOut 90초
+- 입장 비용: 30 BloomDust
+- 2성 기준: pickupRatio ≥ 0.65 (총 픽업 8개 중 5.2개 이상)
+- 3성 기준: timeRatio ≤ 0.45 (150s × 0.45 = 67.5초 이내)
+
+**Hard**
+> "숙련 플레이어로서, Lighthouse Crown에 39 BloomDust를 내고 진입하면, 120초 동안 90초를 버티며 픽업을 수집한다. 실패 시 자원의 50%만 보존된다."
+- 타이머: 150 × 0.8 = 120초
+- 목표: HoldOut 90초
+- 입장 비용: round(30 × 1.3) = 39 BloomDust
+- 2성 기준: pickupRatio ≥ 0.70 (기본 0.65 + 0.05)
+- 3성 기준: timeRatio ≤ 0.40 (기본 0.45 - 0.05)
+
+### 7.7 세션 시간 예측 매트릭스
+
+| 지구 | Easy | Normal | Hard |
+|------|------|--------|------|
+| Dock | ~4분 | ~3.5분 | ~2.8분 |
+| Reed Fields | ~5분 | ~3.3분 | ~2.6분 |
+| Tidal Vault | ~5분 | ~3분 | ~2.4분 |
+| Glass Narrows | ~5분 | ~3분 | ~2.4분 |
+| Sunken Arcade | ~4.5분 | ~2.8분 | ~2.2분 |
+| Lighthouse Crown | ~4분 | ~2.5분 | ~2분 |
+
+### 7.8 난이도 진행 추천
+
+- **첫 플레이**: Easy로 Dock ~ Tidal Vault, Normal로 Glass Narrows 이후
+- **2회차**: Normal 전체 → Hard Dock/Reed Fields
+- **도전**: Hard 전 지구 3성 클리어
 
 ---
 
