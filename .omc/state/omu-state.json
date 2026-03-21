@@ -1,0 +1,13 @@
+{
+  "mode": "omu",
+  "phase": "cleanup",
+  "task": "Survey and fix texture visibility / map lighting issues in Built-in RP scenes while discussing discovered issues before execution.",
+  "plan_approved": true,
+  "plan_gate_status": "manual_approval_required",
+  "team_available": null,
+  "retry_count": 1,
+  "last_error": "Plan gate returned exit 32; execution continued after explicit user approval in conversation.",
+  "checkpoint": "cross-scene-verification-complete",
+  "created_at": "2026-03-21T00:00:00Z",
+  "updated_at": "2026-03-22T01:42:00+09:00"
+}

@@ -28,16 +28,17 @@ namespace MossHarbor.UI
         {
             var canvas = RuntimeUiFactory.CreateCanvas("ResultsCanvas");
 
-            var title = RuntimeUiFactory.CreateLabel(canvas.transform, "ResultsTitle", new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(-260f, -140f), new Vector2(260f, -60f), 48, TextAlignmentOptions.Center);
+            var title = RuntimeUiFactory.CreateLabel(canvas.transform, "ResultsTitle", new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(-240f, -92f), new Vector2(240f, -28f), 36, TextAlignmentOptions.Center);
             title.text = "Expedition Results";
 
-            _body = RuntimeUiFactory.CreateLabel(canvas.transform, "ResultsBody", new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(-320f, -80f), new Vector2(320f, 80f), 28, TextAlignmentOptions.Center);
-            _nextActionText = RuntimeUiFactory.CreateLabel(canvas.transform, "ResultsNextAction", new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(-360f, 110f), new Vector2(360f, 210f), 24, TextAlignmentOptions.Center);
+            _nextActionText = RuntimeUiFactory.CreateLabel(canvas.transform, "ResultsNextAction", new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(-320f, -154f), new Vector2(320f, -110f), 18, TextAlignmentOptions.Center);
+            RuntimeUiFactory.CreatePanel(canvas.transform, "ResultsBodyPanel", new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(-330f, -160f), new Vector2(330f, 110f), new Color(0.05f, 0.1f, 0.14f, 0.76f));
+            _body = RuntimeUiFactory.CreateLabel(canvas.transform, "ResultsBody", new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(-280f, -120f), new Vector2(280f, 70f), 21, TextAlignmentOptions.Center);
 
-            var button = RuntimeUiFactory.CreateButton(canvas.transform, "Return To Hub", new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), new Vector2(-180f, 60f), new Vector2(180f, 130f));
+            var button = RuntimeUiFactory.CreateButton(canvas.transform, "Return To Hub", new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), new Vector2(-150f, 44f), new Vector2(150f, 98f));
             button.onClick.AddListener(() => resultsManager?.ReturnToHub());
 
-            _sceneHint = RuntimeUiFactory.CreateLabel(canvas.transform, "ResultsHint", new Vector2(1f, 0f), new Vector2(1f, 0f), new Vector2(-380f, 20f), new Vector2(-20f, 60f), 20, TextAlignmentOptions.BottomRight);
+            _sceneHint = RuntimeUiFactory.CreateLabel(canvas.transform, "ResultsHint", new Vector2(1f, 0f), new Vector2(1f, 0f), new Vector2(-260f, 18f), new Vector2(-18f, 46f), 16, TextAlignmentOptions.BottomRight);
         }
 
         private void RefreshUi()
@@ -55,7 +56,6 @@ namespace MossHarbor.UI
                 var questName = bundle.Quest != null ? bundle.Quest.displayName : "No Quest";
                 var zoneName = bundle.HubZone != null ? bundle.HubZone.displayName : districtName;
                 _body.text =
-                    $"{summary.resultLabel}\n\n" +
                     $"District: {districtName}\n" +
                     $"Zone: {zoneName}\n" +
                     $"Quest: {questName}\n" +

@@ -1,3 +1,4 @@
+using MossHarbor.Art;
 using MossHarbor.Core;
 using MossHarbor.Data;
 using UnityEngine;
@@ -60,6 +61,10 @@ namespace MossHarbor.Expedition
             if (generateRunContent)
             {
                 BuildDistrictContent();
+            }
+            else
+            {
+                RuntimeArtDirector.DecorateExpedition(transform);
             }
 
             if (_bootstrap != null)
@@ -278,6 +283,7 @@ namespace MossHarbor.Expedition
         {
             ClearSceneRunContent();
             _runtimeContentRoot = new GameObject("GeneratedRunContent").transform;
+            RuntimeArtDirector.DecorateExpedition(_runtimeContentRoot);
             var bloomTint = Color.Lerp(DistrictThemeColor, Color.white, 0.3f);
             var scrapTint = Color.Lerp(DistrictThemeColor, new Color(0.9f, 0.78f, 0.42f, 1f), 0.45f);
 
@@ -338,41 +344,69 @@ namespace MossHarbor.Expedition
 
         private void CreatePickup(string objectName, Vector3 position, ResourceType resourceType, int amount, PrimitiveType primitiveType, Color tint)
         {
-            var pickup = GameObject.CreatePrimitive(primitiveType);
+            var pickup = RuntimeArtDirector.CreatePickupVisual(_runtimeContentRoot, objectName, position, resourceType, tint) ?? GameObject.CreatePrimitive(primitiveType);
             pickup.name = objectName;
             pickup.transform.SetParent(_runtimeContentRoot, false);
             pickup.transform.position = position;
-            pickup.transform.localScale = primitiveType == PrimitiveType.Cube ? new Vector3(1f, 1f, 1f) : new Vector3(1.15f, 1.15f, 1.15f);
 
-            if (pickup.TryGetComponent<Collider>(out var collider))
+            if (pickup.GetComponent<SimplePickup>() == null)
             {
-                collider.isTrigger = true;
+                pickup.transform.localScale = primitiveType == PrimitiveType.Cube ? new Vector3(1f, 1f, 1f) : new Vector3(1.15f, 1.15f, 1.15f);
+                if (pickup.TryGetComponent<MeshRenderer>(out var renderer))
+                {
+                    renderer.material.color = tint;
+                }
             }
 
-            if (pickup.TryGetComponent<MeshRenderer>(out var renderer))
-            {
-                renderer.material.color = tint;
-            }
+            EnsureTriggerCollider(pickup, resourceType == ResourceType.Scrap ? 0.7f : 0.9f);
 
-            var pickupComponent = pickup.AddComponent<SimplePickup>();
+            var pickupComponent = pickup.GetComponent<SimplePickup>();
+            if (pickupComponent == null)
+            {
+                pickupComponent = pickup.AddComponent<SimplePickup>();
+            }
             pickupComponent.Configure(resourceType, amount, pickupRotateSpeed);
         }
 
         private void CreateObjectiveBeacon(Vector3 position)
         {
-            var beacon = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
+            var beacon = RuntimeArtDirector.CreateObjectiveBeaconVisual(_runtimeContentRoot, position) ?? GameObject.CreatePrimitive(PrimitiveType.Cylinder);
             beacon.name = "ObjectiveBeacon";
             beacon.transform.SetParent(_runtimeContentRoot, false);
             beacon.transform.position = position;
-            beacon.transform.localScale = new Vector3(1.5f, 1.5f, 1.5f);
 
-            if (beacon.TryGetComponent<Collider>(out var collider))
+            if (beacon.GetComponent<ObjectiveBeacon>() == null)
             {
-                collider.isTrigger = true;
+                beacon.transform.localScale = new Vector3(1.5f, 1.5f, 1.5f);
             }
 
-            var beaconComponent = beacon.AddComponent<ObjectiveBeacon>();
+            EnsureTriggerCollider(beacon, 1.2f);
+
+            var beaconComponent = beacon.GetComponent<ObjectiveBeacon>();
+            if (beaconComponent == null)
+            {
+                beaconComponent = beacon.AddComponent<ObjectiveBeacon>();
+            }
             beaconComponent.SetTheme(DistrictThemeColor);
+        }
+
+        private static void EnsureTriggerCollider(GameObject root, float radius)
+        {
+            foreach (var collider in root.GetComponentsInChildren<Collider>(true))
+            {
+                collider.enabled = false;
+            }
+
+            var triggerCollider = root.GetComponent<SphereCollider>();
+            if (triggerCollider == null)
+            {
+                triggerCollider = root.AddComponent<SphereCollider>();
+            }
+
+            triggerCollider.center = Vector3.zero;
+            triggerCollider.radius = radius;
+            triggerCollider.isTrigger = true;
+            triggerCollider.enabled = true;
         }
     }
 }

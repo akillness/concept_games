@@ -1,3 +1,4 @@
+using MossHarbor.Art;
 using MossHarbor.Core;
 using MossHarbor.Data;
 using UnityEngine;
@@ -41,6 +42,8 @@ namespace MossHarbor.Hub
             {
                 ApplyContentBundle(DistrictContentCatalog.LoadDefault());
             }
+
+            RuntimeArtDirector.DecorateHub(transform);
         }
 
         public DistrictContentBundle RuntimeContentBundle => _contentBundle;

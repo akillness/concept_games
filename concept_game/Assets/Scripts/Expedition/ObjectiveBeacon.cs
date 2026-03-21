@@ -9,12 +9,13 @@ namespace MossHarbor.Expedition
         [SerializeField] private Color readyColor = new(0.2f, 0.9f, 0.6f, 1f);
 
         private ExpeditionDirector _director;
-        private MeshRenderer _renderer;
+        private Renderer _renderer;
 
         private void Start()
         {
             _director = FindFirstObjectByType<ExpeditionDirector>();
-            _renderer = GetComponent<MeshRenderer>();
+            _renderer = GetComponentInChildren<Renderer>(true);
+            EnsureTriggerCollider();
             RefreshColor();
         }
 
@@ -52,6 +53,25 @@ namespace MossHarbor.Expedition
             lockedColor = Color.Lerp(districtColor, new Color(0.24f, 0.08f, 0.08f, 1f), 0.45f);
             readyColor = Color.Lerp(districtColor, Color.white, 0.35f);
             RefreshColor();
+        }
+
+        private void EnsureTriggerCollider()
+        {
+            foreach (var collider in GetComponentsInChildren<Collider>(true))
+            {
+                collider.enabled = false;
+            }
+
+            var triggerCollider = GetComponent<SphereCollider>();
+            if (triggerCollider == null)
+            {
+                triggerCollider = gameObject.AddComponent<SphereCollider>();
+            }
+
+            triggerCollider.center = Vector3.zero;
+            triggerCollider.radius = 1.2f;
+            triggerCollider.isTrigger = true;
+            triggerCollider.enabled = true;
         }
     }
 }

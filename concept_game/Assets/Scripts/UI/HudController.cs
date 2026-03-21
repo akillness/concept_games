@@ -58,12 +58,13 @@ namespace MossHarbor.UI
         {
             var canvas = RuntimeUiFactory.CreateCanvas("ExpeditionCanvas");
 
-            var title = RuntimeUiFactory.CreateLabel(canvas.transform, "ExpeditionTitle", new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(-240f, -100f), new Vector2(240f, -30f), 42, TextAlignmentOptions.Center);
+            RuntimeUiFactory.CreatePanel(canvas.transform, "ExpeditionHeaderPanel", new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(-360f, -250f), new Vector2(360f, -24f), new Color(0.05f, 0.1f, 0.14f, 0.68f));
+            var title = RuntimeUiFactory.CreateLabel(canvas.transform, "ExpeditionTitle", new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(-200f, -74f), new Vector2(200f, -20f), 34, TextAlignmentOptions.Center);
             title.text = expeditionDirector != null ? expeditionDirector.DistrictDisplayName : "Expedition";
 
-            timerText = RuntimeUiFactory.CreateLabel(canvas.transform, "TimerText", new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(-120f, -190f), new Vector2(120f, -120f), 54, TextAlignmentOptions.Center);
-            districtText = RuntimeUiFactory.CreateLabel(canvas.transform, "DistrictText", new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(-360f, -250f), new Vector2(360f, -180f), 24, TextAlignmentOptions.Center);
-            objectiveText = RuntimeUiFactory.CreateLabel(canvas.transform, "ObjectiveText", new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(-360f, -350f), new Vector2(360f, -250f), 24, TextAlignmentOptions.Center);
+            timerText = RuntimeUiFactory.CreateLabel(canvas.transform, "TimerText", new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(-90f, -126f), new Vector2(90f, -76f), 42, TextAlignmentOptions.Center);
+            districtText = RuntimeUiFactory.CreateLabel(canvas.transform, "DistrictText", new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(-300f, -176f), new Vector2(300f, -126f), 18, TextAlignmentOptions.Center);
+            objectiveText = RuntimeUiFactory.CreateLabel(canvas.transform, "ObjectiveText", new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(-312f, -236f), new Vector2(312f, -174f), 18, TextAlignmentOptions.Center);
 
             var completeButton = RuntimeUiFactory.CreateButton(canvas.transform, "Complete Run", new Vector2(1f, 0f), new Vector2(1f, 0f), new Vector2(-360f, 40f), new Vector2(-40f, 110f));
             completeButton.onClick.AddListener(() => expeditionDirector?.CompleteCurrentRun());

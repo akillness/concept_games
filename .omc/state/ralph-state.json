@@ -1,0 +1,67 @@
+{
+  "mode": "ralph",
+  "session_id": "concept-games-art-pass-2026-03-21",
+  "request": "Replace Cute Birds with StylizedCharacterPack, make Assets/Art the active art root, and validate project usage. Continue with runtime lighting, texture visibility, and map composition fixes until Unity verification is usable.",
+  "status": "cross_scene_runtime_verified_nonblocking_mcp_capture_warning",
+  "iteration": 8,
+  "max_iterations": 8,
+  "last_checkpoint": "hub-results-final-pass",
+  "verification_history": [
+    {
+      "iteration": 1,
+      "passed": false,
+      "score": 0.55,
+      "timestamp": "2026-03-21T00:00:00+09:00",
+      "notes": "Specification and work log created. Asset move and cleanup still pending."
+    },
+    {
+      "iteration": 2,
+      "passed": false,
+      "score": 0.85,
+      "timestamp": "2026-03-21T00:20:00+09:00",
+      "notes": "Asset reorganization and quarantine completed. Unity Editor and unity-mcp verification still required."
+    },
+    {
+      "iteration": 3,
+      "passed": false,
+      "score": 0.9,
+      "timestamp": "2026-03-21T00:35:00+09:00",
+      "notes": "Fabric binary, wrapper, custom pattern, and agent-manager config are in place. Unity batch validation is blocked because the project is already open in another Unity instance."
+    },
+    {
+      "iteration": 4,
+      "passed": false,
+      "score": 0.94,
+      "timestamp": "2026-03-21T23:08:00+09:00",
+      "notes": "StylizedCharacterPack is now the active character pack under Assets/Art/Characters. Cute Birds and StylizedCharacterPack demo content were quarantined. Final scene usage verification remains blocked by the currently open Unity instance."
+    },
+    {
+      "iteration": 5,
+      "passed": false,
+      "score": 0.97,
+      "timestamp": "2026-03-21T23:35:00+09:00",
+      "notes": "Selected GUI, character, environment, pickup, and beacon assets were promoted into Assets/Art/Resources and wired into runtime scripts. Unity MCP health is good, but live scene playtest is still blocked in this shell because the project remains open in another Unity instance."
+    },
+    {
+      "iteration": 6,
+      "passed": false,
+      "score": 0.985,
+      "timestamp": "2026-03-21T23:55:00+09:00",
+      "notes": "Player animation parameters are now driven at runtime and the Leopard material retains linked albedo, normal, metallic, and AO textures. Hub and expedition background composition were expanded with roads, platform pieces, lantern lights, mud patches, and scene-specific fog. Final verification still requires live Unity play mode."
+    },
+    {
+      "iteration": 7,
+      "passed": false,
+      "score": 0.992,
+      "timestamp": "2026-03-22T01:05:00+09:00",
+      "notes": "Unity MCP Play Mode verification was completed for Expedition_Runtime. Runtime material normalization removed magenta URP shader failures from player, pickups, and beacon assets, expedition map composition was rebalanced, and the expedition HUD was compacted. Remaining follow-up is cross-scene validation for Hub and Results plus investigation of two residual depth-surface console messages."
+    },
+    {
+      "iteration": 8,
+      "passed": true,
+      "score": 0.997,
+      "timestamp": "2026-03-22T01:42:00+09:00",
+      "notes": "Hub and Results scenes were verified in Unity Play Mode. Button contrast, HUD density, and Results text overlap were corrected. Remaining console output is limited to two non-blocking depth-surface messages observed during Unity MCP screenshot capture."
+    }
+  ]
+}

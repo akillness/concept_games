@@ -447,6 +447,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   moveSpeed: 4.5
+  sprintMultiplier: 1.45
+  rotationSharpness: 12
+  animationDampTime: 0.08
   modelRoot: {fileID: 0}
 --- !u!23 &816201614
 MeshRenderer:
@@ -567,7 +570,13 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   firstDistrictId: dock_sector_01
-  expeditionEntryCost: 10
+  defaultDistrict: {fileID: 0}
+  defaultTool: {fileID: 0}
+  defaultHubZone: {fileID: 0}
+  starterQuest: {fileID: 0}
+  harborPumpUpgrade: {fileID: 0}
+  routeScannerUpgrade: {fileID: 0}
+  pearlResonatorUpgrade: {fileID: 0}
 --- !u!4 &1473198066
 Transform:
   m_ObjectHideFlags: 0

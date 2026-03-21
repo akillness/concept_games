@@ -50,12 +50,18 @@
 ```text
 concept_game/
   Assets/
+    Art/
     Scenes/
     Scripts/
     Resources/ScriptableObjects/
     Tests/EditMode/
   Packages/
   ProjectSettings/
+art/
+  00_index.md
+  01_asset_replacement_spec.md
+  02_asset_inventory_and_decisions.md
+  03_progress_log.md
 design/
   00_index.md
   01_high_concept.md
