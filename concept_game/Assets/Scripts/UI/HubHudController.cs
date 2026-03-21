@@ -17,11 +17,15 @@ namespace MossHarbor.UI
         private HubManager _hubManager;
         private Button _startExpeditionButton;
         private Button _harborPumpButton;
+        private TMP_Text _harborPumpLabel;
         private Button _routeScannerButton;
+        private TMP_Text _routeScannerLabel;
         private Button _pearlResonatorButton;
+        private TMP_Text _pearlResonatorLabel;
         private Button _previousDistrictButton;
         private Button _nextDistrictButton;
         private Button _debugResourcesButton;
+        private Button _difficultyButton;
 
         private void Start()
         {
@@ -77,47 +81,117 @@ namespace MossHarbor.UI
             }
 
             RefreshButtonStates(save);
+            RefreshDifficultyLabel();
         }
 
         private void BuildUi()
         {
             var canvas = RuntimeUiFactory.CreateCanvas("HubCanvas");
-            var title = RuntimeUiFactory.CreateLabel(canvas.transform, "HubTitle", new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(32f, -88f), new Vector2(420f, -24f), 34, TextAlignmentOptions.TopLeft);
-            title.text = "Moss Harbor Hub";
 
-            RuntimeUiFactory.CreatePanel(canvas.transform, "ObjectivePanel", new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(-340f, -214f), new Vector2(340f, -34f), new Color(0.05f, 0.11f, 0.14f, 0.72f));
-            _objectiveTitleText = RuntimeUiFactory.CreateLabel(canvas.transform, "ObjectiveTitle", new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(-240f, -82f), new Vector2(240f, -42f), 22, TextAlignmentOptions.Center);
-            _objectiveBodyText = RuntimeUiFactory.CreateLabel(canvas.transform, "ObjectiveBody", new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(-300f, -184f), new Vector2(300f, -80f), 17, TextAlignmentOptions.Center);
+            // ── Top center: Objective panel ──────────────────────────────────────
+            RuntimeUiFactory.CreatePanel(canvas.transform, "ObjectivePanel",
+                new Vector2(0.5f, 1f), new Vector2(0.5f, 1f),
+                new Vector2(-340f, -214f), new Vector2(340f, -34f),
+                new Color(0.05f, 0.11f, 0.14f, 0.72f));
+            _objectiveTitleText = RuntimeUiFactory.CreateLabel(canvas.transform, "ObjectiveTitle",
+                new Vector2(0.5f, 1f), new Vector2(0.5f, 1f),
+                new Vector2(-240f, -82f), new Vector2(240f, -42f),
+                22, TextAlignmentOptions.Center);
+            _objectiveBodyText = RuntimeUiFactory.CreateLabel(canvas.transform, "ObjectiveBody",
+                new Vector2(0.5f, 1f), new Vector2(0.5f, 1f),
+                new Vector2(-300f, -184f), new Vector2(300f, -80f),
+                17, TextAlignmentOptions.Center);
 
-            RuntimeUiFactory.CreatePanel(canvas.transform, "BundlePanel", new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(-260f, -318f), new Vector2(260f, -226f), new Color(0.08f, 0.13f, 0.18f, 0.68f));
-            _bundleSummaryText = RuntimeUiFactory.CreateLabel(canvas.transform, "BundleSummary", new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(-228f, -308f), new Vector2(228f, -232f), 16, TextAlignmentOptions.Center);
+            // ── Top left: Resource panel (compact) ──────────────────────────────
+            RuntimeUiFactory.CreatePanel(canvas.transform, "ResourcePanel",
+                new Vector2(0f, 1f), new Vector2(0f, 1f),
+                new Vector2(20f, -230f), new Vector2(220f, -76f),
+                new Color(0.09f, 0.13f, 0.16f, 0.7f));
+            _resourceText = RuntimeUiFactory.CreateLabel(canvas.transform, "HubResources",
+                new Vector2(0f, 1f), new Vector2(0f, 1f),
+                new Vector2(34f, -214f), new Vector2(208f, -90f),
+                16, TextAlignmentOptions.TopLeft);
 
-            RuntimeUiFactory.CreatePanel(canvas.transform, "ResourcePanel", new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(20f, -230f), new Vector2(250f, -76f), new Color(0.09f, 0.13f, 0.16f, 0.7f));
-            _resourceText = RuntimeUiFactory.CreateLabel(canvas.transform, "HubResources", new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(34f, -214f), new Vector2(236f, -90f), 18, TextAlignmentOptions.TopLeft);
+            // ── Top right: Run summary panel ────────────────────────────────────
+            RuntimeUiFactory.CreatePanel(canvas.transform, "RunSummaryPanel",
+                new Vector2(1f, 1f), new Vector2(1f, 1f),
+                new Vector2(-290f, -230f), new Vector2(-20f, -76f),
+                new Color(0.08f, 0.11f, 0.15f, 0.7f));
+            _runSummaryText = RuntimeUiFactory.CreateLabel(canvas.transform, "LastRunSummary",
+                new Vector2(1f, 1f), new Vector2(1f, 1f),
+                new Vector2(-276f, -216f), new Vector2(-34f, -92f),
+                17, TextAlignmentOptions.TopRight);
 
-            RuntimeUiFactory.CreatePanel(canvas.transform, "RunSummaryPanel", new Vector2(1f, 1f), new Vector2(1f, 1f), new Vector2(-290f, -230f), new Vector2(-20f, -76f), new Color(0.08f, 0.11f, 0.15f, 0.7f));
-            _runSummaryText = RuntimeUiFactory.CreateLabel(canvas.transform, "LastRunSummary", new Vector2(1f, 1f), new Vector2(1f, 1f), new Vector2(-276f, -216f), new Vector2(-34f, -92f), 17, TextAlignmentOptions.TopRight);
+            // ── Center: District selection card ──────────────────────────────────
+            RuntimeUiFactory.CreatePanel(canvas.transform, "BundlePanel",
+                new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f),
+                new Vector2(-280f, -90f), new Vector2(280f, 90f),
+                new Color(0.08f, 0.13f, 0.18f, 0.78f));
+            _bundleSummaryText = RuntimeUiFactory.CreateLabel(canvas.transform, "BundleSummary",
+                new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f),
+                new Vector2(-256f, -76f), new Vector2(256f, 76f),
+                17, TextAlignmentOptions.Center);
 
-            _startExpeditionButton = RuntimeUiFactory.CreateButton(canvas.transform, "Start Expedition", new Vector2(0f, 0f), new Vector2(0f, 0f), new Vector2(24f, 32f), new Vector2(254f, 88f));
+            // ── Bottom center: Start Expedition button (prominent) ───────────────
+            _startExpeditionButton = RuntimeUiFactory.CreateButton(canvas.transform, "Start Expedition",
+                new Vector2(0.5f, 0f), new Vector2(0.5f, 0f),
+                new Vector2(-220f, 24f), new Vector2(220f, 90f));
             _startExpeditionButton.onClick.AddListener(() => _hubManager?.StartExpedition());
 
-            _harborPumpButton = RuntimeUiFactory.CreateButton(canvas.transform, "Install Harbor Pump", new Vector2(0f, 0f), new Vector2(0f, 0f), new Vector2(24f, 96f), new Vector2(254f, 152f));
+            // ── Bottom left: Upgrade panel ───────────────────────────────────────
+            RuntimeUiFactory.CreatePanel(canvas.transform, "UpgradePanel",
+                new Vector2(0f, 0f), new Vector2(0f, 0f),
+                new Vector2(20f, 100f), new Vector2(290f, 330f),
+                new Color(0.07f, 0.12f, 0.16f, 0.72f));
+            RuntimeUiFactory.CreateLabel(canvas.transform, "UpgradeHeader",
+                new Vector2(0f, 0f), new Vector2(0f, 0f),
+                new Vector2(28f, 302f), new Vector2(282f, 326f),
+                16, TextAlignmentOptions.Left).text = "Upgrades";
+
+            _harborPumpButton = RuntimeUiFactory.CreateButton(canvas.transform, "Harbor Pump",
+                new Vector2(0f, 0f), new Vector2(0f, 0f),
+                new Vector2(28f, 234f), new Vector2(282f, 290f));
             _harborPumpButton.onClick.AddListener(() => _hubManager?.TryInstallHarborPump());
+            _harborPumpLabel = _harborPumpButton.GetComponentInChildren<TMP_Text>();
 
-            _routeScannerButton = RuntimeUiFactory.CreateButton(canvas.transform, "Install Route Scanner", new Vector2(0f, 0f), new Vector2(0f, 0f), new Vector2(24f, 160f), new Vector2(254f, 216f));
+            _routeScannerButton = RuntimeUiFactory.CreateButton(canvas.transform, "Route Scanner",
+                new Vector2(0f, 0f), new Vector2(0f, 0f),
+                new Vector2(28f, 170f), new Vector2(282f, 226f));
             _routeScannerButton.onClick.AddListener(() => _hubManager?.TryInstallRouteScanner());
+            _routeScannerLabel = _routeScannerButton.GetComponentInChildren<TMP_Text>();
 
-            _pearlResonatorButton = RuntimeUiFactory.CreateButton(canvas.transform, "Install Pearl Resonator", new Vector2(0f, 0f), new Vector2(0f, 0f), new Vector2(24f, 224f), new Vector2(254f, 280f));
+            _pearlResonatorButton = RuntimeUiFactory.CreateButton(canvas.transform, "Pearl Resonator",
+                new Vector2(0f, 0f), new Vector2(0f, 0f),
+                new Vector2(28f, 106f), new Vector2(282f, 162f));
             _pearlResonatorButton.onClick.AddListener(() => _hubManager?.TryInstallPearlResonator());
+            _pearlResonatorLabel = _pearlResonatorButton.GetComponentInChildren<TMP_Text>();
 
-            _previousDistrictButton = RuntimeUiFactory.CreateButton(canvas.transform, "Previous District", new Vector2(1f, 0f), new Vector2(1f, 0f), new Vector2(-254f, 32f), new Vector2(-24f, 88f));
+            // ── Bottom right: District nav buttons ───────────────────────────────
+            _previousDistrictButton = RuntimeUiFactory.CreateButton(canvas.transform, "< Prev District",
+                new Vector2(1f, 0f), new Vector2(1f, 0f),
+                new Vector2(-290f, 100f), new Vector2(-24f, 156f));
             _previousDistrictButton.onClick.AddListener(() => _hubManager?.SelectPreviousDistrict());
 
-            _nextDistrictButton = RuntimeUiFactory.CreateButton(canvas.transform, "Next District", new Vector2(1f, 0f), new Vector2(1f, 0f), new Vector2(-254f, 96f), new Vector2(-24f, 152f));
+            _nextDistrictButton = RuntimeUiFactory.CreateButton(canvas.transform, "Next District >",
+                new Vector2(1f, 0f), new Vector2(1f, 0f),
+                new Vector2(-290f, 164f), new Vector2(-24f, 220f));
             _nextDistrictButton.onClick.AddListener(() => _hubManager?.SelectNextDistrict());
 
-            _debugResourcesButton = RuntimeUiFactory.CreateButton(canvas.transform, "[Debug] Grant Resources", new Vector2(1f, 0f), new Vector2(1f, 0f), new Vector2(-254f, 224f), new Vector2(-24f, 280f));
+            // ── Top-right corner: Debug button (editor only) ─────────────────────
+            _debugResourcesButton = RuntimeUiFactory.CreateButton(canvas.transform, "[Debug] Grant Resources",
+                new Vector2(1f, 1f), new Vector2(1f, 1f),
+                new Vector2(-280f, -68f), new Vector2(-20f, -24f));
             _debugResourcesButton.onClick.AddListener(() => _hubManager?.GrantDebugStarterResources());
+
+            // ── Bottom right: Difficulty toggle ────────────────────────────────
+            _difficultyButton = RuntimeUiFactory.CreateButton(canvas.transform, "Difficulty: Normal",
+                new Vector2(1f, 0f), new Vector2(1f, 0f),
+                new Vector2(-290f, 228f), new Vector2(-24f, 284f));
+            _difficultyButton.onClick.AddListener(() =>
+            {
+                _hubManager?.CycleDifficulty();
+                RefreshDifficultyLabel();
+            });
         }
 
         private string BuildPrimaryObjectiveText(SaveService save)
@@ -180,18 +254,45 @@ namespace MossHarbor.UI
             var zone = _hubManager.RuntimeHubZone;
             var quest = _hubManager.RuntimeQuest;
             var districtName = district != null ? district.displayName : "Unknown District";
-            var zoneName = zone != null ? zone.displayName : "Unknown Zone";
-            var questName = quest != null ? quest.displayName : "No Quest";
+            var questDisplayName = quest != null ? quest.displayName : "No Quest";
             var requiredStars = district != null ? district.requiredStars : 0;
             var questState = _hubManager.ActiveQuestClaimed ? "Reward claimed" : "Reward pending";
             var zoneState = _hubManager.SelectedHubZoneRestored ? "Restored" : "Needs restoration";
-            var districtState = _hubManager.SelectedDistrictUnlocked ? "Unlocked" : $"Locked at {requiredStars} total stars";
 
-            return
-                $"District: {districtName} ({districtState})\n" +
-                $"Zone: {zoneName} ({zoneState})\n" +
-                $"Quest: {questName} ({questState})\n" +
-                $"Entry Cost: {_hubManager.EffectiveEntryCost} BloomDust | District Stars: {_hubManager.SelectedDistrictStars} | Total Stars: {_hubManager.TotalDistrictStars}";
+            var isUnlocked = _hubManager.SelectedDistrictUnlocked;
+            var lockIcon = isUnlocked ? "[Open]" : "[Locked]";
+            var districtStars = _hubManager.SelectedDistrictStars;
+            var totalStars = _hubManager.TotalDistrictStars;
+            var starDisplay = BuildStarDisplay(districtStars, 3);
+
+            if (isUnlocked)
+            {
+                return
+                    $"{lockIcon}  {districtName}\n" +
+                    $"Stars  {starDisplay}  ({districtStars}/3)\n" +
+                    $"Zone: {(zone != null ? zone.displayName : "Unknown")} — {zoneState}\n" +
+                    $"Quest: {questDisplayName} ({questState})\n" +
+                    $"Entry Cost: {_hubManager.EffectiveEntryCost} BloomDust  |  Total Stars: {totalStars}";
+            }
+            else
+            {
+                return
+                    $"{lockIcon}  {districtName}  [LOCKED]\n" +
+                    $"Stars  {starDisplay}  ({districtStars}/3)\n" +
+                    $"Requires {requiredStars} total stars to unlock\n" +
+                    $"(You have {totalStars} total stars)\n" +
+                    $"Entry Cost: {_hubManager.EffectiveEntryCost} BloomDust";
+            }
+        }
+
+        private static string BuildStarDisplay(int earned, int max)
+        {
+            var sb = new System.Text.StringBuilder();
+            for (var i = 0; i < max; i++)
+            {
+                sb.Append(i < earned ? "*" : "-");
+            }
+            return sb.ToString();
         }
 
         private string BuildRouteDirectiveText()
@@ -220,6 +321,14 @@ namespace MossHarbor.UI
             }
         }
 
+        private void RefreshDifficultyLabel()
+        {
+            if (_difficultyButton == null || _hubManager == null) return;
+            var label = _difficultyButton.GetComponentInChildren<TMP_Text>();
+            if (label != null)
+                label.text = $"Difficulty: {DifficultyConfig.DisplayName(_hubManager.CurrentDifficulty)}";
+        }
+
         private void RefreshButtonStates(SaveService save)
         {
             var tutorialActive = _hubManager.IsTutorialActive;
@@ -235,18 +344,36 @@ namespace MossHarbor.UI
                 var showHarborPump = !tutorialActive || stage == TutorialStage.InstallFirstUpgrade || _hubManager.HarborPumpLevel > 0;
                 _harborPumpButton.gameObject.SetActive(showHarborPump);
                 _harborPumpButton.interactable = _hubManager.HarborPumpLevel == 0 && _hubManager.CanAffordHarborPump;
+                if (_harborPumpLabel != null)
+                {
+                    _harborPumpLabel.text = _hubManager.HarborPumpLevel > 0
+                        ? "Harbor Pump [Installed]"
+                        : $"Harbor Pump ({_hubManager.HarborPumpScrapCost} Scrap) \u2192 Water +{((_hubManager.HarborPumpUpgrade != null) ? _hubManager.HarborPumpUpgrade.cleanWaterBonus : 0)}";
+                }
             }
 
             if (_routeScannerButton != null)
             {
                 _routeScannerButton.gameObject.SetActive(!tutorialActive);
                 _routeScannerButton.interactable = _hubManager.RouteScannerLevel == 0 && save.GetResource(ResourceType.BloomDust) >= _hubManager.RouteScannerBloomCost;
+                if (_routeScannerLabel != null)
+                {
+                    _routeScannerLabel.text = _hubManager.RouteScannerLevel > 0
+                        ? "Route Scanner [Installed]"
+                        : $"Route Scanner ({_hubManager.RouteScannerBloomCost} Bloom) \u2192 Timer +{((_hubManager.RouteScannerUpgrade != null) ? Mathf.RoundToInt(_hubManager.RouteScannerUpgrade.timerBonusSeconds) : 0)}s";
+                }
             }
 
             if (_pearlResonatorButton != null)
             {
                 _pearlResonatorButton.gameObject.SetActive(!tutorialActive);
                 _pearlResonatorButton.interactable = _hubManager.PearlResonatorLevel == 0 && save.GetResource(ResourceType.CleanWater) >= _hubManager.PearlResonatorWaterCost;
+                if (_pearlResonatorLabel != null)
+                {
+                    _pearlResonatorLabel.text = _hubManager.PearlResonatorLevel > 0
+                        ? "Pearl Resonator [Installed]"
+                        : $"Pearl Resonator ({_hubManager.PearlResonatorWaterCost} Water) \u2192 Pearl +{((_hubManager.PearlResonatorUpgrade != null) ? _hubManager.PearlResonatorUpgrade.memoryPearlBonus : 0)}";
+                }
             }
 
             if (_previousDistrictButton != null)

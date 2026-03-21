@@ -26,5 +26,20 @@ namespace MossHarbor.Data
         public float pickupSpawnRadius = 8f;
         public Vector3 beaconPosition = new(0f, 0.75f, 8f);
         public Color districtColor = Color.cyan;
+
+        [Header("Environment")]
+        public Color fogColor = new Color(0.55f, 0.72f, 0.78f, 1f);
+        public float fogDensity = 0.022f;
+        public Color ambientColor = new Color(0.42f, 0.56f, 0.62f, 1f);
+        public Color sunColor = new Color(0.82f, 0.92f, 0.96f, 1f);
+        public float sunIntensity = 1.35f;
+
+        [Header("Pickup Distribution")]
+        public int seedPodPickupCount = 0;
+        public int seedPodPickupAmount = 3;
+
+        [Header("Star Rating")]
+        public float twoStarPickupRatio = 0.8f;
+        public float threeStarTimeRatio = 0.6f;
     }
 }

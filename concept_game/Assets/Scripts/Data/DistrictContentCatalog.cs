@@ -41,13 +41,36 @@ namespace MossHarbor.Data
 
         private static DistrictContentBundle LoadInternal(int selectionIndex, string districtPath, string hubZonePath, string questPath)
         {
-            var district = LoadOrDefault<DistrictDef>(districtPath, ContentPaths.DefaultDistrict);
+            var district = ApplyBalanceIfNeeded(LoadOrDefault<DistrictDef>(districtPath, ContentPaths.DefaultDistrict));
             var hubZone = LoadOrDefault<HubZoneDef>(hubZonePath, ContentPaths.DefaultHubZone);
             var quest = LoadOrDefault<QuestDef>(questPath, ContentPaths.DefaultQuest);
             var bundle = new DistrictContentBundle(selectionIndex, district, hubZone, quest);
 
             ValidateBundle(bundle, districtPath, hubZonePath, questPath);
             return bundle;
+        }
+
+        private static DistrictDef ApplyBalanceIfNeeded(DistrictDef district)
+        {
+            if (district == null) return null;
+
+            bool needsBalance;
+            if (district.districtId == "dock")
+            {
+                needsBalance = district.expeditionEntryCost == 10;
+            }
+            else
+            {
+                needsBalance = district.expeditionEntryCost == 10 && Mathf.Approximately(district.runTimerSeconds, 180f);
+            }
+
+            if (!needsBalance) return district;
+
+            // Clone to avoid mutating the shared ScriptableObject asset
+            var clone = Object.Instantiate(district);
+            clone.name = district.name;
+            DistrictBalanceDefaults.ApplyIfDefault(clone);
+            return clone;
         }
 
         private static T LoadOrDefault<T>(string path, string defaultPath) where T : Object

@@ -7,10 +7,6 @@ namespace MossHarbor.Hub
 {
     public sealed class HubManager : MonoBehaviour
     {
-        private const string HarborPumpUpgradeId = "harbor_pump";
-        private const string RouteScannerUpgradeId = "route_scanner";
-        private const string PearlResonatorUpgradeId = "pearl_resonator";
-
         [SerializeField] private string firstDistrictId = "dock";
         [SerializeField] private DistrictDef defaultDistrict;
         [SerializeField] private ToolDef defaultTool;
@@ -43,7 +39,7 @@ namespace MossHarbor.Hub
                 ApplyContentBundle(DistrictContentCatalog.LoadDefault());
             }
 
-            RuntimeArtDirector.DecorateHub(transform);
+            RuntimeArtDirector.DecorateHub(transform, _bootstrap?.SaveService);
         }
 
         public DistrictContentBundle RuntimeContentBundle => _contentBundle;
@@ -55,11 +51,11 @@ namespace MossHarbor.Hub
         public HubUpgradeDef RouteScannerUpgrade => routeScannerUpgrade != null ? routeScannerUpgrade : Resources.Load<HubUpgradeDef>(ContentPaths.RouteScannerUpgrade);
         public HubUpgradeDef PearlResonatorUpgrade => pearlResonatorUpgrade != null ? pearlResonatorUpgrade : Resources.Load<HubUpgradeDef>(ContentPaths.PearlResonatorUpgrade);
         public int SelectedDistrictIndex => _selectedDistrictIndex;
-        public int HarborPumpLevel => _bootstrap != null ? _bootstrap.SaveService.GetHubUpgradeLevel(HarborPumpUpgradeId) : 0;
+        public int HarborPumpLevel => _bootstrap != null ? _bootstrap.SaveService.GetHubUpgradeLevel(UpgradeIds.HarborPump) : 0;
         public int HarborPumpScrapCost => HarborPumpUpgrade != null ? HarborPumpUpgrade.costAmount : 15;
-        public int RouteScannerLevel => _bootstrap != null ? _bootstrap.SaveService.GetHubUpgradeLevel(RouteScannerUpgradeId) : 0;
+        public int RouteScannerLevel => _bootstrap != null ? _bootstrap.SaveService.GetHubUpgradeLevel(UpgradeIds.RouteScanner) : 0;
         public int RouteScannerBloomCost => RouteScannerUpgrade != null ? RouteScannerUpgrade.costAmount : 60;
-        public int PearlResonatorLevel => _bootstrap != null ? _bootstrap.SaveService.GetHubUpgradeLevel(PearlResonatorUpgradeId) : 0;
+        public int PearlResonatorLevel => _bootstrap != null ? _bootstrap.SaveService.GetHubUpgradeLevel(UpgradeIds.PearlResonator) : 0;
         public int PearlResonatorWaterCost => PearlResonatorUpgrade != null ? PearlResonatorUpgrade.costAmount : 20;
         public bool IsTutorialActive => _bootstrap != null && _bootstrap.SaveService.IsTutorialActive();
         public bool ActiveQuestClaimed => _bootstrap != null && RuntimeQuest != null && _bootstrap.SaveService.IsQuestClaimed(RuntimeQuest.questId);
@@ -79,8 +75,19 @@ namespace MossHarbor.Hub
             {
                 var baseCost = _runtimeDistrict != null ? _runtimeDistrict.expeditionEntryCost : 10;
                 var reduction = HarborPumpLevel > 0 && HarborPumpUpgrade != null ? HarborPumpUpgrade.entryCostReduction : 0;
-                return Mathf.Max(1, baseCost - reduction);
+                var difficulty = _bootstrap != null ? _bootstrap.SaveService.Current.selectedDifficulty : DifficultyLevel.Normal;
+                return Mathf.Max(1, Mathf.RoundToInt((baseCost - reduction) * DifficultyConfig.EntryCostMultiplier(difficulty)));
             }
+        }
+
+        public DifficultyLevel CurrentDifficulty => _bootstrap != null ? _bootstrap.SaveService.Current.selectedDifficulty : DifficultyLevel.Normal;
+
+        public void CycleDifficulty()
+        {
+            if (_bootstrap == null) return;
+            var current = (int)_bootstrap.SaveService.Current.selectedDifficulty;
+            var next = (DifficultyLevel)((current + 1) % 3);
+            _bootstrap.SaveService.Current.selectedDifficulty = next;
         }
 
         [ContextMenu("Grant Debug Starter Resources")]
@@ -153,7 +160,7 @@ namespace MossHarbor.Hub
             }
 
             _bootstrap.SaveService.AddResource(upgrade.costType, -upgrade.costAmount);
-            _bootstrap.SaveService.SetHubUpgradeLevel(HarborPumpUpgradeId, 1);
+            _bootstrap.SaveService.SetHubUpgradeLevel(UpgradeIds.HarborPump, 1);
             if (upgrade.cleanWaterBonus > 0)
             {
                 _bootstrap.SaveService.AddResource(ResourceType.CleanWater, upgrade.cleanWaterBonus);
@@ -178,7 +185,7 @@ namespace MossHarbor.Hub
             }
 
             _bootstrap.SaveService.AddResource(upgrade.costType, -upgrade.costAmount);
-            _bootstrap.SaveService.SetHubUpgradeLevel(RouteScannerUpgradeId, 1);
+            _bootstrap.SaveService.SetHubUpgradeLevel(UpgradeIds.RouteScanner, 1);
             CompleteTutorialIfReady();
         }
 
@@ -198,7 +205,7 @@ namespace MossHarbor.Hub
             }
 
             _bootstrap.SaveService.AddResource(upgrade.costType, -upgrade.costAmount);
-            _bootstrap.SaveService.SetHubUpgradeLevel(PearlResonatorUpgradeId, 1);
+            _bootstrap.SaveService.SetHubUpgradeLevel(UpgradeIds.PearlResonator, 1);
             CompleteTutorialIfReady();
         }
 

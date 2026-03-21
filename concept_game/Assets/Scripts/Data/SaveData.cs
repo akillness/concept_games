@@ -10,6 +10,7 @@ namespace MossHarbor.Data
         public string profileId = "slot-0";
         public string currentScene = "Hub";
         public int selectedDistrictIndex;
+        public DifficultyLevel selectedDifficulty = DifficultyLevel.Normal;
         public bool tutorialStateInitialized;
         public TutorialStage tutorialStage = TutorialStage.StartFirstExpedition;
         public SerializableDictionary<ResourceType, int> resources = new();
@@ -29,6 +30,7 @@ namespace MossHarbor.Data
         public int scrapCollected;
         public int cleanWaterCollected;
         public int memoryPearlCollected;
+        public int seedPodCollected;
         public int pickupsCollected;
         public float durationSeconds;
         public string resultLabel = "No runs yet";
@@ -76,6 +78,7 @@ namespace MossHarbor.Data
             return
                 $"BloomDust: {bloomDustCollected}\n" +
                 $"Scrap: {scrapCollected}\n" +
+                $"SeedPod: {seedPodCollected}\n" +
                 $"CleanWater: {cleanWaterCollected}\n" +
                 $"MemoryPearl: {memoryPearlCollected}";
         }
@@ -220,6 +223,8 @@ namespace MossHarbor.Data
                     return bloomDustCollected;
                 case ResourceType.Scrap:
                     return scrapCollected;
+                case ResourceType.SeedPod:
+                    return seedPodCollected;
                 case ResourceType.CleanWater:
                     return cleanWaterCollected;
                 case ResourceType.MemoryPearl:

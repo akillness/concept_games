@@ -7,11 +7,11 @@ namespace MossHarbor.UI
 {
     public sealed class ResultsHudController : MonoBehaviour
     {
-        private const string RouteScannerUpgradeId = "route_scanner";
         [SerializeField] private ResultsManager resultsManager;
         private TMP_Text _body;
         private TMP_Text _nextActionText;
         private TMP_Text _sceneHint;
+        private TMP_Text _starText;
 
         private void Start()
         {
@@ -30,6 +30,8 @@ namespace MossHarbor.UI
 
             var title = RuntimeUiFactory.CreateLabel(canvas.transform, "ResultsTitle", new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(-240f, -92f), new Vector2(240f, -28f), 36, TextAlignmentOptions.Center);
             title.text = "Expedition Results";
+
+            _starText = RuntimeUiFactory.CreateLabel(canvas.transform, "ResultsStars", new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(-120f, -128f), new Vector2(120f, -96f), 28, TextAlignmentOptions.Center);
 
             _nextActionText = RuntimeUiFactory.CreateLabel(canvas.transform, "ResultsNextAction", new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(-320f, -154f), new Vector2(320f, -110f), 18, TextAlignmentOptions.Center);
             RuntimeUiFactory.CreatePanel(canvas.transform, "ResultsBodyPanel", new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(-330f, -160f), new Vector2(330f, 110f), new Color(0.05f, 0.1f, 0.14f, 0.76f));
@@ -50,6 +52,15 @@ namespace MossHarbor.UI
 
             var summary = GameBootstrap.Instance.SaveService.Current.lastRunSummary;
             var bundle = DistrictContentCatalog.LoadByDistrictId(summary.districtId);
+            var stars = StarRatingCalculator.Calculate(bundle.District, summary, GameBootstrap.Instance.SaveService.Current.selectedDifficulty);
+            if (_starText != null)
+            {
+                var filled = new string('*', stars);
+                var empty = new string('-', 3 - stars);
+                _starText.text = filled + empty;
+                _starText.color = stars > 0 ? new Color(1f, 0.85f, 0.28f, 1f) : new Color(0.4f, 0.4f, 0.4f, 1f);
+            }
+
             if (_body != null)
             {
                 var districtName = bundle.District != null ? bundle.District.displayName : summary.districtId;
@@ -109,7 +120,7 @@ namespace MossHarbor.UI
                 case ExpeditionObjectiveType.CollectResource:
                     return $"Next Action\nBank the {resourceType} haul, then rerun {districtName} or pivot into the next upgrade.";
                 case ExpeditionObjectiveType.HoldOut:
-                    return save.GetHubUpgradeLevel(RouteScannerUpgradeId) == 0
+                    return save.GetHubUpgradeLevel(UpgradeIds.RouteScanner) == 0
                         ? $"Next Action\nReturn to hub and install Route Scanner before the next hold in {districtName}."
                         : $"Next Action\nReturn to hub, restock, and push a longer hold in {districtName}.";
                 default:

@@ -30,13 +30,29 @@
 - 지구 선택, 업그레이드, 스타 해금, 튜토리얼 상태 관리
 - ScriptableObject 중심 데이터 구조와 EditMode 테스트
 - 구현용 상세 기획 문서 패키지 포함
+- 난이도 시스템 (Easy/Normal/Hard) — 타이머, 입장 비용, 별점 기준, 실패 시 자원 보존율 조정
+- CharacterController 기반 물리 충돌과 중력 처리
+- 픽업 오브젝트 bob/proximity scale/수집 shrink 애니메이션
+- 비콘 pulse 애니메이션 (목표 달성 시 활성화)
+- 씬 전환 이벤트 시스템과 비동기 페이드 효과
 
 ## Controls
 
 - 이동: `WASD`
+- 달리기: `Shift`
 - UI 조작: 마우스 클릭
 - 허브: `Start Expedition`, 지구 선택, 업그레이드 버튼
 - 원정: 픽업 수집 후 `Complete Run` 또는 `Fail Run`
+
+## Difficulty
+
+게임 난이도는 허브 화면에서 변경할 수 있습니다.
+
+| 모드 | 타이머 | 입장 비용 | 실패 보존율 | 별점 기준 |
+|------|--------|-----------|-------------|-----------|
+| Easy | +30% | -30% | 85% | 완화 |
+| Normal | 기본값 | 기본값 | 70% | 기본값 |
+| Hard | -20% | +30% | 50% | 강화 |
 
 ## Open In Unity
 
@@ -78,6 +94,8 @@ media/
 - 하이 콘셉트: [design/01_high_concept.md](design/01_high_concept.md)
 - 코어 루프: [design/03_core_loop_and_progression.md](design/03_core_loop_and_progression.md)
 - Unity 기술 스펙: [design/09_unity_technical_spec.md](design/09_unity_technical_spec.md)
+- 게임플레이 시스템 통합 명세: [design/15_gameplay_systems_spec.md](design/15_gameplay_systems_spec.md)
+- 게임성 강화 변경 이력: [design/16_gameplay_enhancement_changelog.md](design/16_gameplay_enhancement_changelog.md)
 
 ## Notes
 

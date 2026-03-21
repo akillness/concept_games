@@ -1,3 +1,4 @@
+using MossHarbor.UI;
 using UnityEngine;
 
 namespace MossHarbor.Core
@@ -31,13 +32,32 @@ namespace MossHarbor.Core
             SaveService = new SaveService();
             SaveService.Initialize();
             SceneFlowService = new SceneFlowService(GameStateService, SaveService);
+            EnsureSceneFadeController();
             GameStateService.SetState(GameFlowState.Boot);
+        }
+
+        private static void EnsureSceneFadeController()
+        {
+            if (SceneFadeController.Instance != null)
+            {
+                return;
+            }
+
+            var fadeGo = new GameObject("SceneFadeController");
+            fadeGo.AddComponent<SceneFadeController>();
         }
 
         private void Start()
         {
-            if (UnityEngine.SceneManagement.SceneManager.GetActiveScene().name == "SampleScene")
+            var currentScene = UnityEngine.SceneManagement.SceneManager.GetActiveScene().name;
+            if (currentScene == SceneFlowService.BootSceneName || currentScene == "SampleScene")
             {
+                var fade = SceneFadeController.Instance;
+                if (fade != null)
+                {
+                    fade.SetOpaque();
+                    fade.FadeIn(SceneFlowService.DefaultFadeInDuration);
+                }
                 GameStateService.SetState(GameFlowState.Hub);
             }
         }

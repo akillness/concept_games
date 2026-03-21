@@ -7,10 +7,6 @@ namespace MossHarbor.Expedition
 {
     public sealed class ExpeditionDirector : MonoBehaviour
     {
-        private const string HarborPumpUpgradeId = "harbor_pump";
-        private const string RouteScannerUpgradeId = "route_scanner";
-        private const string PearlResonatorUpgradeId = "pearl_resonator";
-
         [SerializeField] private DistrictDef districtDefinition;
         [SerializeField] private bool autoCompleteWhenTimerEnds;
         [SerializeField] private bool generateRunContent = true;
@@ -25,6 +21,7 @@ namespace MossHarbor.Expedition
         private bool _runActive;
         private int _bloomDustCollected;
         private int _scrapCollected;
+        private int _seedPodCollected;
         private int _pickupsCollected;
         private Transform _runtimeContentRoot;
         private ObjectiveService _objectiveService;
@@ -35,6 +32,7 @@ namespace MossHarbor.Expedition
         public QuestDef RuntimeQuest => _contentBundle != null ? _contentBundle.Quest : null;
         public int BloomDustCollected => _bloomDustCollected;
         public int ScrapCollected => _scrapCollected;
+        public int SeedPodCollected => _seedPodCollected;
         public int PickupsCollected => _pickupsCollected;
         public int TargetPickupCount => _objectiveService != null ? _objectiveService.TargetAmount : (districtDefinition != null ? districtDefinition.targetPickupCount : 3);
         public bool ObjectiveReady => _objectiveService != null ? _objectiveService.IsComplete : _pickupsCollected >= TargetPickupCount;
@@ -45,6 +43,7 @@ namespace MossHarbor.Expedition
             : (RuntimeQuest != null && !string.IsNullOrWhiteSpace(RuntimeQuest.objectiveText) ? RuntimeQuest.objectiveText : "Collect enough salvage and activate the beacon.");
         public string ObjectiveProgressText => _objectiveService != null ? _objectiveService.GetProgressText() : $"Pickups: {_pickupsCollected} / {TargetPickupCount}";
         public Color DistrictThemeColor => RuntimeDistrict != null ? RuntimeDistrict.districtColor : new Color(0.4f, 0.95f, 0.85f, 1f);
+        public DifficultyLevel ActiveDifficulty => _bootstrap != null ? _bootstrap.SaveService.Current.selectedDifficulty : DifficultyLevel.Normal;
 
         private void Start()
         {
@@ -52,10 +51,12 @@ namespace MossHarbor.Expedition
             ResolveConfiguredDistrict();
             _objectiveService = new ObjectiveService(districtDefinition, objectiveHoldSecondsOverride);
             var routeScannerUpgrade = Resources.Load<HubUpgradeDef>(ContentPaths.RouteScannerUpgrade);
-            var routeScannerBonus = _bootstrap != null && _bootstrap.SaveService.GetHubUpgradeLevel(RouteScannerUpgradeId) > 0 && routeScannerUpgrade != null
+            var routeScannerBonus = _bootstrap != null && _bootstrap.SaveService.GetHubUpgradeLevel(UpgradeIds.RouteScanner) > 0 && routeScannerUpgrade != null
                 ? routeScannerUpgrade.timerBonusSeconds
                 : 0f;
-            var runTimerSeconds = districtDefinition != null ? districtDefinition.runTimerSeconds + routeScannerBonus : 180f + routeScannerBonus;
+            var difficulty = _bootstrap != null ? _bootstrap.SaveService.Current.selectedDifficulty : DifficultyLevel.Normal;
+            var baseTimer = districtDefinition != null ? districtDefinition.runTimerSeconds : 180f;
+            var runTimerSeconds = baseTimer * DifficultyConfig.TimerMultiplier(difficulty) + routeScannerBonus;
             _remainingTime = runTimerSeconds;
             _runActive = true;
             if (generateRunContent)
@@ -104,42 +105,32 @@ namespace MossHarbor.Expedition
             _runActive = false;
             if (_bootstrap != null)
             {
-                var bonusBloom = districtDefinition != null ? districtDefinition.completionBonusBloomDust : 30;
-                var bonusScrap = districtDefinition != null ? districtDefinition.completionBonusScrap : 8;
-                var harborPumpUpgrade = Resources.Load<HubUpgradeDef>(ContentPaths.HarborPumpUpgrade);
-                var routeScannerUpgrade = Resources.Load<HubUpgradeDef>(ContentPaths.RouteScannerUpgrade);
-                var pearlResonatorUpgrade = Resources.Load<HubUpgradeDef>(ContentPaths.PearlResonatorUpgrade);
-                var cleanWaterBonus = _bootstrap.SaveService.GetHubUpgradeLevel(HarborPumpUpgradeId) > 0 && harborPumpUpgrade != null ? harborPumpUpgrade.cleanWaterBonus : 0;
-                var routeScannerBloomBonus = _bootstrap.SaveService.GetHubUpgradeLevel(RouteScannerUpgradeId) > 0 && routeScannerUpgrade != null
-                    ? Mathf.RoundToInt(_bloomDustCollected * Mathf.Max(0f, routeScannerUpgrade.bloomMultiplier - 1f))
-                    : 0;
-                var memoryPearlBonus = _bootstrap.SaveService.GetHubUpgradeLevel(PearlResonatorUpgradeId) > 0 && pearlResonatorUpgrade != null && districtDefinition != null && districtDefinition.recommendedPower >= 3
-                    ? pearlResonatorUpgrade.memoryPearlBonus
-                    : 0;
-                var baseRunTime = districtDefinition != null ? districtDefinition.runTimerSeconds : 180f;
-                var bonusRunTime = _bootstrap.SaveService.GetHubUpgradeLevel(RouteScannerUpgradeId) > 0 && routeScannerUpgrade != null ? routeScannerUpgrade.timerBonusSeconds : 0f;
-                var totalDuration = baseRunTime + bonusRunTime - _remainingTime;
+                var reward = RewardCalculator.CalculateSuccess(
+                    districtDefinition, _bootstrap.SaveService,
+                    _bloomDustCollected, _scrapCollected, _remainingTime);
 
-                _bloomDustCollected += routeScannerBloomBonus;
-                _bloomDustCollected += bonusBloom;
-                _scrapCollected += bonusScrap;
-                _bootstrap.SaveService.AddResource(ResourceType.BloomDust, _bloomDustCollected);
-                _bootstrap.SaveService.AddResource(ResourceType.Scrap, _scrapCollected);
-                if (cleanWaterBonus > 0)
+                _bootstrap.SaveService.AddResource(ResourceType.BloomDust, reward.bloomDust);
+                _bootstrap.SaveService.AddResource(ResourceType.Scrap, reward.scrap);
+                if (reward.cleanWater > 0)
                 {
-                    _bootstrap.SaveService.AddResource(ResourceType.CleanWater, cleanWaterBonus);
+                    _bootstrap.SaveService.AddResource(ResourceType.CleanWater, reward.cleanWater);
                 }
-                if (memoryPearlBonus > 0)
+                if (reward.memoryPearl > 0)
                 {
-                    _bootstrap.SaveService.AddResource(ResourceType.MemoryPearl, memoryPearlBonus);
+                    _bootstrap.SaveService.AddResource(ResourceType.MemoryPearl, reward.memoryPearl);
+                }
+                if (_seedPodCollected > 0)
+                {
+                    _bootstrap.SaveService.AddResource(ResourceType.SeedPod, _seedPodCollected);
                 }
                 _bootstrap.SaveService.SetLastRunSummary(BuildRunSummary(
                     completed: true,
-                    bloomDustCollected: _bloomDustCollected,
-                    scrapCollected: _scrapCollected,
-                    cleanWaterCollected: cleanWaterBonus,
-                    memoryPearlCollected: memoryPearlBonus,
-                    durationSeconds: totalDuration,
+                    bloomDustCollected: reward.bloomDust,
+                    scrapCollected: reward.scrap,
+                    cleanWaterCollected: reward.cleanWater,
+                    memoryPearlCollected: reward.memoryPearl,
+                    seedPodCollected: _seedPodCollected,
+                    durationSeconds: reward.duration,
                     resultLabel: $"{(districtDefinition != null ? districtDefinition.displayName : "Dock")} Cleared"));
                 _bootstrap.SceneFlowService.LoadResults();
             }
@@ -151,22 +142,29 @@ namespace MossHarbor.Expedition
             _runActive = false;
             if (_bootstrap != null)
             {
-                var fallbackBloom = districtDefinition != null ? districtDefinition.completionBonusBloomDust : 30;
-                var retainedBloomDust = _bloomDustCollected + Mathf.RoundToInt(fallbackBloom * 0.5f);
-                var baseRunTime = districtDefinition != null ? districtDefinition.runTimerSeconds : 180f;
-                var routeScannerUpgrade = Resources.Load<HubUpgradeDef>(ContentPaths.RouteScannerUpgrade);
-                var bonusRunTime = _bootstrap.SaveService.GetHubUpgradeLevel(RouteScannerUpgradeId) > 0 && routeScannerUpgrade != null
-                    ? routeScannerUpgrade.timerBonusSeconds
-                    : 0f;
-                var totalDuration = baseRunTime + bonusRunTime - _remainingTime;
-                _bootstrap.SaveService.AddResource(ResourceType.BloomDust, retainedBloomDust);
+                var reward = RewardCalculator.CalculateFailure(
+                    districtDefinition, _bootstrap.SaveService,
+                    _bloomDustCollected, _scrapCollected, _remainingTime);
+
+                _bootstrap.SaveService.AddResource(ResourceType.BloomDust, reward.bloomDust);
+                if (reward.scrap > 0)
+                {
+                    _bootstrap.SaveService.AddResource(ResourceType.Scrap, reward.scrap);
+                }
+                var retention = DifficultyConfig.FailResourceRetention(_bootstrap.SaveService.Current.selectedDifficulty);
+                var retainedSeedPods = Mathf.RoundToInt(_seedPodCollected * retention);
+                if (retainedSeedPods > 0)
+                {
+                    _bootstrap.SaveService.AddResource(ResourceType.SeedPod, retainedSeedPods);
+                }
                 _bootstrap.SaveService.SetLastRunSummary(BuildRunSummary(
                     completed: false,
-                    bloomDustCollected: retainedBloomDust,
-                    scrapCollected: _scrapCollected,
+                    bloomDustCollected: reward.bloomDust,
+                    scrapCollected: reward.scrap,
                     cleanWaterCollected: 0,
                     memoryPearlCollected: 0,
-                    durationSeconds: totalDuration,
+                    seedPodCollected: retainedSeedPods,
+                    durationSeconds: reward.duration,
                     resultLabel: "Run Failed"));
                 _bootstrap.SceneFlowService.LoadResults();
             }
@@ -186,6 +184,9 @@ namespace MossHarbor.Expedition
                     break;
                 case ResourceType.Scrap:
                     _scrapCollected += amount;
+                    break;
+                case ResourceType.SeedPod:
+                    _seedPodCollected += amount;
                     break;
             }
 
@@ -209,6 +210,7 @@ namespace MossHarbor.Expedition
             int scrapCollected,
             int cleanWaterCollected,
             int memoryPearlCollected,
+            int seedPodCollected,
             float durationSeconds,
             string resultLabel)
         {
@@ -219,6 +221,7 @@ namespace MossHarbor.Expedition
                 scrapCollected = scrapCollected,
                 cleanWaterCollected = cleanWaterCollected,
                 memoryPearlCollected = memoryPearlCollected,
+                seedPodCollected = seedPodCollected,
                 pickupsCollected = _pickupsCollected,
                 durationSeconds = durationSeconds,
                 districtId = districtDefinition != null ? districtDefinition.districtId : "dock",
@@ -283,13 +286,15 @@ namespace MossHarbor.Expedition
         {
             ClearSceneRunContent();
             _runtimeContentRoot = new GameObject("GeneratedRunContent").transform;
-            RuntimeArtDirector.DecorateExpedition(_runtimeContentRoot);
+            RuntimeArtDirector.DecorateExpedition(_runtimeContentRoot, districtDefinition);
             var bloomTint = Color.Lerp(DistrictThemeColor, Color.white, 0.3f);
             var scrapTint = Color.Lerp(DistrictThemeColor, new Color(0.9f, 0.78f, 0.42f, 1f), 0.45f);
+            var seedPodTint = Color.Lerp(DistrictThemeColor, new Color(0.42f, 0.82f, 0.38f, 1f), 0.5f);
 
             var bloomCount = districtDefinition != null ? districtDefinition.bloomPickupCount : 2;
             var scrapCount = districtDefinition != null ? districtDefinition.scrapPickupCount : 1;
-            var totalPickups = Mathf.Max(1, bloomCount + scrapCount);
+            var seedPodCount = districtDefinition != null ? districtDefinition.seedPodPickupCount : 0;
+            var totalPickups = Mathf.Max(1, bloomCount + scrapCount + seedPodCount);
 
             for (var i = 0; i < bloomCount; i++)
             {
@@ -311,6 +316,17 @@ namespace MossHarbor.Expedition
                     districtDefinition != null ? districtDefinition.scrapPickupAmount : 4,
                     PrimitiveType.Sphere,
                     scrapTint);
+            }
+
+            for (var i = 0; i < seedPodCount; i++)
+            {
+                CreatePickup(
+                    $"SeedPodPickup_{i + 1}",
+                    ResolvePickupPosition(bloomCount + scrapCount + i, totalPickups),
+                    ResourceType.SeedPod,
+                    districtDefinition != null ? districtDefinition.seedPodPickupAmount : 3,
+                    PrimitiveType.Capsule,
+                    seedPodTint);
             }
 
             CreateObjectiveBeacon(districtDefinition != null ? districtDefinition.beaconPosition : new Vector3(0f, 0.75f, 8f));

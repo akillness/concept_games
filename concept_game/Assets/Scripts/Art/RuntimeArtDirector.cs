@@ -1,3 +1,4 @@
+using MossHarbor.Core;
 using MossHarbor.Data;
 using UnityEngine;
 using Object = UnityEngine.Object;
@@ -40,7 +41,73 @@ namespace MossHarbor.Art
             StyleGroundPlane(new Color(0.34f, 0.47f, 0.41f, 1f), new Vector3(1.7f, 1f, 1.7f));
         }
 
+        public static void DecorateHub(Transform parent, SaveService saveService)
+        {
+            if (parent == null) return;
+
+            // Call existing decoration
+            DecorateHub(parent);
+
+            if (saveService == null) return;
+
+            var root = parent.Find("RuntimeHubArt");
+            if (root == null) return;
+
+            // Add restoration visuals based on zone states
+            AddRestorationVisuals(root, saveService);
+        }
+
+        private static void AddRestorationVisuals(Transform root, SaveService saveService)
+        {
+            var restorationRoot = EnsureChildRoot(root, "RestorationVisuals");
+            ClearChildren(restorationRoot);
+
+            // Dock zone restored — add dock lights
+            if (saveService.IsHubZoneRestored("dock"))
+            {
+                CreateLantern(restorationRoot, "DockRestoredLight", new Vector3(12f, 0f, 0f), new Color(0.4f, 0.95f, 0.85f, 1f), 7f, 1.9f);
+            }
+
+            // Reed Fields zone restored — add vegetation patch
+            if (saveService.IsHubZoneRestored("reed_fields"))
+            {
+                SpawnDecor(restorationRoot, ArtResourcePaths.EnvironmentMossPatch, "ReedRestoredPatch", new Vector3(-6f, 0.02f, 16f), new Vector3(0f, 30f, 0f), Vector3.one * 1.1f);
+                CreateLantern(restorationRoot, "ReedRestoredLight", new Vector3(-8f, 0f, 14f), new Color(0.45f, 0.78f, 0.42f, 1f), 5f, 1.5f);
+            }
+
+            // Tidal Vault zone restored — add platform
+            if (saveService.IsHubZoneRestored("tidal_vault"))
+            {
+                SpawnDecor(restorationRoot, ArtResourcePaths.EnvironmentVillagePlatform, "VaultRestoredPlatform", new Vector3(6f, -0.04f, 16f), new Vector3(0f, -15f, 0f), Vector3.one * 0.7f);
+                CreateLantern(restorationRoot, "VaultRestoredLight", new Vector3(6f, 0f, 16f), new Color(0.28f, 0.58f, 0.82f, 1f), 6f, 1.6f);
+            }
+
+            // Glass Narrows zone restored — add crystal light
+            if (saveService.IsHubZoneRestored("glass_narrows"))
+            {
+                CreateLantern(restorationRoot, "NarrowsRestoredLight", new Vector3(-10f, 0f, 20f), new Color(0.72f, 0.85f, 0.92f, 1f), 8f, 2.0f);
+            }
+
+            // Sunken Arcade zone restored — add warm glow
+            if (saveService.IsHubZoneRestored("sunken_arcade"))
+            {
+                SpawnDecor(restorationRoot, ArtResourcePaths.EnvironmentRoadCobble, "ArcadeRestoredPath", new Vector3(0f, -0.01f, 22f), new Vector3(0f, 0f, 0f), Vector3.one * 0.9f);
+                CreateLantern(restorationRoot, "ArcadeRestoredLight", new Vector3(0f, 0f, 22f), new Color(0.92f, 0.62f, 0.28f, 1f), 7f, 1.8f);
+            }
+
+            // Lighthouse Crown zone restored — add beacon
+            if (saveService.IsHubZoneRestored("lighthouse_crown"))
+            {
+                CreateLantern(restorationRoot, "CrownRestoredBeacon", new Vector3(0f, 0f, 26f), new Color(1f, 0.95f, 0.8f, 1f), 12f, 2.5f);
+            }
+        }
+
         public static void DecorateExpedition(Transform parent)
+        {
+            DecorateExpedition(parent, null);
+        }
+
+        public static void DecorateExpedition(Transform parent, MossHarbor.Data.DistrictDef district)
         {
             if (parent == null)
             {
@@ -49,7 +116,7 @@ namespace MossHarbor.Art
 
             var root = EnsureChildRoot(parent, "RuntimeExpeditionArt");
             ClearChildren(root);
-            ApplyExpeditionAtmosphere();
+            ApplyExpeditionAtmosphere(district);
 
             SpawnDecor(root, ArtResourcePaths.EnvironmentVillagePlatform, "ExpeditionBase", new Vector3(0f, -0.04f, 5.4f), new Vector3(0f, 0f, 0f), Vector3.one * 1.18f);
             SpawnDecor(root, ArtResourcePaths.EnvironmentRoadWood, "ExpeditionPathEntry", new Vector3(0f, -0.02f, -7.5f), new Vector3(0f, 0f, 0f), Vector3.one * 1.2f);
@@ -229,15 +296,21 @@ namespace MossHarbor.Art
             ConfigureSceneLighting(new Vector3(36f, 134f, 0f), HubSunColor, 1.45f, HubFogColor);
         }
 
-        private static void ApplyExpeditionAtmosphere()
+        private static void ApplyExpeditionAtmosphere(MossHarbor.Data.DistrictDef district = null)
         {
+            var fogColor = district != null ? district.fogColor : ExpeditionFogColor;
+            var fogDensity = district != null ? district.fogDensity : 0.019f;
+            var ambientColor = district != null ? district.ambientColor : ExpeditionAmbientColor;
+            var sunColor = district != null ? district.sunColor : ExpeditionSunColor;
+            var sunIntensity = district != null ? district.sunIntensity : 1.5f;
+
             RenderSettings.fog = true;
             RenderSettings.fogMode = FogMode.Exponential;
-            RenderSettings.fogDensity = 0.019f;
-            RenderSettings.fogColor = ExpeditionFogColor;
+            RenderSettings.fogDensity = fogDensity;
+            RenderSettings.fogColor = fogColor;
             RenderSettings.ambientMode = UnityEngine.Rendering.AmbientMode.Flat;
-            RenderSettings.ambientLight = ExpeditionAmbientColor;
-            ConfigureSceneLighting(new Vector3(46f, 134f, 0f), ExpeditionSunColor, 1.5f, ExpeditionFogColor);
+            RenderSettings.ambientLight = ambientColor;
+            ConfigureSceneLighting(new Vector3(46f, 134f, 0f), sunColor, sunIntensity, fogColor);
         }
 
         private static void DisableColliders(GameObject root)
