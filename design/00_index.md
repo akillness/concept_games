@@ -28,6 +28,9 @@
 - [16. Gameplay Enhancement Changelog](16_gameplay_enhancement_changelog.md)
 - [17. District Map Layouts](17_district_map_layouts.md)
 - [18. Consolidated Technical Reference](18_consolidated_technical_reference.md)
+- [19. Balance Survey & Tuning](19_balance_survey.md)
+- [20. Map Collision & Playable Boundaries](20_map_collision_spec.md)
+- [21. Character & Art Asset Spec](21_character_art_spec.md)
 
 ## 제품 원칙
 
