@@ -214,3 +214,48 @@
 - [ ] **정화/오염 시스템 미구현** → 위협 요소 없이 탐색과 수집만 존재
 - [ ] **ToolDef ScriptableObject** (`ScriptableObjects/Tool_Vacuum`) 로드되나 실제 정화 로직 없음
 - [ ] **HoldOut 목표 시각 피드백 미확인** → Glass Narrows/Lighthouse Crown에서 HoldOut 진행률 UI 표시 여부 검증 필요
+
+
+## 9. QA 테스트 시나리오 (우선순위)
+
+### 9.1 P0 (출시 전 필수)
+
+- [ ] **시나리오 1: SeedPod Dead Stock 방지**
+  - 1) Reed Fields, 2) Tidal Vault, 3) Glass Narrows 순으로 각 5회 Run.
+  - 2) 각 Run 종료 시 SeedPod 누적량 / Dock 진입 횟수 / Harbor Pump 진행도 스냅샷 저장.
+  - 3) SeedPod는 사용되지 않아 50개 이상 누적되면 실패.
+
+- [ ] **시나리오 2: 3성 수학적 검증**
+  - 1) Glass Narrows, Lighthouse Crown를 각각 10회 이상 클리어.
+  - 2) HoldOut 구간에서 실패/성공 시각, 타이머 소모, 3성 조건을 비교.
+  - 3) `threeStarTimeRatio` 조건에서 3성 달성이 구조적으로 불가하면 QA Fail.
+
+- [ ] **시나리오 3: 캐릭터 UV 맵 아티팩트 정합성**
+  - 1) `Art/Characters/player_avatar.prefab` 로드 후 회전/거리별 스크린샷 12컷 캡처.
+  - 2) `Assets/Art/Characters/StylizedCharacterPack/Textures/Characters/Leopard_Albedo.png`의 UV 누수·뒤집힘·늘어짐(브러시 잉크/스트레치 패턴) 수동 판독.
+  - 3) 아티팩트가 눈에 띄는 스크린샷 1장 이상이면 실패로 간주.
+
+### 9.2 P1 (릴리즈 직후 1회차)
+
+- [ ] **시나리오 4: Dock→Reed Fields 난이도 점프 완화 검증**
+  - 1) 새 계정으로 Dock 5회, Reed Fields 5회 실행.
+  - 2) Dock 완료 후 즉시 Reed Fields 첫 실패율과 이탈률을 측정.
+  - 3) 이탈률이 35% 초과 시 P1 실패.
+
+- [ ] **시나나리오 5: 스타 요구량/재도전 유도 체크**
+  - 1) 게임 전체를 1성 기준으로 최소 3회 순환.
+  - 2) Sunken Arcade 및 Lighthouse Crown 진입까지 필요한 누적 run 수를 측정.
+  - 3) 목표: Sunken Arcade 5회 미만, Lighthouse Crown 10회 미만 진입 금지(필요 run 증가 유도).
+
+### 9.3 P2 (회귀)
+
+- [ ] **시나리오 6: 실패 자원 보존율 회귀**
+  - 1) 난이도별(에이스/Normal/Hard) 실패 케이스 20회 수집.
+  - 2) 실패 후 `BloomDust`/`Scrap`/`SeedPod` 보존율을 수집해 평균을 계산.
+  - 3) 설계치(70% ±5%?) 및 현재 구현 범위에서 이탈 시 회귀 이슈 등록.
+
+- [ ] **시나리오 7: 캐릭터/아트 로드 안정성 회귀**
+  - 1) Hub/Expedition 씬 진입 시 플레이어 비주얼(`player_avatar`)과 오브젝트 렌더링 성공률 100% 확인.
+  - 2) 캐릭터 텍스처 교체 시 UV 채널이 깨지지 않는지 2회 이상 교체 테스트.
+
+---
