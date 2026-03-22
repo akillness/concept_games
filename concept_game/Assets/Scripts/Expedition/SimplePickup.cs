@@ -76,7 +76,7 @@ namespace MossHarbor.Expedition
             if (!other.TryGetComponent<PlayerController>(out _))
                 return;
 
-            _director?.Collect(resourceType, amount);
+            _director?.Collect(resourceType, amount, other.transform);
             _isCollecting = true;
             _collectTimer = 0f;
         }

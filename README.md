@@ -9,20 +9,21 @@
 
 ## Gameplay Preview
 
-![Project Moss Harbor gameplay preview](media/moss-harbor-gameplay.gif)
+![Project Moss Harbor expedition redesign preview](media/omu-expedition-redesign-latest.gif)
 
-- MP4 다운로드: [media/moss-harbor-gameplay.mp4](media/moss-harbor-gameplay.mp4)
-- 대표 이미지: [media/moss-harbor-gameplay-poster.png](media/moss-harbor-gameplay-poster.png)
+- 최신 GIF: [media/omu-expedition-redesign-latest.gif](media/omu-expedition-redesign-latest.gif)
+- 대표 이미지: [media/omu-expedition-redesign-latest-poster.png](media/omu-expedition-redesign-latest-poster.png)
+- 이전 전체 루프 프리뷰: [media/moss-harbor-gameplay.gif](media/moss-harbor-gameplay.gif)
 
 ## Live Play Captures
 
-허브 실제 플레이 캡처:
+최신 캡처는 넓어진 Expedition 레벨 리디자인 기준입니다.
 
-![Hub live play capture](concept_game/Assets/Screenshots/qa_hub_playmode_readme.png)
-
-원정 실제 플레이 캡처:
-
-![Expedition live play capture](concept_game/Assets/Screenshots/qa_expedition_playmode_readme.png)
+- 넓은 메인 그라운드와 좌우 진입 레인
+- 램프를 통한 상층 데크 진입
+- 비콘 플랫폼으로 이어지는 북측 브리지
+- Boost Pad / Sweep Hazard 배치
+- 카메라 디렉터 기반 픽업, 목표 해금, 비콘 활성화 연출
 
 최신 QA 증적과 체크리스트 상태는 [docs/QA/01_ultraqa_execution_report.md](docs/QA/01_ultraqa_execution_report.md), [docs/qa_verification_checklist.md](docs/qa_verification_checklist.md)에서 확인할 수 있습니다.
 
@@ -50,6 +51,8 @@
 - SeedPod 비율 검증용 run summary telemetry (`seedPodDelta`, `bioPressUseCount`, `bioPressCleanWaterConverted`)
 - district별 `BoundaryRecoveryProfile` 기반 경계 복귀
 - 에디터 UV import guardrail (`Tools/Moss Harbor/Validation/Audit Player UV Guardrail`)
+- Expedition 런타임 레벨 리디자인 (넓은 ground, 고저차 램프, 상층 데크, 비콘 플랫폼)
+- 동적 기믹 (`TraversalBoostPad`, `SweepHazard`)과 이벤트 카메라 (`ExpeditionCameraDirector`)
 - 6개 지구별 맵 레이아웃과 기믹 동선 설계 (기획 문서)
 - 10개 시스템 구현 상태 추적 및 기획-코드 매핑 문서
 

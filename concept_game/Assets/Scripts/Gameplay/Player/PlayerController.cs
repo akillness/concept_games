@@ -16,6 +16,7 @@ namespace MossHarbor.Gameplay.Player
         [SerializeField] private float acceleration = 18f;
         [SerializeField] private float deceleration = 22f;
         [SerializeField] private float gravity = -15f;
+        [SerializeField] private float externalImpulseDecay = 14f;
         [SerializeField] private Transform modelRoot;
         [Header("Boundary Recovery")]
         [SerializeField] private bool enableBoundaryRecovery = true;
@@ -24,6 +25,7 @@ namespace MossHarbor.Gameplay.Player
 
         private CharacterController _controller;
         private Vector3 _currentVelocity;
+        private Vector3 _externalVelocity;
         private float _verticalSpeed;
         private Animator _animator;
         private float _currentAnimationSpeed;
@@ -84,6 +86,7 @@ namespace MossHarbor.Gameplay.Player
             var targetVelocity = moveDirection * targetSpeed;
             var accelRate = moveDirection.sqrMagnitude > 0f ? acceleration : deceleration;
             _currentVelocity = Vector3.MoveTowards(_currentVelocity, targetVelocity, accelRate * Time.deltaTime);
+            _externalVelocity = Vector3.MoveTowards(_externalVelocity, Vector3.zero, externalImpulseDecay * Time.deltaTime);
 
             // Gravity
             if (_controller.isGrounded && _verticalSpeed < 0f)
@@ -91,7 +94,7 @@ namespace MossHarbor.Gameplay.Player
             _verticalSpeed += gravity * Time.deltaTime;
 
             // Apply movement
-            var motion = _currentVelocity + Vector3.up * _verticalSpeed;
+            var motion = _currentVelocity + _externalVelocity + Vector3.up * _verticalSpeed;
             _controller.Move(motion * Time.deltaTime);
 
             if (TryRecoverBoundary())
@@ -142,10 +145,50 @@ namespace MossHarbor.Gameplay.Player
             transform.position = safePosition;
             _controller.enabled = true;
             _currentVelocity = Vector3.zero;
+            _externalVelocity = Vector3.zero;
             _verticalSpeed = 0f;
             _currentAnimationSpeed = 0f;
             _lastBoundaryRecoveryTime = currentTime;
             return true;
+        }
+
+        public Vector3 FacingDirection
+        {
+            get
+            {
+                if (modelRoot != null)
+                {
+                    var modelForward = Vector3.ProjectOnPlane(modelRoot.forward, Vector3.up);
+                    if (modelForward.sqrMagnitude > 0.001f)
+                    {
+                        return modelForward.normalized;
+                    }
+                }
+
+                var horizontalVelocity = Vector3.ProjectOnPlane(_currentVelocity + _externalVelocity, Vector3.up);
+                if (horizontalVelocity.sqrMagnitude > 0.001f)
+                {
+                    return horizontalVelocity.normalized;
+                }
+
+                return Vector3.forward;
+            }
+        }
+
+        public void ApplyExternalImpulse(Vector3 worldVelocity)
+        {
+            if (worldVelocity.sqrMagnitude <= 0f)
+            {
+                return;
+            }
+
+            if (worldVelocity.sqrMagnitude >= _externalVelocity.sqrMagnitude)
+            {
+                _externalVelocity = worldVelocity;
+                return;
+            }
+
+            _externalVelocity += worldVelocity * 0.35f;
         }
 
         public static BoundaryRecoveryProfile ResolveBoundaryRecoveryProfile(
@@ -196,7 +239,7 @@ namespace MossHarbor.Gameplay.Player
             }
 
             var isSprinting = Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift);
-            var currentSpeed = new Vector3(_currentVelocity.x, 0f, _currentVelocity.z).magnitude;
+            var currentSpeed = new Vector3(_currentVelocity.x + _externalVelocity.x, 0f, _currentVelocity.z + _externalVelocity.z).magnitude;
             var targetAnimationSpeed = currentSpeed > 0.1f ? (isSprinting ? 1f : 0.55f) : 0f;
             _currentAnimationSpeed = Mathf.Lerp(_currentAnimationSpeed, targetAnimationSpeed, 1f - Mathf.Exp(-Time.deltaTime / Mathf.Max(0.001f, animationDampTime)));
             _animator.SetFloat(SpeedHash, _currentAnimationSpeed);

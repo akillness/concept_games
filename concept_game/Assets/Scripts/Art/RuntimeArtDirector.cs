@@ -135,7 +135,7 @@ namespace MossHarbor.Art
             SpawnDecor(root, ArtResourcePaths.EnvironmentMossPatch, "ExpeditionMossPatchB", new Vector3(-4.2f, 0.02f, 7.8f), new Vector3(0f, 75f, 0f), Vector3.one * 0.58f);
             CreateLantern(root, "ExpeditionSignalA", new Vector3(-2.4f, 0f, 2.4f), new Color(0.52f, 0.92f, 0.8f, 1f), 5.6f, 1.8f);
             CreateLantern(root, "ExpeditionSignalB", new Vector3(3.8f, 0f, 10.6f), new Color(0.38f, 0.74f, 0.66f, 1f), 4.8f, 1.6f);
-            StyleGroundPlane(new Color(0.22f, 0.33f, 0.31f, 1f), new Vector3(1.22f, 1f, 1.22f));
+            StyleGroundPlane(new Color(0.22f, 0.33f, 0.31f, 1f), new Vector3(2.35f, 1f, 2.65f));
         }
 
         public static Transform AttachPlayerVisual(Transform playerRoot)

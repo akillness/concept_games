@@ -188,3 +188,22 @@
   - 비교 결과: `high-yield -> baseline -> fast-sink`
 - Conclusion:
   - SeedPod 비율 비교를 위한 자동 평가 하네스가 코드와 테스트에 반영됐고, 현재 라이브 baseline을 바꾸기 전 검증 기반이 생겼다.
+
+## Ralph + OMU Expedition Level Redesign Gate (2026-03-22)
+
+- Scope:
+  - 좁은 평면 원정을 넓은 ground + side lane + elevated deck + beacon bridge 구조로 확장
+  - `TraversalBoostPad`, `SweepHazard`, `ExpeditionCameraDirector` 추가
+  - 최신 Expedition 플레이 GIF와 README 동기화
+- Result:
+  - EditMode tests: **53/53 passed** (job: `f982822022974cdface6ff8298fed2b7`)
+  - Runtime verification:
+    - `RuntimeLevelLayout`, `WestBoostPad`, `EastBoostPad`, `CentralSweeper`, `BridgeSweeper`, `ObjectiveBeacon` 존재 확인
+    - `ExpeditionCameraDirector`가 `Main Camera`에 바인딩됨
+  - Capture output:
+    - `media/omu-expedition-redesign-latest.gif`
+    - `media/omu-expedition-redesign-latest-poster.png`
+- Open issue:
+  - play mode 콘솔에서 `The referenced script (Unknown) on this Behaviour is missing!` 경고가 반복되어 후속 추적이 필요함
+- Conclusion:
+  - 레벨 리디자인과 카메라 연출은 런타임에 반영됐고, 최신 플레이 증적은 README 기준선으로 갱신됐다.

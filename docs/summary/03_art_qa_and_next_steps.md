@@ -2,12 +2,12 @@
 
 ## Current QA Gate
 
-- EditMode 테스트: `45/45 passed`
+- EditMode 테스트: `53/53 passed`
 - 직접 플레이:
-  - Hub play/stop 확인
-  - Expedition play/stop 확인
+  - Expedition runtime layout 확인
+  - `ExpeditionCameraDirector` 바인딩 확인
 - 콘솔:
-  - error `0`
+  - `The referenced script (Unknown)` 경고 재확인 필요
 - UV guardrail:
   - `critical=0`
   - `warnings=0`
@@ -44,6 +44,17 @@
 - 검증:
   - Unity MCP로 district별 진입
   - 경계 이탈 재현 및 복귀 확인
+
+### 2.5. Expedition Layout Polish
+- 목표:
+  - 넓어진 공간 위에 실제 플레이 압축도를 더 높인다
+- 구현:
+  - pickup/hazard/boost 배치 밀도 재조정
+  - 상층/하층 왕복 동선에 위험-보상 루트 추가
+  - 카메라 cue 지속시간과 위치 튜닝
+- 검증:
+  - Unity MCP play mode 기준 GIF/README 증적 업데이트
+  - objective-ready / beacon-activate 시점 직접 재검증
 
 ### 3. UV Guardrail Expansion
 - 목표:

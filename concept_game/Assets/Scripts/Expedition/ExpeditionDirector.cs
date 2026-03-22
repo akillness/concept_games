@@ -25,6 +25,12 @@ namespace MossHarbor.Expedition
         private int _pickupsCollected;
         private Transform _runtimeContentRoot;
         private ObjectiveService _objectiveService;
+        private ExpeditionLevelLayoutPlan _levelLayoutPlan;
+        private ExpeditionCameraDirector _cameraDirector;
+        private ObjectiveBeacon _objectiveBeacon;
+        private bool _objectiveReadyCuePlayed;
+        private bool _beaconCompletionQueued;
+        private float _beaconCompletionTime;
 
         public float RemainingTime => _remainingTime;
         public DistrictContentBundle RuntimeContentBundle => _contentBundle;
@@ -72,16 +78,32 @@ namespace MossHarbor.Expedition
             {
                 _bootstrap.GameStateService.SetState(GameFlowState.Expedition);
             }
+
+            TryBindCameraDirector();
         }
 
         private void Update()
         {
+            TryBindCameraDirector();
             if (!_runActive)
             {
                 return;
             }
 
             _objectiveService?.Tick(Time.deltaTime);
+            if (!_objectiveReadyCuePlayed && ObjectiveReady)
+            {
+                _cameraDirector?.PlayObjectiveReadyCue(_objectiveBeacon != null ? _objectiveBeacon.transform : null);
+                _objectiveReadyCuePlayed = true;
+            }
+
+            if (_beaconCompletionQueued && Time.time >= _beaconCompletionTime)
+            {
+                _beaconCompletionQueued = false;
+                CompleteCurrentRun();
+                return;
+            }
+
             _remainingTime -= Time.deltaTime;
             if (_remainingTime > 0f)
             {
@@ -171,7 +193,7 @@ namespace MossHarbor.Expedition
             }
         }
 
-        public void Collect(ResourceType resourceType, int amount)
+        public void Collect(ResourceType resourceType, int amount, Transform collector = null)
         {
             if (!_runActive)
             {
@@ -193,6 +215,7 @@ namespace MossHarbor.Expedition
 
             _pickupsCollected++;
             _objectiveService?.RegisterCollection(resourceType, amount);
+            _cameraDirector?.RegisterPickupCue(resourceType, collector);
         }
 
         public void ActivateObjectiveBeacon()
@@ -202,7 +225,9 @@ namespace MossHarbor.Expedition
                 return;
             }
 
-            CompleteCurrentRun();
+            _cameraDirector?.PlayBeaconActivatedCue();
+            _beaconCompletionQueued = true;
+            _beaconCompletionTime = Time.time + 0.9f;
         }
 
         private RunSummary BuildRunSummary(
@@ -289,6 +314,8 @@ namespace MossHarbor.Expedition
             ClearSceneRunContent();
             _runtimeContentRoot = new GameObject("GeneratedRunContent").transform;
             RuntimeArtDirector.DecorateExpedition(_runtimeContentRoot, districtDefinition);
+            _levelLayoutPlan = ExpeditionLevelLayoutBuilder.CreatePlan(districtDefinition);
+            ExpeditionLevelLayoutBuilder.Build(_runtimeContentRoot, _levelLayoutPlan, DistrictThemeColor);
             var bloomTint = Color.Lerp(DistrictThemeColor, Color.white, 0.3f);
             var scrapTint = Color.Lerp(DistrictThemeColor, new Color(0.9f, 0.78f, 0.42f, 1f), 0.45f);
             var seedPodTint = Color.Lerp(DistrictThemeColor, new Color(0.42f, 0.82f, 0.38f, 1f), 0.5f);
@@ -331,7 +358,10 @@ namespace MossHarbor.Expedition
                     seedPodTint);
             }
 
-            CreateObjectiveBeacon(districtDefinition != null ? districtDefinition.beaconPosition : new Vector3(0f, 0.75f, 8f));
+            var beaconPosition = _levelLayoutPlan != null
+                ? _levelLayoutPlan.beaconPosition
+                : districtDefinition != null ? districtDefinition.beaconPosition : new Vector3(0f, 0.75f, 8f);
+            CreateObjectiveBeacon(beaconPosition);
         }
 
         private void ClearSceneRunContent()
@@ -355,6 +385,11 @@ namespace MossHarbor.Expedition
 
         private Vector3 ResolvePickupPosition(int index, int totalPickups)
         {
+            if (_levelLayoutPlan != null && _levelLayoutPlan.pickupAnchors != null && _levelLayoutPlan.pickupAnchors.Length > 0)
+            {
+                return _levelLayoutPlan.pickupAnchors[index % _levelLayoutPlan.pickupAnchors.Length];
+            }
+
             var radius = districtDefinition != null ? districtDefinition.pickupSpawnRadius : 8f;
             var angle = totalPickups <= 1 ? 0f : (Mathf.PI * 2f * index) / totalPickups;
             return new Vector3(Mathf.Cos(angle) * radius, 0.75f, Mathf.Sin(angle) * radius);
@@ -406,6 +441,50 @@ namespace MossHarbor.Expedition
                 beaconComponent = beacon.AddComponent<ObjectiveBeacon>();
             }
             beaconComponent.SetTheme(DistrictThemeColor);
+            _objectiveBeacon = beaconComponent;
+        }
+
+        private void TryBindCameraDirector()
+        {
+            if (_cameraDirector == null)
+            {
+                var gameplayCamera = ResolveGameplayCamera();
+                if (gameplayCamera != null)
+                {
+                    _cameraDirector = gameplayCamera.GetComponent<ExpeditionCameraDirector>();
+                    if (_cameraDirector == null)
+                    {
+                        _cameraDirector = gameplayCamera.gameObject.AddComponent<ExpeditionCameraDirector>();
+                    }
+                }
+            }
+
+            if (_cameraDirector == null)
+            {
+                return;
+            }
+
+            var player = FindFirstObjectByType<MossHarbor.Gameplay.Player.PlayerController>();
+            _cameraDirector.Configure(player, _objectiveBeacon != null ? _objectiveBeacon.transform : null);
+        }
+
+        private static Camera ResolveGameplayCamera()
+        {
+            if (Camera.main != null)
+            {
+                return Camera.main;
+            }
+
+            var cameras = FindObjectsByType<Camera>(FindObjectsInactive.Exclude, FindObjectsSortMode.None);
+            foreach (var camera in cameras)
+            {
+                if (camera != null && camera.enabled)
+                {
+                    return camera;
+                }
+            }
+
+            return null;
         }
 
         private static void EnsureTriggerCollider(GameObject root, float radius)
