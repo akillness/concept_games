@@ -36,7 +36,7 @@ namespace MossHarbor.Data
             // Tutorial district: generous, easy, cyan/misty
             d.recommendedPower = 1;
             d.requiredStars = 0;
-            d.expeditionEntryCost = 5;
+            d.expeditionEntryCost = 8;
             d.runTimerSeconds = 210f;
             d.targetPickupCount = 3;
             d.objectiveType = ExpeditionObjectiveType.CollectPickups;
@@ -130,8 +130,8 @@ namespace MossHarbor.Data
         {
             // Glass channels: MemoryPearl intro, long movement routes
             d.recommendedPower = 3;
-            d.requiredStars = 3;
-            d.expeditionEntryCost = 20;
+            d.requiredStars = 4;
+            d.expeditionEntryCost = 22;
             d.runTimerSeconds = 180f;
             d.targetPickupCount = 5;
             d.objectiveType = ExpeditionObjectiveType.HoldOut;
@@ -162,8 +162,8 @@ namespace MossHarbor.Data
         {
             // Locked shops: tight spaces, surrounded corruption
             d.recommendedPower = 3;
-            d.requiredStars = 4;
-            d.expeditionEntryCost = 25;
+            d.requiredStars = 6;
+            d.expeditionEntryCost = 28;
             d.runTimerSeconds = 165f;
             d.targetPickupCount = 5;
             d.objectiveType = ExpeditionObjectiveType.CollectPickups;
@@ -193,8 +193,8 @@ namespace MossHarbor.Data
         {
             // Final: multi-objective, long, complex
             d.recommendedPower = 4;
-            d.requiredStars = 5;
-            d.expeditionEntryCost = 30;
+            d.requiredStars = 8;
+            d.expeditionEntryCost = 35;
             d.runTimerSeconds = 150f;
             d.targetPickupCount = 6;
             d.objectiveType = ExpeditionObjectiveType.HoldOut;
@@ -218,7 +218,7 @@ namespace MossHarbor.Data
             d.sunColor = new Color(0.56f, 0.62f, 0.82f, 1f);
             d.sunIntensity = 1.15f;
             d.twoStarPickupRatio = 0.65f;
-            d.threeStarTimeRatio = 0.45f;
+            d.threeStarTimeRatio = 0.65f;
         }
     }
 }

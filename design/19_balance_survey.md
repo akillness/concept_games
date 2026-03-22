@@ -14,12 +14,12 @@
 
 | 지구 | 입장 비용 | 픽업 BD | 완료 보너스 | 총 획득 BD | 순이익 BD | BD/초 (총) | 다음 지구까지 런 수 |
 |------|-----------|---------|------------|-----------|-----------|-----------|-------------------|
-| Dock | 5 | 3×12=36 | +25 | 61 | **+56** | 0.29 | 1 런 |
+| Dock | ~~5~~ **8** | 3×12=36 | +25 | 61 | **+53** | 0.29 | 1 런 |
 | Reed Fields | 10 | 2×10=20 | +30 | 50 | **+40** | 0.26 | 1 런 |
 | Tidal Vault | 15 | 2×10=20 | +35 | 55 | **+40** | 0.31 | 1 런 |
-| Glass Narrows | 20 | 2×12=24 | +40 | 64 | **+44** | 0.36 | 1 런 |
-| Sunken Arcade | 25 | 3×14=42 | +50 | 92 | **+67** | 0.56 | 1 런 |
-| Lighthouse Crown | 30 | 3×15=45 | +60 | 105 | **+75** | 0.70 | — |
+| Glass Narrows | ~~20~~ **22** | 2×12=24 | +40 | 64 | **+42** | 0.36 | 1 런 |
+| Sunken Arcade | ~~25~~ **28** | 3×14=42 | +50 | 92 | **+64** | 0.56 | 1 런 |
+| Lighthouse Crown | ~~30~~ **35** | 3×15=45 | +60 | 105 | **+70** | 0.70 | — |
 
 > 계산식: 순이익 = (bloomPickupCount × bloomPickupAmount + completionBonusBloomDust) - expeditionEntryCost
 > BD/초 = 총 획득 BD ÷ runTimerSeconds
@@ -87,7 +87,7 @@
 | Tidal Vault | 0.75 | 0.55 | **0.413** | 180×0.55=**99초 이내** | 중간 |
 | Glass Narrows | 0.70 | 0.50 | **0.350** | 180×0.50=**90초 이내** | 높음 (HoldOut 75초 내 포함) |
 | Sunken Arcade | 0.70 | 0.50 | **0.350** | 165×0.50=**82.5초 이내** | 높음 |
-| Lighthouse Crown | 0.65 | 0.45 | **0.293** | 150×0.45=**67.5초 이내** | 불가에 가까움 (HoldOut 90초 > 67.5초) |
+| Lighthouse Crown | 0.65 | ~~0.45~~ **0.65** | **0.423** | 150×0.65=**97.5초 이내** | 달성 가능 (HoldOut 90초 < 97.5초) ✓ |
 
 > **설계 모순**: Lighthouse Crown의 3성 컷 67.5초가 HoldOut 요구 시간 90초보다 짧다. 즉 HoldOut 목표를 완수하는 것만으로도 3성 달성이 불가능하다. 의도된 설계(수집 포기 후 즉시 HoldOut 진입)라면 design/17에 명시된 대로이나, 일반 플레이어에게는 3성 달성 경로가 불투명하게 느껴질 수 있다.
 
@@ -137,17 +137,27 @@
 
 ### 3.1 P0 (Critical — 즉시 수정 필요)
 
-**P0-A: 전 지구 순이익 양수 — 경제 병목 부재**
+**[RESOLVED] P0-A: 전 지구 순이익 양수 — 경제 병목 부재**
 
 모든 지구에서 단 1런으로 다음 지구 진입 비용을 회수한다. 최소 비용/수익 비율이 Dock 기준 1120% (비용 5, 수익 61)로, 경제적 긴장감이 없다. 플레이어가 "무엇이 부족한지"를 느낄 기회가 없고 자원 관리의 전략적 의미가 희석된다.
 
 설계 문서(design/06) 원안의 "신규 기능 해금은 2~3회 원정 내 달성"은 현재 수치로는 모두 1~2런으로 달성되어 원안보다 훨씬 쉽다. 특히 설계 원안(design/06)과 현 구현 수치가 크게 다르다: 원안 Dock 입장 비용 10BD / 완료 30BD vs. 현재 5BD / 25BD.
 
-**P0-B: Lighthouse Crown 3성 수학적 불가 구조**
+> **수정 (2026-03-22)**: 입장 비용 전반 인상 — Dock 5→**8**, Glass Narrows 20→**22**, Sunken Arcade 25→**28**, Lighthouse Crown 30→**35**. `DistrictBalanceDefaults.cs` 반영 완료.
+> 신규 비용 기준 Dock 순이익: 61 - 8 = **+53 BD** (1320% → 663%). 경제 긴장감 일부 회복.
+
+**[RESOLVED] P0-B: Lighthouse Crown 3성 수학적 불가 구조**
 
 3성 달성 조건(67.5초 이내 완료)이 HoldOut 목표 시간(90초)보다 짧다. HoldOut이 필수 목표이므로 3성은 달성 불가능하다. 의도된 설계라면 UI/문서에서 명시적으로 안내해야 하며, 의도되지 않았다면 `threeStarTimeRatio`를 0.45 이상으로 조정해야 한다.
 
+> **수정 (2026-03-22)**: `threeStarTimeRatio` 0.45 → **0.65** 로 상향. 새 3성 컷 = 150 × 0.65 = **97.5초**, HoldOut 90초를 초과하므로 수학적 달성 가능 구조 복원. `DistrictBalanceDefaults.cs` 반영 완료.
+
 ### 3.2 P1 (Important — 다음 마일스톤 전 수정)
+
+**[RESOLVED — 부분] P1-B 관련: 스타 요구량 비선형 강화**
+
+> **수정 (2026-03-22)**: Glass Narrows 3→**4**, Sunken Arcade 4→**6**, Lighthouse Crown 5→**8**. `DistrictBalanceDefaults.cs` 반영 완료.
+> 전체 요구량 배열: [0, 1, 2, **4**, **6**, **8**] — 후반 진입 허들 강화. (P1-B 권고값 [0,1,3,5,8,12] 대비 보수적 조정)
 
 **P1-A: SeedPod 소비처 전무**
 
@@ -198,16 +208,17 @@ RewardCalculator.CalculateFailure는 `bloomDustCollected + RoundToInt(completion
 
 **스타 요구량 재배치 — 비선형 구조로 전환:**
 
-| 지구 | 현재 requiredStars | 권고값 | 변화 이유 |
-|------|-------------------|--------|---------|
-| Dock | 0 | **0** | 유지 (튜토리얼) |
-| Reed Fields | 1 | **1** | 유지 |
-| Tidal Vault | 2 | **3** | 2성 달성 후 진입 → 재도전 동기 1회 발생 |
-| Glass Narrows | 3 | **5** | 중간 허들 강화 |
-| Sunken Arcade | 4 | **8** | 상급 진입 전 충분한 숙련 확보 |
-| Lighthouse Crown | 5 | **12** | 최종 지구 진입은 충분한 재도전 후 |
+| 지구 | 현재 requiredStars | 권고값 | 적용값 (2026-03-22) | 변화 이유 |
+|------|-------------------|--------|---------------------|---------|
+| Dock | 0 | **0** | **0** | 유지 (튜토리얼) |
+| Reed Fields | 1 | **1** | **1** | 유지 |
+| Tidal Vault | 2 | **3** | **2** | 미조정 |
+| Glass Narrows | 3 | **5** | **4** ✓ | 중간 허들 강화 (보수적 조정) |
+| Sunken Arcade | 4 | **8** | **6** ✓ | 상급 진입 전 숙련 확보 |
+| Lighthouse Crown | 5 | **12** | **8** ✓ | 최종 지구 진입 허들 강화 |
 
 > 비선형 요구량 [0, 1, 3, 5, 8, 12]로 변경 시 후반 지구 진입에 재도전이 강제되어 스타 시스템의 존재 이유가 생긴다. Celeste B-Side처럼 "다시 돌아가서 더 잘 클리어"하는 경험이 강화된다.
+> **적용된 값 [0, 1, 2, 4, 6, 8]** — 권고값 대비 보수적이지만 방향성 일치. `DistrictBalanceDefaults.cs` 반영 완료.
 
 **업그레이드 비용 조정:**
 
@@ -242,10 +253,10 @@ RewardCalculator.CalculateFailure는 `bloomDustCollected + RoundToInt(completion
 | 순위 | 항목 | 코드 위치 | 영향도 | 구현 난이도 | 비고 |
 |------|------|---------|--------|-----------|-----|
 | 1 | **SeedPod 소비처 추가** | 허브 장식/복원 시스템 | 높음 | 중간 | 자원 순환 복구, P1-A |
-| 2 | **스타 요구량 비선형 재배치** | `DistrictBalanceDefaults.cs` `requiredStars` | 높음 | 낮음 | 6개 상수 수정 |
-| 3 | **Lighthouse Crown 3성 모순 해소** | `DistrictBalanceDefaults.cs` `threeStarTimeRatio` | 높음 | 낮음 | threeStarTimeRatio 0.45→0.55 또는 HoldOut 75초 |
-| 4 | **실패 BD 보존 로직 수정** | `RewardCalculator.CalculateFailure()` | 중간 | 낮음 | 수집분 70%, 보너스 미지급 |
-| 5 | **입장 비용 미세 조정** | `DistrictBalanceDefaults.cs` `expeditionEntryCost` | 중간 | 낮음 | Dock 5→8 |
+| 2 | ~~**스타 요구량 비선형 재배치**~~ **[DONE]** | `DistrictBalanceDefaults.cs` `requiredStars` | 높음 | 낮음 | Glass Narrows 3→4, Sunken Arcade 4→6, Lighthouse Crown 5→8 |
+| 3 | ~~**Lighthouse Crown 3성 모순 해소**~~ **[DONE]** | `DistrictBalanceDefaults.cs` `threeStarTimeRatio` | 높음 | 낮음 | threeStarTimeRatio 0.45→0.65 (3성 컷 97.5s > HoldOut 90s) |
+| 4 | **실패 BD/Scrap 보존 로직 개선** | `RewardCalculator.CalculateFailure()` | 중간 | 낮음 | **[DONE]** DifficultyLevel 파라미터 추가, FailResourceRetention 적용 |
+| 5 | ~~**입장 비용 미세 조정**~~ **[DONE]** | `DistrictBalanceDefaults.cs` `expeditionEntryCost` | 중간 | 낮음 | Dock 5→8, Glass Narrows 20→22, Sunken Arcade 25→28, Lighthouse Crown 30→35 |
 | 6 | **완료 보너스 조정** | `DistrictBalanceDefaults.cs` `completionBonusBloomDust` | 중간 | 낮음 | Dock 25→20 |
 | 7 | **HoldOut 시간 하향** | `DistrictBalanceDefaults.cs` `objectiveHoldSeconds` | 중간 | 낮음 | Glass Narrows 75→60, Lighthouse 90→75 |
 | 8 | **Harbor Pump 비용 상향** | HubUpgradeDef ScriptableObject | 낮음 | 낮음 | Scrap 15→20 |

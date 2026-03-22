@@ -57,11 +57,13 @@ namespace MossHarbor.Expedition
             SaveService save,
             int bloomDustCollected,
             int scrapCollected,
-            float remainingTime)
+            float remainingTime,
+            DifficultyLevel difficulty = DifficultyLevel.Normal)
         {
+            var retention = DifficultyConfig.FailResourceRetention(difficulty);
             var fallbackBloom = district != null ? district.completionBonusBloomDust : 30;
-            var retainedBloomDust = bloomDustCollected + Mathf.RoundToInt(fallbackBloom * 0.5f);
-            var retainedScrap = Mathf.RoundToInt(scrapCollected * 0.7f);
+            var retainedBloomDust = Mathf.RoundToInt(bloomDustCollected * retention) + Mathf.RoundToInt(fallbackBloom * 0.5f);
+            var retainedScrap = Mathf.RoundToInt(scrapCollected * retention);
 
             var routeScannerUpgrade = Resources.Load<HubUpgradeDef>(ContentPaths.RouteScannerUpgrade);
             var baseRunTime = district != null ? district.runTimerSeconds : 180f;

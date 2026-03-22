@@ -68,3 +68,20 @@
 | `design/16_gameplay_enhancement_changelog.md` | NEW |
 | `docs/scene_improvement_spec.md` | EDIT |
 | `README.md` | EDIT |
+
+---
+
+## Sprint 4: Balance P0 Fixes (2026-03-22)
+
+### Critical Fixes
+- **Lighthouse Crown 3-star impossibility**: `threeStarTimeRatio` 0.45 → 0.65 (3-star cutoff 97.5s now exceeds 90s HoldOut)
+- **Economy tightening**: Entry costs increased — Dock 5→8, Glass Narrows 20→22, Sunken Arcade 25→28, Lighthouse Crown 30→35
+- **Star gate steepening**: Required stars — Glass Narrows 3→4, Sunken Arcade 4→6, Lighthouse Crown 5→8
+- **Fail retention consistency**: `RewardCalculator.CalculateFailure` now accepts `DifficultyLevel` and applies `DifficultyConfig.FailResourceRetention` to bloomDust and scrap (was hardcoded 0.5/0.7)
+
+### Files Changed
+| File | Type | Change |
+|------|------|--------|
+| `DistrictBalanceDefaults.cs` | EDIT | Entry costs, star requirements, Lighthouse Crown threeStarTimeRatio |
+| `RewardCalculator.cs` | EDIT | Added DifficultyLevel parameter to CalculateFailure, uses FailResourceRetention |
+| `ExpeditionDirector.cs` | EDIT | Passes selectedDifficulty to CalculateFailure |

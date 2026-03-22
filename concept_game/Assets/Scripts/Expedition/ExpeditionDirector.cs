@@ -144,7 +144,8 @@ namespace MossHarbor.Expedition
             {
                 var reward = RewardCalculator.CalculateFailure(
                     districtDefinition, _bootstrap.SaveService,
-                    _bloomDustCollected, _scrapCollected, _remainingTime);
+                    _bloomDustCollected, _scrapCollected, _remainingTime,
+                    _bootstrap.SaveService.Current.selectedDifficulty);
 
                 _bootstrap.SaveService.AddResource(ResourceType.BloomDust, reward.bloomDust);
                 if (reward.scrap > 0)
