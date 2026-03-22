@@ -1,4 +1,7 @@
+using MossHarbor.Data;
 using MossHarbor.Art;
+using MossHarbor.Expedition;
+using MossHarbor.Hub;
 using UnityEngine;
 
 namespace MossHarbor.Gameplay.Player
@@ -16,10 +19,6 @@ namespace MossHarbor.Gameplay.Player
         [SerializeField] private Transform modelRoot;
         [Header("Boundary Recovery")]
         [SerializeField] private bool enableBoundaryRecovery = true;
-        [SerializeField] private Vector3 boundaryCenter = Vector3.zero;
-        [SerializeField] private Vector2 boundaryHalfExtents = new Vector2(180f, 180f);
-        [SerializeField] private float boundaryFloorY = -12f;
-        [SerializeField] private Vector3 boundarySafePosition = new Vector3(0f, 1f, 0f);
         [SerializeField] private float boundarySafeHeightOffset = 1f;
         [SerializeField] private float boundaryRecoveryCooldownSeconds = 1.25f;
 
@@ -29,6 +28,10 @@ namespace MossHarbor.Gameplay.Player
         private Animator _animator;
         private float _currentAnimationSpeed;
         private float _lastBoundaryRecoveryTime = float.NegativeInfinity;
+        private HubManager _hubManager;
+        private ExpeditionDirector _expeditionDirector;
+        private BoundaryRecoveryProfile _boundaryRecoveryProfile = DistrictDef.CreateDefaultBoundaryRecoveryProfile();
+        private string _boundaryRecoveryDistrictId = string.Empty;
         private static readonly int SpeedHash = Animator.StringToHash("Speed");
         private static readonly int SprintHash = Animator.StringToHash("Sprint");
         private static readonly int GroundedHash = Animator.StringToHash("Grounded");
@@ -57,11 +60,15 @@ namespace MossHarbor.Gameplay.Player
                 _animator = GetComponentInChildren<Animator>(true);
             }
 
+            _hubManager = FindFirstObjectByType<HubManager>();
+            _expeditionDirector = FindFirstObjectByType<ExpeditionDirector>();
+            RefreshBoundaryRecoveryProfile(force: true);
             TryRecoverBoundary();
         }
 
         private void Update()
         {
+            RefreshBoundaryRecoveryProfile();
             if (TryRecoverBoundary())
             {
                 UpdateAnimatorState();
@@ -111,11 +118,12 @@ namespace MossHarbor.Gameplay.Player
 
             var currentTime = Time.time;
             var currentPosition = transform.position;
+            var boundaryProfile = _boundaryRecoveryProfile ?? DistrictDef.CreateDefaultBoundaryRecoveryProfile();
             if (!BoundaryRecoveryRules.ShouldRecover(
                     currentPosition,
-                    boundaryCenter,
-                    boundaryHalfExtents,
-                    boundaryFloorY,
+                    boundaryProfile.boundaryCenter,
+                    boundaryProfile.boundaryHalfExtents,
+                    boundaryProfile.floorY,
                     boundaryRecoveryCooldownSeconds,
                     currentTime,
                     _lastBoundaryRecoveryTime))
@@ -124,10 +132,10 @@ namespace MossHarbor.Gameplay.Player
             }
 
             var safePosition = BoundaryRecoveryRules.ResolveSafePosition(
-                boundarySafePosition,
-                boundaryCenter,
-                boundaryHalfExtents,
-                boundaryFloorY,
+                boundaryProfile.safePosition,
+                boundaryProfile.boundaryCenter,
+                boundaryProfile.boundaryHalfExtents,
+                boundaryProfile.floorY,
                 boundarySafeHeightOffset);
 
             _controller.enabled = false;
@@ -138,6 +146,46 @@ namespace MossHarbor.Gameplay.Player
             _currentAnimationSpeed = 0f;
             _lastBoundaryRecoveryTime = currentTime;
             return true;
+        }
+
+        public static BoundaryRecoveryProfile ResolveBoundaryRecoveryProfile(
+            DistrictDef district,
+            BoundaryRecoveryProfile fallback = null)
+        {
+            if (district != null)
+            {
+                return district.GetBoundaryRecoveryProfile();
+            }
+
+            return fallback ?? DistrictDef.CreateDefaultBoundaryRecoveryProfile();
+        }
+
+        private void RefreshBoundaryRecoveryProfile(bool force = false)
+        {
+            var district = ResolveRuntimeDistrict();
+            var districtId = district != null ? district.districtId : string.Empty;
+            if (!force && districtId == _boundaryRecoveryDistrictId)
+            {
+                return;
+            }
+
+            _boundaryRecoveryProfile = ResolveBoundaryRecoveryProfile(district, _boundaryRecoveryProfile);
+            _boundaryRecoveryDistrictId = districtId;
+        }
+
+        private DistrictDef ResolveRuntimeDistrict()
+        {
+            if (_expeditionDirector != null && _expeditionDirector.RuntimeDistrict != null)
+            {
+                return _expeditionDirector.RuntimeDistrict;
+            }
+
+            if (_hubManager != null && _hubManager.RuntimeDistrict != null)
+            {
+                return _hubManager.RuntimeDistrict;
+            }
+
+            return null;
         }
 
         private void UpdateAnimatorState()

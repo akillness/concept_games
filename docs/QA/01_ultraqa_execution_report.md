@@ -98,3 +98,22 @@
 - 런타임에서 캐릭터 material albedo 누락 시 fallback UV checker 텍스처를 적용하도록 코드 보강.
 - UV 접근 가능한 경우 메시 복제(`*_RuntimeUv`)를 통해 UV를 생성하고, non-readable 메시는 안전 우회하도록 보강.
 - 플레이 캡처 기준 심각한 UV 깨짐 관찰되지 않음.
+
+## Ralph + Ultrawork Follow-up Validation (A1~A3)
+
+- Scope:
+  - A1 SeedPod telemetry 확장
+  - A2 boundary profile district 외부화
+  - A3 UV import guardrail 추가
+- Result:
+  - EditMode tests: **45/45 passed** (job: `6084f8a468f141e898d4095bcb4cb754`)
+  - Play verification:
+    - Hub play/stop + Expedition play/stop 직접 수행
+  - Console verification:
+    - clear 후 재생 루프 기준 Error log **0건**
+  - UV guardrail:
+    - 메뉴 실행 결과 `critical=2` 탐지 (사전 검출 성공)
+- Evidence (screenshots):
+  - `concept_game/Assets/Screenshots/qa_hub_playmode_r5.png`
+  - `concept_game/Assets/Screenshots/qa_expedition_playmode_r5.png`
+  - `concept_game/Assets/Screenshots/qa_expedition_playmode_r6.png`

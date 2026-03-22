@@ -41,6 +41,48 @@ namespace MossHarbor.Tests.EditMode
         }
 
         [Test]
+        public void RunSummary_DefaultSeedPodTelemetry_IsZero()
+        {
+            var summary = new RunSummary();
+
+            Assert.AreEqual(0, summary.seedPodDelta);
+            Assert.AreEqual(0, summary.bioPressUseCount);
+            Assert.AreEqual(0, summary.bioPressCleanWaterConverted);
+        }
+
+        [Test]
+        public void SeedPodTelemetry_RecordRefinement_AccumulatesAndResets()
+        {
+            var telemetry = new SeedPodTelemetry();
+            telemetry.RecordRefinement(-6, 2);
+            telemetry.RecordRefinement(-5, 3);
+
+            var summary = new RunSummary();
+            telemetry.ApplyTo(summary);
+
+            Assert.AreEqual(-11, summary.seedPodDelta);
+            Assert.AreEqual(2, summary.bioPressUseCount);
+            Assert.AreEqual(5, summary.bioPressCleanWaterConverted);
+
+            telemetry.Reset();
+            Assert.AreEqual(0, telemetry.seedPodDelta);
+            Assert.AreEqual(0, telemetry.bioPressUseCount);
+            Assert.AreEqual(0, telemetry.bioPressCleanWaterConverted);
+        }
+
+        [Test]
+        public void SeedPodRefineryRules_ExposesExperimentRatioProfiles()
+        {
+            Assert.AreEqual(3, SeedPodRefineryRules.CandidateProfiles.Length);
+            Assert.AreEqual("baseline", SeedPodRefineryRules.CandidateProfiles[0].ProfileId);
+            Assert.AreEqual("6:2", SeedPodRefineryRules.CandidateProfiles[0].RatioLabel);
+            Assert.AreEqual("fast-sink", SeedPodRefineryRules.CandidateProfiles[1].ProfileId);
+            Assert.AreEqual("5:2", SeedPodRefineryRules.CandidateProfiles[1].RatioLabel);
+            Assert.AreEqual("high-yield", SeedPodRefineryRules.CandidateProfiles[2].ProfileId);
+            Assert.AreEqual("6:3", SeedPodRefineryRules.CandidateProfiles[2].RatioLabel);
+        }
+
+        [Test]
         public void RunSummary_GetObjectiveSummary_UsesStoredObjectiveStrings()
         {
             var summary = new RunSummary

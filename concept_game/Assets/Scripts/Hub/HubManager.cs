@@ -69,6 +69,7 @@ namespace MossHarbor.Hub
         public int PearlResonatorMemoryBonus => PearlResonatorLevel > 0 && PearlResonatorUpgrade != null ? PearlResonatorUpgrade.memoryPearlBonus : 0;
         public int SeedPodRefineCost => SeedPodRefineryRules.SeedPodCost;
         public int SeedPodRefineWaterGain => SeedPodRefineryRules.CleanWaterGain;
+        public string SeedPodRefineRatioLabel => SeedPodRefineryRules.BaselineProfile.RatioLabel;
         public bool CanRefineSeedPods => _bootstrap != null && SeedPodRefineryRules.CanRefine(HarborPumpLevel, _bootstrap.SaveService.GetResource(ResourceType.SeedPod));
         public bool CanAffordSelectedExpedition => _bootstrap != null && _bootstrap.SaveService.GetResource(ResourceType.BloomDust) >= EffectiveEntryCost;
         public bool CanAffordHarborPump => _bootstrap != null && HarborPumpUpgrade != null && _bootstrap.SaveService.GetResource(HarborPumpUpgrade.costType) >= HarborPumpUpgrade.costAmount;
@@ -237,6 +238,7 @@ namespace MossHarbor.Hub
 
             _bootstrap.SaveService.AddResource(ResourceType.SeedPod, seedPodDelta);
             _bootstrap.SaveService.AddResource(ResourceType.CleanWater, cleanWaterDelta);
+            _bootstrap.SaveService.RecordSeedPodTelemetry(seedPodDelta, cleanWaterDelta);
         }
 
         [ContextMenu("Select Next District")]

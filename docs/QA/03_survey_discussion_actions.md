@@ -45,3 +45,30 @@
 
 ## Execution Note
 - 다음 작업은 위 A1~A3를 순차가 아니라 병렬 분할(ultrawork)로 진행하고, 최종 게이트는 UltraQA(테스트 + 플레이 + 콘솔 0 에러)로 고정한다.
+
+---
+
+## Execution Update (Ralph + Ultrawork, 2026-03-22)
+
+### A1. SeedPod Ratio Tuning Telemetry
+- 상태: **Done**
+- 반영:
+  - `RunSummary`에 `seedPodDelta`, `bioPressUseCount`, `bioPressCleanWaterConverted` 기록 필드 추가
+  - Bio Press 실행 시 `SaveService.RecordSeedPodTelemetry(...)`로 `lastRunSummary`에 즉시 누적
+  - 후보 비율 `6:2`, `5:2`, `6:3` 코드 프로파일 노출 (`SeedPodRefineryRules.CandidateProfiles`)
+
+### A2. Boundary Profile Externalization
+- 상태: **Done**
+- 반영:
+  - `DistrictDef`에 `BoundaryRecoveryProfile` 추가 (`boundaryCenter`, `boundaryHalfExtents`, `safePosition`, `floorY`)
+  - `PlayerController`가 런타임 district(Hub/Expedition) 기준으로 boundary profile을 해석하도록 변경
+  - district 데이터가 없을 때 legacy 기본값 fallback 유지
+
+### A3. UV Import Guardrail
+- 상태: **Done (검출 파이프라인 구축)**
+- 반영:
+  - `UvImportGuardrail` + Editor 메뉴(`Tools/Moss Harbor/Validation/*`) 추가
+  - 검사 항목: `Mesh.isReadable`, UV 채널 존재/길이 정합성
+- 실행 결과:
+  - `Audit Player UV Guardrail` 실행 시 `critical=2` 탐지(읽기 불가 메시)
+  - 런타임 fallback 이전 단계에서 사전 검출 가능 상태 확인

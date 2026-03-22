@@ -19,6 +19,8 @@ namespace MossHarbor.Data
         public float runTimerSeconds = 180f;
         public int completionBonusBloomDust = 30;
         public int completionBonusScrap = 8;
+        [Header("Boundary Recovery")]
+        public BoundaryRecoveryProfile boundaryRecovery = new();
         public int bloomPickupCount = 2;
         public int bloomPickupAmount = 10;
         public int scrapPickupCount = 1;
@@ -41,5 +43,25 @@ namespace MossHarbor.Data
         [Header("Star Rating")]
         public float twoStarPickupRatio = 0.8f;
         public float threeStarTimeRatio = 0.6f;
+
+        public BoundaryRecoveryProfile GetBoundaryRecoveryProfile()
+        {
+            boundaryRecovery ??= CreateDefaultBoundaryRecoveryProfile();
+            return boundaryRecovery;
+        }
+
+        public static BoundaryRecoveryProfile CreateDefaultBoundaryRecoveryProfile()
+        {
+            return new BoundaryRecoveryProfile();
+        }
+    }
+
+    [System.Serializable]
+    public sealed class BoundaryRecoveryProfile
+    {
+        public Vector3 boundaryCenter = Vector3.zero;
+        public Vector2 boundaryHalfExtents = new(180f, 180f);
+        public Vector3 safePosition = new(0f, 1f, 0f);
+        public float floorY = -12f;
     }
 }

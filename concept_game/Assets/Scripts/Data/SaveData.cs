@@ -18,6 +18,7 @@ namespace MossHarbor.Data
         public SerializableDictionary<string, int> hubUpgradeLevels = new();
         public SerializableDictionary<string, bool> hubZoneRestorationStates = new();
         public SerializableDictionary<string, bool> claimedQuests = new();
+        public SeedPodTelemetry seedPodTelemetry = new();
         public RunSummary lastRunSummary = new();
     }
 
@@ -31,6 +32,9 @@ namespace MossHarbor.Data
         public int cleanWaterCollected;
         public int memoryPearlCollected;
         public int seedPodCollected;
+        public int seedPodDelta;
+        public int bioPressUseCount;
+        public int bioPressCleanWaterConverted;
         public int pickupsCollected;
         public float durationSeconds;
         public string resultLabel = "No runs yet";
@@ -80,7 +84,10 @@ namespace MossHarbor.Data
                 $"Scrap: {scrapCollected}\n" +
                 $"SeedPod: {seedPodCollected}\n" +
                 $"CleanWater: {cleanWaterCollected}\n" +
-                $"MemoryPearl: {memoryPearlCollected}";
+                $"MemoryPearl: {memoryPearlCollected}\n" +
+                $"SeedPod Delta: {seedPodDelta}\n" +
+                $"Bio Press Uses: {bioPressUseCount}\n" +
+                $"Bio Press CleanWater: {bioPressCleanWaterConverted}";
         }
 
         private string GetFallbackObjectiveDescription(
@@ -232,6 +239,40 @@ namespace MossHarbor.Data
                 default:
                     return 0;
             }
+        }
+    }
+
+    [Serializable]
+    public sealed class SeedPodTelemetry
+    {
+        public int seedPodDelta;
+        public int bioPressUseCount;
+        public int bioPressCleanWaterConverted;
+
+        public void RecordRefinement(int seedPodDelta, int cleanWaterConverted)
+        {
+            this.seedPodDelta += seedPodDelta;
+            bioPressUseCount++;
+            bioPressCleanWaterConverted += cleanWaterConverted;
+        }
+
+        public void ApplyTo(RunSummary summary)
+        {
+            if (summary == null)
+            {
+                return;
+            }
+
+            summary.seedPodDelta += seedPodDelta;
+            summary.bioPressUseCount += bioPressUseCount;
+            summary.bioPressCleanWaterConverted += bioPressCleanWaterConverted;
+        }
+
+        public void Reset()
+        {
+            seedPodDelta = 0;
+            bioPressUseCount = 0;
+            bioPressCleanWaterConverted = 0;
         }
     }
 

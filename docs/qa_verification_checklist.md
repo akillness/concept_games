@@ -211,12 +211,14 @@
 
 - [ ] **SampleScene (Build Index 4)** 사용되지 않음 → Build Settings에서 제거 필요
 - [x] **맵 경계 복귀 1차 적용 완료** → `PlayerController` 경계/낙하 감지 후 safe position 텔레포트 + cooldown 동작 확인
-- [ ] **맵 경계 파라미터 튜닝 필요** → 지구별 경계 반경/복귀 지점 데이터 외부화 필요
+- [x] **맵 경계 파라미터 외부화 완료** → `DistrictDef.BoundaryRecoveryProfile` 기반으로 center/extent/safe/floor 분리
+- [ ] **맵 경계 파라미터 튜닝 필요** → 지구별 경계 반경/복귀 지점 실측 보정 필요
 - [ ] **SeedPod sink 튜닝 필요** → Bio Press(6:2) 도입 완료, 장기 플레이 누적량 기준 추가 조정 필요
 - [ ] **사운드 없음** → 수집, 비콘 활성화, UI 버튼, 배경음 전무
 - [ ] **정화/오염 시스템 미구현** → 위협 요소 없이 탐색과 수집만 존재
 - [ ] **ToolDef ScriptableObject** (`ScriptableObjects/Tool_Vacuum`) 로드되나 실제 정화 로직 없음
 - [ ] **HoldOut 목표 시각 피드백 미확인** → Glass Narrows/Lighthouse Crown에서 HoldOut 진행률 UI 표시 여부 검증 필요
+- [x] **UV import guardrail 추가 완료** → `Tools/Moss Harbor/Validation/Audit Player UV Guardrail`로 사전 탐지 가능
 
 
 ## 9. QA 테스트 시나리오 (우선순위)
@@ -288,5 +290,9 @@
 
 - [ ] **임시 수정 가이드(발견 시)**
   - UV 누락이 확인되면 1) 모델 재임포트 옵션 초기화, 2) 기존 슬롯 교체 없이 FBX `Materials` → `Default_Material`만 고정, 3) 동일 씬에서 재배포 후 회귀 재시험.
+
+- [x] **에디터 가드레일 실행**
+  - 메뉴 `Tools/Moss Harbor/Validation/Audit Player UV Guardrail` 실행 가능
+  - 결과 요약(`UV Guardrail: OK/FAIL`, critical/warnings)이 콘솔에 출력됨
 
 ---

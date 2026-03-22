@@ -5,6 +5,15 @@ namespace MossHarbor.Hub
         public const int SeedPodCost = 6;
         public const int CleanWaterGain = 2;
 
+        public static readonly SeedPodRefineProfile[] CandidateProfiles =
+        {
+            new SeedPodRefineProfile("baseline", 6, 2),
+            new SeedPodRefineProfile("fast-sink", 5, 2),
+            new SeedPodRefineProfile("high-yield", 6, 3),
+        };
+
+        public static SeedPodRefineProfile BaselineProfile => CandidateProfiles[0];
+
         public static bool CanRefine(int harborPumpLevel, int currentSeedPods)
         {
             return harborPumpLevel > 0 && currentSeedPods >= SeedPodCost;
@@ -23,5 +32,21 @@ namespace MossHarbor.Hub
             cleanWaterDelta = CleanWaterGain;
             return true;
         }
+    }
+
+    public readonly struct SeedPodRefineProfile
+    {
+        public SeedPodRefineProfile(string profileId, int seedPodCost, int cleanWaterGain)
+        {
+            ProfileId = profileId;
+            SeedPodCost = seedPodCost;
+            CleanWaterGain = cleanWaterGain;
+        }
+
+        public string ProfileId { get; }
+        public int SeedPodCost { get; }
+        public int CleanWaterGain { get; }
+
+        public string RatioLabel => $"{SeedPodCost}:{CleanWaterGain}";
     }
 }

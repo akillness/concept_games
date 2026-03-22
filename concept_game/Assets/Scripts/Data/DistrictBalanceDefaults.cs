@@ -41,6 +41,7 @@ namespace MossHarbor.Data
             d.targetPickupCount = 3;
             d.objectiveType = ExpeditionObjectiveType.CollectPickups;
             d.objectiveTargetAmount = 3;
+            ApplyBoundaryRecovery(d);
             d.bloomPickupCount = 3;
             d.bloomPickupAmount = 12;
             d.scrapPickupCount = 1;
@@ -73,6 +74,7 @@ namespace MossHarbor.Data
             d.objectiveType = ExpeditionObjectiveType.CollectResource;
             d.objectiveResourceType = ResourceType.SeedPod;
             d.objectiveTargetAmount = 5;
+            ApplyBoundaryRecovery(d);
             d.bloomPickupCount = 2;
             d.bloomPickupAmount = 10;
             d.scrapPickupCount = 2;
@@ -105,6 +107,7 @@ namespace MossHarbor.Data
             d.objectiveType = ExpeditionObjectiveType.CollectResource;
             d.objectiveResourceType = ResourceType.CleanWater;
             d.objectiveTargetAmount = 3;
+            ApplyBoundaryRecovery(d);
             d.bloomPickupCount = 2;
             d.bloomPickupAmount = 10;
             d.scrapPickupCount = 2;
@@ -137,6 +140,7 @@ namespace MossHarbor.Data
             d.objectiveType = ExpeditionObjectiveType.HoldOut;
             d.objectiveHoldSeconds = 60f;
             d.objectiveTargetAmount = 1;
+            ApplyBoundaryRecovery(d);
             d.bloomPickupCount = 2;
             d.bloomPickupAmount = 12;
             d.scrapPickupCount = 2;
@@ -168,6 +172,7 @@ namespace MossHarbor.Data
             d.targetPickupCount = 5;
             d.objectiveType = ExpeditionObjectiveType.CollectPickups;
             d.objectiveTargetAmount = 5;
+            ApplyBoundaryRecovery(d);
             d.bloomPickupCount = 3;
             d.bloomPickupAmount = 14;
             d.scrapPickupCount = 3;
@@ -200,6 +205,7 @@ namespace MossHarbor.Data
             d.objectiveType = ExpeditionObjectiveType.HoldOut;
             d.objectiveHoldSeconds = 75f;
             d.objectiveTargetAmount = 1;
+            ApplyBoundaryRecovery(d);
             d.bloomPickupCount = 3;
             d.bloomPickupAmount = 15;
             d.scrapPickupCount = 3;
@@ -219,6 +225,20 @@ namespace MossHarbor.Data
             d.sunIntensity = 1.15f;
             d.twoStarPickupRatio = 0.65f;
             d.threeStarTimeRatio = 0.65f;
+        }
+
+        private static void ApplyBoundaryRecovery(DistrictDef d)
+        {
+            if (d == null)
+            {
+                return;
+            }
+
+            d.boundaryRecovery ??= DistrictDef.CreateDefaultBoundaryRecoveryProfile();
+            d.boundaryRecovery.boundaryCenter = Vector3.zero;
+            d.boundaryRecovery.boundaryHalfExtents = new Vector2(180f, 180f);
+            d.boundaryRecovery.safePosition = new Vector3(0f, 1f, 0f);
+            d.boundaryRecovery.floorY = -12f;
         }
     }
 }

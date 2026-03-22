@@ -223,6 +223,7 @@ namespace MossHarbor.Expedition
                 cleanWaterCollected = cleanWaterCollected,
                 memoryPearlCollected = memoryPearlCollected,
                 seedPodCollected = seedPodCollected,
+                seedPodDelta = seedPodCollected,
                 pickupsCollected = _pickupsCollected,
                 durationSeconds = durationSeconds,
                 districtId = districtDefinition != null ? districtDefinition.districtId : "dock",

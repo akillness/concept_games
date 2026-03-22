@@ -31,6 +31,14 @@ namespace MossHarbor.Core
             Save();
         }
 
+        public void RecordSeedPodTelemetry(int seedPodDelta, int cleanWaterConverted)
+        {
+            Current.seedPodTelemetry.RecordRefinement(seedPodDelta, cleanWaterConverted);
+            Current.seedPodTelemetry.ApplyTo(Current.lastRunSummary);
+            Current.seedPodTelemetry.Reset();
+            Save();
+        }
+
         public void SetDistrictStars(string districtId, int stars)
         {
             var starMap = Current.districtStars.ToDictionary();
@@ -172,7 +180,9 @@ namespace MossHarbor.Core
 
         public void SetLastRunSummary(RunSummary summary)
         {
-            Current.lastRunSummary = summary;
+            var resolvedSummary = summary ?? new RunSummary();
+            Current.seedPodTelemetry.Reset();
+            Current.lastRunSummary = resolvedSummary;
             Save();
         }
 
@@ -228,6 +238,7 @@ namespace MossHarbor.Core
             data.hubUpgradeLevels ??= new SerializableDictionary<string, int>();
             data.hubZoneRestorationStates ??= new SerializableDictionary<string, bool>();
             data.claimedQuests ??= new SerializableDictionary<string, bool>();
+            data.seedPodTelemetry ??= new SeedPodTelemetry();
             data.lastRunSummary ??= new RunSummary();
             EnsureTutorialState(data);
         }
