@@ -30,8 +30,9 @@ Date: 2026-03-22
   - 콘솔 에러 로그 조회 결과: **0건**
 - UV guardrail 실행:
   - 메뉴: `Tools > Moss Harbor > Validation > Audit Player UV Guardrail`
-  - 결과: `UV Guardrail: FAIL | ... critical=2`
-  - 해석: 런타임 이전 단계에서 읽기 불가 메시를 사전 탐지함
+  - 초기 결과: `UV Guardrail: FAIL | ... critical=2`
+  - 조치: `Leopard.fbx` Read/Write Enabled 적용
+  - 재실행 결과: `UV Guardrail: OK | ... critical=0, warnings=0`
 
 ## Survey Comparison (Before vs After)
 1. SeedPod sink (design/19 P1-A)
@@ -46,8 +47,8 @@ Date: 2026-03-22
 
 3. UV regression prevention (docs/QA A3)
 - Before: 런타임 fallback 중심
-- After: 에디터 단계 guardrail 도입, critical 탐지 가능
-- 남은 갭: 탐지된 critical 2건에 대한 importer/asset 정책 수립 필요
+- After: 에디터 단계 guardrail 도입 + 읽기 불가 메시 수정까지 완료
+- 남은 갭: 플레이어 외 핵심 프리팹으로 guardrail 적용 범위 확장 필요
 
 ## Proposed Next Improvements
 1. SeedPod ratio 자동 평가 루프

@@ -112,7 +112,8 @@
   - Console verification:
     - clear 후 재생 루프 기준 Error log **0건**
   - UV guardrail:
-    - 메뉴 실행 결과 `critical=2` 탐지 (사전 검출 성공)
+    - 초기 실행: `critical=2` 탐지(읽기 불가 메시)
+    - `Leopard.fbx` Read/Write 활성화 후 재실행: `critical=0`, `warnings=0`
 - Evidence (screenshots):
   - `concept_game/Assets/Screenshots/qa_hub_playmode_r5.png`
   - `concept_game/Assets/Screenshots/qa_expedition_playmode_r5.png`

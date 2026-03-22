@@ -10,9 +10,9 @@
   - 15-run 시뮬레이션 수집 스크립트 추가
   - 목표: SeedPod 재고 20~30 밴드 유지
 
-- UV import guardrail remediation
-  - 현재 guardrail에서 critical 2건(읽기 불가 메시) 탐지
-  - 릴리즈 전 importer 설정 정책(Readable 허용 범위) 확정 필요
+- UV guardrail 범위 확장
+  - 현재 플레이어 핵심 에셋은 `critical=0` 확인
+  - 지구별 핵심 프리팹/메시까지 검사 대상을 확장 필요
 
 ## Priority 2
 - 경계 회수 district 튜닝

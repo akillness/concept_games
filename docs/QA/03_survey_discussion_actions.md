@@ -70,5 +70,6 @@
   - `UvImportGuardrail` + Editor 메뉴(`Tools/Moss Harbor/Validation/*`) 추가
   - 검사 항목: `Mesh.isReadable`, UV 채널 존재/길이 정합성
 - 실행 결과:
-  - `Audit Player UV Guardrail` 실행 시 `critical=2` 탐지(읽기 불가 메시)
-  - 런타임 fallback 이전 단계에서 사전 검출 가능 상태 확인
+  - 초기 실행에서 읽기 불가 메시 `critical=2` 탐지
+  - `Leopard.fbx` Read/Write 활성화 후 재실행 결과 `critical=0`, `warnings=0`
+  - 런타임 fallback 이전 단계의 사전 검출 + 즉시 수정 루프 확인
