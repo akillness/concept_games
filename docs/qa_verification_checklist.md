@@ -259,3 +259,26 @@
   - 2) 캐릭터 텍스처 교체 시 UV 채널이 깨지지 않는지 2회 이상 교체 테스트.
 
 ---
+
+## 10. 캐릭터 UV 맵 누락 정합성(아트 임포트) 체크
+
+- [ ] **프리팹 참조 무결성**
+  - `Art/Characters/player_avatar`가 `Assets/Art/Characters/StylizedCharacterPack/Models/Leopard.fbx`를 사용 중인지 확인.
+  - FBX의 `ModelImporter > meshes > generateSecondaryUV`가 Off(0)이고 UV 채널 0/1이 정상 임포트되는지 로그로 기록.
+
+- [ ] **텍스처 바인딩 일치성**
+  - `Leopard_Albedo.png`(또는 대체 텍스처)가 소재 슬롯에 `_MainTex`로 바인딩되어 있는지 확인.
+  - UV 레이아웃이 atlas/채널 변경 시, 바인딩이 누락되어 텍스처가 기본 색상으로 바뀌지 않는지 확인.
+
+- [ ] **UV 누수/오버랩 정적 탐지**
+  - Unity에서 모델을 `UV` 뷰로 확인하여 0~1 범위 초과/언더랩 또는 급격한 트라이앵글 압축(needle-like) 발생 여부 점검.
+  - `Assets/Art/Characters/StylizedCharacterPack/Textures/Characters/Leopard_Albedo.png`에서 스트레치/씐득한 경계가 보이는지 판독.
+
+- [ ] **런타임 깨짐 확인**
+  - 카메라 각도 3개 이상 + 조도 2개 이상 조건에서 플레이어 표면이 블록 아트 스냅과 일치하는지 스크린샷 검토.
+  - UV 누락 또는 꼬임이 1회 이상 관측되면 QA Fail.
+
+- [ ] **임시 수정 가이드(발견 시)**
+  - UV 누락이 확인되면 1) 모델 재임포트 옵션 초기화, 2) 기존 슬롯 교체 없이 FBX `Materials` → `Default_Material`만 고정, 3) 동일 씬에서 재배포 후 회귀 재시험.
+
+---
