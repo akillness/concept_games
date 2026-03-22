@@ -3,8 +3,32 @@
 > BMAD-GDS 밸런스 분석 — 현재 구현 상태 기반 경제 흐름, 난이도 곡선, 진행 속도 평가 및 튜닝 권고.
 > 관심사 분리: 이 문서는 밸런스(수치/경제)만 다룬다. 기획은 design/20, QA는 docs/qa_verification_checklist.md 참조.
 > 모든 수치는 `DistrictBalanceDefaults.cs` 및 `RewardCalculator.cs` 직접 계산값 기준.
+> 주의: 본문 1~9장은 분석 시점 스냅샷/권고 이력을 포함한다. 현재 적용된 최신 값은 10장 패치 로그와 `docs/qa_verification_checklist.md`를 기준으로 판단한다.
 
 ---
+
+## Patch Log: 2026-03-22 QA 패치 반영 (OMU + UltraQA)
+
+이번 사이클에서 실제 코드/데이터에 반영한 밸런스 변경은 아래와 같다.
+
+| 구분 | 파일 | 변경 전 | 변경 후 |
+|---|---|---|---|
+| Dock 완료 보너스 | `DistrictBalanceDefaults.ApplyDock` | 25 | **20** |
+| Reed Fields 타이머 | `DistrictBalanceDefaults.ApplyReedFields` | 195초 | **185초** |
+| Glass Narrows HoldOut | `DistrictBalanceDefaults.ApplyGlassNarrows` | 75초 | **60초** |
+| Lighthouse Crown HoldOut | `DistrictBalanceDefaults.ApplyLighthouseCrown` | 90초 | **75초** |
+| Harbor Pump 비용 | `Upgrade_HarborPump.asset` | Scrap 15 | **Scrap 20** |
+| Route Scanner 비용 | `Upgrade_RouteScanner.asset` | BloomDust 60 | **BloomDust 80** |
+| Pearl Resonator 비용 | `Upgrade_PearlResonator.asset` | CleanWater 20 | **CleanWater 12** |
+| 실패 BD 계산 | `RewardCalculator.CalculateFailure` | 수집분 × 보존율 + 완료보너스 50% | **수집분 × 보존율만 반영** |
+| SeedPod sink | `HubManager` + `HubHudController` | 없음 | **Bio Press (6 SeedPod → Water +2)** |
+| 경계 복귀 | `PlayerController` + `BoundaryRecoveryRules` | 없음 | **경계 이탈/낙하 시 safe-zone 텔레포트 + cooldown** |
+| UV 런타임 메시 fallback | `RuntimeArtDirector` + `MeshUvGenerator` | 텍스처 fallback 중심 | **UV 누락 시 `*_RuntimeUv` 메시 생성(읽기 불가 메시 안전 우회)** |
+
+보조 변경:
+- `RuntimeArtDirector`에 캐릭터 비주얼용 UV/알베도 누락 fallback 텍스처 자동 생성/적용 로직을 추가했다.
+- 경계 복귀/UV fallback 검증 결과는 `docs/QA/01_ultraqa_execution_report.md`의 continue phase 증적을 기준으로 관리한다.
+- QA 기준값은 `docs/qa_verification_checklist.md`의 입장 비용/타이머/HoldOut/업그레이드 항목에 동기화했다.
 
 ## 1. 현재 밸런스 스냅샷
 
@@ -43,13 +67,13 @@
 
 | 지구 | 픽업 SeedPod | 총 획득 | 소비처 |
 |------|-------------|--------|--------|
-| Reed Fields | 2×3=6 | 6 | 없음 (설계 미완) |
-| Tidal Vault | 1×2=2 | 2 | 없음 |
-| Glass Narrows | 1×3=3 | 3 | 없음 |
-| Sunken Arcade | 1×3=3 | 3 | 없음 |
-| Lighthouse Crown | 2×4=8 | 8 | 없음 |
+| Reed Fields | 2×3=6 | 6 | Bio Press 변환 (6 → Water +2) |
+| Tidal Vault | 1×2=2 | 2 | Bio Press 변환 |
+| Glass Narrows | 1×3=3 | 3 | Bio Press 변환 |
+| Sunken Arcade | 1×3=3 | 3 | Bio Press 변환 |
+| Lighthouse Crown | 2×4=8 | 8 | Bio Press 변환 |
 
-> **P1 이슈**: SeedPod는 설계 문서(design/06)에서 "식생 복원, 생물 유인 장식" 소비처가 명시되어 있으나, 현재 구현에서 실제 소비처가 없어 자원이 누적만 된다. 자원 순환이 단절된 상태.
+> **업데이트 (2026-03-22 continue)**: Bio Press sink가 구현되어 SeedPod -> CleanWater 변환 루프가 연결됨. 현재 이슈는 "소비처 부재"에서 "변환 비율(6:2) 튜닝 필요"로 전환.
 
 ### 1.2 난이도 곡선 분석
 
@@ -159,9 +183,9 @@
 > **수정 (2026-03-22)**: Glass Narrows 3→**4**, Sunken Arcade 4→**6**, Lighthouse Crown 5→**8**. `DistrictBalanceDefaults.cs` 반영 완료.
 > 전체 요구량 배열: [0, 1, 2, **4**, **6**, **8**] — 후반 진입 허들 강화. (P1-B 권고값 [0,1,3,5,8,12] 대비 보수적 조정)
 
-**P1-A: SeedPod 소비처 전무**
+**[RESOLVED — 부분] P1-A: SeedPod 소비처 연결**
 
-SeedPod는 Reed Fields 이상 모든 지구에서 누적되지만 소비처가 구현되어 있지 않다. 설계 문서(design/06)의 "식생 복원, 생물 유인 장식" 소비처가 구현 미완 상태다. 이는 자원 순환 단절로 이어지며, 후반부 SeedPod 과잉 축적이 경제 설계의 신뢰도를 낮춘다.
+SeedPod 소비처 부재 이슈는 `Bio Press`(Harbor Pump 연동, 6 SeedPod -> CleanWater +2) 추가로 해소됐다. 현재 남은 과제는 장기 플레이 기준에서 변환 비율의 경제 균형을 튜닝하는 것이다.
 
 **P1-B: 스타 요구량 선형 구조로 인한 진행 벽 부재**
 
@@ -252,7 +276,7 @@ RewardCalculator.CalculateFailure는 `bloomDustCollected + RoundToInt(completion
 
 | 순위 | 항목 | 코드 위치 | 영향도 | 구현 난이도 | 비고 |
 |------|------|---------|--------|-----------|-----|
-| 1 | **SeedPod 소비처 추가** | 허브 장식/복원 시스템 | 높음 | 중간 | 자원 순환 복구, P1-A |
+| 1 | **SeedPod sink 튜닝** | `HubManager.TryRefineSeedPods()` + 허브 UI | 높음 | 중간 | 6:2 비율 실측 튜닝, P1-A 후속 |
 | 2 | ~~**스타 요구량 비선형 재배치**~~ **[DONE]** | `DistrictBalanceDefaults.cs` `requiredStars` | 높음 | 낮음 | Glass Narrows 3→4, Sunken Arcade 4→6, Lighthouse Crown 5→8 |
 | 3 | ~~**Lighthouse Crown 3성 모순 해소**~~ **[DONE]** | `DistrictBalanceDefaults.cs` `threeStarTimeRatio` | 높음 | 낮음 | threeStarTimeRatio 0.45→0.65 (3성 컷 97.5s > HoldOut 90s) |
 | 4 | **실패 BD/Scrap 보존 로직 개선** | `RewardCalculator.CalculateFailure()` | 중간 | 낮음 | **[DONE]** DifficultyLevel 파라미터 추가, FailResourceRetention 적용 |

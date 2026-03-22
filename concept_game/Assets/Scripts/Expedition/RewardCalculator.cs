@@ -61,8 +61,7 @@ namespace MossHarbor.Expedition
             DifficultyLevel difficulty = DifficultyLevel.Normal)
         {
             var retention = DifficultyConfig.FailResourceRetention(difficulty);
-            var fallbackBloom = district != null ? district.completionBonusBloomDust : 30;
-            var retainedBloomDust = Mathf.RoundToInt(bloomDustCollected * retention) + Mathf.RoundToInt(fallbackBloom * 0.5f);
+            var retainedBloomDust = Mathf.RoundToInt(bloomDustCollected * retention);
             var retainedScrap = Mathf.RoundToInt(scrapCollected * retention);
 
             var routeScannerUpgrade = Resources.Load<HubUpgradeDef>(ContentPaths.RouteScannerUpgrade);

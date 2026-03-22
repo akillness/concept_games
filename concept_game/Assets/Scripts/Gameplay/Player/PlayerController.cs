@@ -14,12 +14,21 @@ namespace MossHarbor.Gameplay.Player
         [SerializeField] private float deceleration = 22f;
         [SerializeField] private float gravity = -15f;
         [SerializeField] private Transform modelRoot;
+        [Header("Boundary Recovery")]
+        [SerializeField] private bool enableBoundaryRecovery = true;
+        [SerializeField] private Vector3 boundaryCenter = Vector3.zero;
+        [SerializeField] private Vector2 boundaryHalfExtents = new Vector2(180f, 180f);
+        [SerializeField] private float boundaryFloorY = -12f;
+        [SerializeField] private Vector3 boundarySafePosition = new Vector3(0f, 1f, 0f);
+        [SerializeField] private float boundarySafeHeightOffset = 1f;
+        [SerializeField] private float boundaryRecoveryCooldownSeconds = 1.25f;
 
         private CharacterController _controller;
         private Vector3 _currentVelocity;
         private float _verticalSpeed;
         private Animator _animator;
         private float _currentAnimationSpeed;
+        private float _lastBoundaryRecoveryTime = float.NegativeInfinity;
         private static readonly int SpeedHash = Animator.StringToHash("Speed");
         private static readonly int SprintHash = Animator.StringToHash("Sprint");
         private static readonly int GroundedHash = Animator.StringToHash("Grounded");
@@ -47,10 +56,18 @@ namespace MossHarbor.Gameplay.Player
             {
                 _animator = GetComponentInChildren<Animator>(true);
             }
+
+            TryRecoverBoundary();
         }
 
         private void Update()
         {
+            if (TryRecoverBoundary())
+            {
+                UpdateAnimatorState();
+                return;
+            }
+
             var input = new Vector3(Input.GetAxisRaw("Horizontal"), 0f, Input.GetAxisRaw("Vertical"));
             var moveDirection = input.normalized;
             var isSprinting = Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift);
@@ -70,7 +87,75 @@ namespace MossHarbor.Gameplay.Player
             var motion = _currentVelocity + Vector3.up * _verticalSpeed;
             _controller.Move(motion * Time.deltaTime);
 
-            // Rotation
+            if (TryRecoverBoundary())
+            {
+                UpdateAnimatorState();
+                return;
+            }
+
+            UpdateAnimatorState();
+        }
+
+        private void DisableRootRenderers()
+        {
+            foreach (var renderer in GetComponents<Renderer>())
+                renderer.enabled = false;
+        }
+
+        private bool TryRecoverBoundary()
+        {
+            if (!enableBoundaryRecovery || _controller == null)
+            {
+                return false;
+            }
+
+            var currentTime = Time.time;
+            var currentPosition = transform.position;
+            if (!BoundaryRecoveryRules.ShouldRecover(
+                    currentPosition,
+                    boundaryCenter,
+                    boundaryHalfExtents,
+                    boundaryFloorY,
+                    boundaryRecoveryCooldownSeconds,
+                    currentTime,
+                    _lastBoundaryRecoveryTime))
+            {
+                return false;
+            }
+
+            var safePosition = BoundaryRecoveryRules.ResolveSafePosition(
+                boundarySafePosition,
+                boundaryCenter,
+                boundaryHalfExtents,
+                boundaryFloorY,
+                boundarySafeHeightOffset);
+
+            _controller.enabled = false;
+            transform.position = safePosition;
+            _controller.enabled = true;
+            _currentVelocity = Vector3.zero;
+            _verticalSpeed = 0f;
+            _currentAnimationSpeed = 0f;
+            _lastBoundaryRecoveryTime = currentTime;
+            return true;
+        }
+
+        private void UpdateAnimatorState()
+        {
+            if (_animator == null)
+            {
+                return;
+            }
+
+            var isSprinting = Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift);
+            var currentSpeed = new Vector3(_currentVelocity.x, 0f, _currentVelocity.z).magnitude;
+            var targetAnimationSpeed = currentSpeed > 0.1f ? (isSprinting ? 1f : 0.55f) : 0f;
+            _currentAnimationSpeed = Mathf.Lerp(_currentAnimationSpeed, targetAnimationSpeed, 1f - Mathf.Exp(-Time.deltaTime / Mathf.Max(0.001f, animationDampTime)));
+            _animator.SetFloat(SpeedHash, _currentAnimationSpeed);
+            _animator.SetBool(SprintHash, isSprinting && currentSpeed > 0.1f);
+            _animator.SetBool(GroundedHash, _controller != null && _controller.isGrounded);
+            _animator.SetFloat(VerticalSpeedHash, _verticalSpeed);
+
             if (_currentVelocity.sqrMagnitude > 0.01f && modelRoot != null)
             {
                 var horizontalVelocity = new Vector3(_currentVelocity.x, 0f, _currentVelocity.z);
@@ -80,24 +165,6 @@ namespace MossHarbor.Gameplay.Player
                     modelRoot.rotation = Quaternion.Slerp(modelRoot.rotation, targetRotation, rotationSharpness * Time.deltaTime);
                 }
             }
-
-            // Animation
-            if (_animator == null)
-                return;
-
-            var currentSpeed = new Vector3(_currentVelocity.x, 0f, _currentVelocity.z).magnitude;
-            var targetAnimationSpeed = currentSpeed > 0.1f ? (isSprinting ? 1f : 0.55f) : 0f;
-            _currentAnimationSpeed = Mathf.Lerp(_currentAnimationSpeed, targetAnimationSpeed, 1f - Mathf.Exp(-Time.deltaTime / Mathf.Max(0.001f, animationDampTime)));
-            _animator.SetFloat(SpeedHash, _currentAnimationSpeed);
-            _animator.SetBool(SprintHash, isSprinting && currentSpeed > 0.1f);
-            _animator.SetBool(GroundedHash, _controller.isGrounded);
-            _animator.SetFloat(VerticalSpeedHash, _verticalSpeed);
-        }
-
-        private void DisableRootRenderers()
-        {
-            foreach (var renderer in GetComponents<Renderer>())
-                renderer.enabled = false;
         }
     }
 }

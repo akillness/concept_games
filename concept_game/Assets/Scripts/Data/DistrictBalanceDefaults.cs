@@ -46,7 +46,7 @@ namespace MossHarbor.Data
             d.scrapPickupCount = 1;
             d.scrapPickupAmount = 5;
             d.seedPodPickupCount = 0;
-            d.completionBonusBloomDust = 25;
+            d.completionBonusBloomDust = 20;
             d.completionBonusScrap = 6;
             d.pickupSpawnRadius = 7f;
             d.beaconPosition = new Vector3(0f, 0.75f, 10f);
@@ -68,7 +68,7 @@ namespace MossHarbor.Data
             d.recommendedPower = 1;
             d.requiredStars = 1;
             d.expeditionEntryCost = 10;
-            d.runTimerSeconds = 195f;
+            d.runTimerSeconds = 185f;
             d.targetPickupCount = 4;
             d.objectiveType = ExpeditionObjectiveType.CollectResource;
             d.objectiveResourceType = ResourceType.SeedPod;
@@ -135,7 +135,7 @@ namespace MossHarbor.Data
             d.runTimerSeconds = 180f;
             d.targetPickupCount = 5;
             d.objectiveType = ExpeditionObjectiveType.HoldOut;
-            d.objectiveHoldSeconds = 75f;
+            d.objectiveHoldSeconds = 60f;
             d.objectiveTargetAmount = 1;
             d.bloomPickupCount = 2;
             d.bloomPickupAmount = 12;
@@ -198,7 +198,7 @@ namespace MossHarbor.Data
             d.runTimerSeconds = 150f;
             d.targetPickupCount = 6;
             d.objectiveType = ExpeditionObjectiveType.HoldOut;
-            d.objectiveHoldSeconds = 90f;
+            d.objectiveHoldSeconds = 75f;
             d.objectiveTargetAmount = 1;
             d.bloomPickupCount = 3;
             d.bloomPickupAmount = 15;

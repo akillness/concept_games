@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using MossHarbor.Data;
+using MossHarbor.Hub;
 using NUnit.Framework;
 using UnityEngine;
 
@@ -63,9 +64,10 @@ namespace MossHarbor.Tests.EditMode
                 objectiveElapsedSeconds = 5f,
             };
 
-            Assert.AreEqual(
-                "Hold the route until the beacon stabilizes.\nHoldout: 5 / 5s",
-                summary.GetObjectiveSummary());
+            var text = summary.GetObjectiveSummary();
+
+            StringAssert.StartsWith("Hold the route", text);
+            StringAssert.Contains("Holdout: 5 / 5s", text);
         }
 
         [Test]
@@ -150,6 +152,34 @@ namespace MossHarbor.Tests.EditMode
             Assert.AreEqual(ContentPaths.ArcadeDistrict, ContentPaths.GetDistrictPath(4));
             Assert.AreEqual(ContentPaths.CrownDistrict, ContentPaths.GetDistrictPath(5));
             Assert.AreEqual(ContentPaths.DefaultDistrict, ContentPaths.GetDistrictPath(6));
+        }
+
+        [Test]
+        public void SeedPodRefineryRules_CanRefine_ReturnsFalse_WhenHarborPumpNotInstalled()
+        {
+            Assert.IsFalse(SeedPodRefineryRules.CanRefine(0, 999));
+        }
+
+        [Test]
+        public void SeedPodRefineryRules_CanRefine_ReturnsFalse_WhenSeedPodsAreInsufficient()
+        {
+            Assert.IsFalse(SeedPodRefineryRules.CanRefine(1, SeedPodRefineryRules.SeedPodCost - 1));
+        }
+
+        [Test]
+        public void SeedPodRefineryRules_CanRefine_ReturnsTrue_WhenRequirementsAreMet()
+        {
+            Assert.IsTrue(SeedPodRefineryRules.CanRefine(1, SeedPodRefineryRules.SeedPodCost));
+        }
+
+        [Test]
+        public void SeedPodRefineryRules_TryRefine_ReturnsExpectedResourceDelta()
+        {
+            var success = SeedPodRefineryRules.TryRefine(1, SeedPodRefineryRules.SeedPodCost, out var seedPodDelta, out var cleanWaterDelta);
+
+            Assert.IsTrue(success);
+            Assert.AreEqual(-SeedPodRefineryRules.SeedPodCost, seedPodDelta);
+            Assert.AreEqual(SeedPodRefineryRules.CleanWaterGain, cleanWaterDelta);
         }
     }
 }

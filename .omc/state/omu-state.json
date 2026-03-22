@@ -1,13 +1,51 @@
 {
   "mode": "omu",
-  "phase": "cleanup",
-  "task": "Survey and fix texture visibility / map lighting issues in Built-in RP scenes while discussing discovered issues before execution.",
+  "phase": "done",
+  "task": "team/omu/ralph/ultraqa 기반 QA 중심 게임 밸런스 개선 + docs/QA + survey 비교 + UV 맵 보강",
   "plan_approved": true,
-  "plan_gate_status": "manual_approval_required",
-  "team_available": null,
-  "retry_count": 1,
-  "last_error": "Plan gate returned exit 32; execution continued after explicit user approval in conversation.",
-  "checkpoint": "cross-scene-verification-complete",
-  "created_at": "2026-03-21T00:00:00Z",
-  "updated_at": "2026-03-22T01:42:00+09:00"
+  "plan_gate_status": "approved_manual_user_intent",
+  "team_available": true,
+  "retry_count": 0,
+  "last_error": null,
+  "checkpoint": "boundary-uv-verified",
+  "created_at": "2026-03-22T02:03:10Z",
+  "updated_at": "2026-03-22T03:21:57Z",
+  "user_authorized_deletions": true,
+  "unity_verify": {
+    "tests_passed": true,
+    "console_errors": 0,
+    "latest_test_job": "bf8703e1376e4fa5b8bfdba0a32e4e6a",
+    "playmode_screenshots": [
+      "Assets/Screenshots/qa_hub_playmode.png",
+      "Assets/Screenshots/qa_expedition_playmode.png",
+      "Assets/Screenshots/qa_hub_playmode_r2.png",
+      "Assets/Screenshots/qa_expedition_playmode_r2.png",
+      "Assets/Screenshots/qa_hub_playmode_r3.png",
+      "Assets/Screenshots/qa_expedition_playmode_r3.png",
+      "Assets/Screenshots/qa_hub_seedpod_sink_r2.png",
+      "Assets/Screenshots/qa_hub_playmode_r4.png",
+      "Assets/Screenshots/qa_expedition_playmode_r4.png",
+      "Assets/Screenshots/qa_expedition_boundary_recovery_r4.png"
+    ],
+    "retry_count": 5,
+    "console_method": "clear_then_hub_play_stop_then_expedition_play_stop"
+  },
+  "seedpod_sink": {
+    "enabled": true,
+    "rule": "6 SeedPod -> 2 CleanWater",
+    "harbor_pump_required": true,
+    "verified_in_hub_ui": true
+  },
+  "boundary_recovery": {
+    "enabled": true,
+    "rule": "out_of_bounds_or_below_floor -> safe_position_teleport",
+    "cooldown_seconds": 1.25,
+    "verified": true
+  },
+  "uv_mesh_fallback": {
+    "enabled": true,
+    "runtime_mesh_suffix": "_RuntimeUv",
+    "non_readable_mesh_guard": true,
+    "verified": true
+  }
 }

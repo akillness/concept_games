@@ -67,6 +67,9 @@ namespace MossHarbor.Hub
         public int RouteScannerTimerBonus => RouteScannerLevel > 0 && RouteScannerUpgrade != null ? Mathf.RoundToInt(RouteScannerUpgrade.timerBonusSeconds) : 0;
         public float RouteScannerBloomMultiplier => RouteScannerLevel > 0 && RouteScannerUpgrade != null ? RouteScannerUpgrade.bloomMultiplier : 1f;
         public int PearlResonatorMemoryBonus => PearlResonatorLevel > 0 && PearlResonatorUpgrade != null ? PearlResonatorUpgrade.memoryPearlBonus : 0;
+        public int SeedPodRefineCost => SeedPodRefineryRules.SeedPodCost;
+        public int SeedPodRefineWaterGain => SeedPodRefineryRules.CleanWaterGain;
+        public bool CanRefineSeedPods => _bootstrap != null && SeedPodRefineryRules.CanRefine(HarborPumpLevel, _bootstrap.SaveService.GetResource(ResourceType.SeedPod));
         public bool CanAffordSelectedExpedition => _bootstrap != null && _bootstrap.SaveService.GetResource(ResourceType.BloomDust) >= EffectiveEntryCost;
         public bool CanAffordHarborPump => _bootstrap != null && HarborPumpUpgrade != null && _bootstrap.SaveService.GetResource(HarborPumpUpgrade.costType) >= HarborPumpUpgrade.costAmount;
         public int EffectiveEntryCost
@@ -207,6 +210,33 @@ namespace MossHarbor.Hub
             _bootstrap.SaveService.AddResource(upgrade.costType, -upgrade.costAmount);
             _bootstrap.SaveService.SetHubUpgradeLevel(UpgradeIds.PearlResonator, 1);
             CompleteTutorialIfReady();
+        }
+
+        [ContextMenu("Refine SeedPod")]
+        public void TryRefineSeedPods()
+        {
+            if (_bootstrap == null)
+            {
+                return;
+            }
+
+            var currentSeedPods = _bootstrap.SaveService.GetResource(ResourceType.SeedPod);
+            if (!SeedPodRefineryRules.TryRefine(HarborPumpLevel, currentSeedPods, out var seedPodDelta, out var cleanWaterDelta))
+            {
+                if (HarborPumpLevel <= 0)
+                {
+                    Debug.Log("Install Harbor Pump before refining SeedPods.");
+                }
+                else
+                {
+                    Debug.Log($"Not enough SeedPod to refine. Need {SeedPodRefineCost}.");
+                }
+
+                return;
+            }
+
+            _bootstrap.SaveService.AddResource(ResourceType.SeedPod, seedPodDelta);
+            _bootstrap.SaveService.AddResource(ResourceType.CleanWater, cleanWaterDelta);
         }
 
         [ContextMenu("Select Next District")]

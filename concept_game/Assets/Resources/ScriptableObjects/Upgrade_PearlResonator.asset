@@ -16,7 +16,7 @@ MonoBehaviour:
   displayName: Pearl Resonator
   description: Tunes the harbor grid to reveal MemoryPearls in advanced districts.
   costType: 3
-  costAmount: 20
+  costAmount: 12
   entryCostReduction: 0
   cleanWaterBonus: 0
   timerBonusSeconds: 0

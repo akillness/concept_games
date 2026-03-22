@@ -22,6 +22,8 @@ namespace MossHarbor.UI
         private TMP_Text _routeScannerLabel;
         private Button _pearlResonatorButton;
         private TMP_Text _pearlResonatorLabel;
+        private Button _seedPodRefineryButton;
+        private TMP_Text _seedPodRefineryLabel;
         private Button _previousDistrictButton;
         private Button _nextDistrictButton;
         private Button _debugResourcesButton;
@@ -141,11 +143,11 @@ namespace MossHarbor.UI
             // ── Bottom left: Upgrade panel ───────────────────────────────────────
             RuntimeUiFactory.CreatePanel(canvas.transform, "UpgradePanel",
                 new Vector2(0f, 0f), new Vector2(0f, 0f),
-                new Vector2(20f, 100f), new Vector2(290f, 330f),
+                new Vector2(20f, 100f), new Vector2(290f, 394f),
                 new Color(0.07f, 0.12f, 0.16f, 0.72f));
             RuntimeUiFactory.CreateLabel(canvas.transform, "UpgradeHeader",
                 new Vector2(0f, 0f), new Vector2(0f, 0f),
-                new Vector2(28f, 302f), new Vector2(282f, 326f),
+                new Vector2(28f, 366f), new Vector2(282f, 390f),
                 16, TextAlignmentOptions.Left).text = "Upgrades";
 
             _harborPumpButton = RuntimeUiFactory.CreateButton(canvas.transform, "Harbor Pump",
@@ -165,6 +167,12 @@ namespace MossHarbor.UI
                 new Vector2(28f, 106f), new Vector2(282f, 162f));
             _pearlResonatorButton.onClick.AddListener(() => _hubManager?.TryInstallPearlResonator());
             _pearlResonatorLabel = _pearlResonatorButton.GetComponentInChildren<TMP_Text>();
+
+            _seedPodRefineryButton = RuntimeUiFactory.CreateButton(canvas.transform, "Bio Press",
+                new Vector2(0f, 0f), new Vector2(0f, 0f),
+                new Vector2(28f, 42f), new Vector2(282f, 98f));
+            _seedPodRefineryButton.onClick.AddListener(() => _hubManager?.TryRefineSeedPods());
+            _seedPodRefineryLabel = _seedPodRefineryButton.GetComponentInChildren<TMP_Text>();
 
             // ── Bottom right: District nav buttons ───────────────────────────────
             _previousDistrictButton = RuntimeUiFactory.CreateButton(canvas.transform, "< Prev District",
@@ -233,6 +241,13 @@ namespace MossHarbor.UI
                     if (_hubManager.HarborPumpLevel == 0)
                     {
                         return $"Harbor Pump is still offline.\nInstall it when you have {_hubManager.HarborPumpScrapCost} Scrap.";
+                    }
+
+                    if (save.GetResource(ResourceType.SeedPod) >= _hubManager.SeedPodRefineCost)
+                    {
+                        return
+                            $"SeedPod stock is ready for refinement.\n" +
+                            $"Use Bio Press: {_hubManager.SeedPodRefineCost} SeedPod -> Water +{_hubManager.SeedPodRefineWaterGain}.";
                     }
 
                     if (_hubManager.RuntimeDistrict != null && _hubManager.RuntimeDistrict.objectiveType == ExpeditionObjectiveType.HoldOut && _hubManager.RouteScannerLevel == 0)
@@ -373,6 +388,18 @@ namespace MossHarbor.UI
                     _pearlResonatorLabel.text = _hubManager.PearlResonatorLevel > 0
                         ? "Pearl Resonator [Installed]"
                         : $"Pearl Resonator ({_hubManager.PearlResonatorWaterCost} Water) \u2192 Pearl +{((_hubManager.PearlResonatorUpgrade != null) ? _hubManager.PearlResonatorUpgrade.memoryPearlBonus : 0)}";
+                }
+            }
+
+            if (_seedPodRefineryButton != null)
+            {
+                _seedPodRefineryButton.gameObject.SetActive(!tutorialActive);
+                _seedPodRefineryButton.interactable = _hubManager.CanRefineSeedPods;
+                if (_seedPodRefineryLabel != null)
+                {
+                    _seedPodRefineryLabel.text = _hubManager.HarborPumpLevel <= 0
+                        ? "Bio Press (Install Harbor Pump first)"
+                        : $"Bio Press ({_hubManager.SeedPodRefineCost} SeedPod) -> Water +{_hubManager.SeedPodRefineWaterGain}";
                 }
             }
 

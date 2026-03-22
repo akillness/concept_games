@@ -16,7 +16,7 @@ MonoBehaviour:
   displayName: Harbor Pump
   description: Stabilizes intake pressure to reduce entry costs and restore clean water on successful runs.
   costType: 1
-  costAmount: 15
+  costAmount: 20
   entryCostReduction: 4
   cleanWaterBonus: 3
   timerBonusSeconds: 0

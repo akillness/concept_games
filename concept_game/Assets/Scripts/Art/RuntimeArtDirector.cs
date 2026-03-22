@@ -13,6 +13,7 @@ namespace MossHarbor.Art
         private static readonly Color ExpeditionAmbientColor = new(0.24f, 0.34f, 0.32f, 1f);
         private static readonly Color HubSunColor = new(1f, 0.93f, 0.8f, 1f);
         private static readonly Color ExpeditionSunColor = new(0.76f, 0.9f, 0.86f, 1f);
+        private static Texture2D _uvFallbackTexture;
 
         public static void DecorateHub(Transform parent)
         {
@@ -165,7 +166,8 @@ namespace MossHarbor.Art
             DisableColliders(instance);
             StabilizeRigidbodies(instance);
             ConfigureAnimators(instance);
-            NormalizeRendererMaterials(instance);
+            EnsureRuntimeUvFallback(instance);
+            NormalizeRendererMaterials(instance, null, false, true);
             return instance.transform;
         }
 
@@ -354,6 +356,30 @@ namespace MossHarbor.Art
             }
         }
 
+        private static void EnsureRuntimeUvFallback(GameObject root)
+        {
+            if (root == null)
+            {
+                return;
+            }
+
+            foreach (var meshFilter in root.GetComponentsInChildren<MeshFilter>(true))
+            {
+                if (MeshUvGenerator.EnsureRuntimeUvMesh(meshFilter.sharedMesh, out var runtimeMesh))
+                {
+                    meshFilter.sharedMesh = runtimeMesh;
+                }
+            }
+
+            foreach (var skinnedMeshRenderer in root.GetComponentsInChildren<SkinnedMeshRenderer>(true))
+            {
+                if (MeshUvGenerator.EnsureRuntimeUvMesh(skinnedMeshRenderer.sharedMesh, out var runtimeMesh))
+                {
+                    skinnedMeshRenderer.sharedMesh = runtimeMesh;
+                }
+            }
+        }
+
         private static void ConfigureSceneLighting(Vector3 sunEulerAngles, Color sunColor, float intensity, Color backgroundColor)
         {
             foreach (var light in Object.FindObjectsOfType<Light>(true))
@@ -410,10 +436,15 @@ namespace MossHarbor.Art
 
         private static void NormalizeRendererMaterials(GameObject root)
         {
-            NormalizeRendererMaterials(root, null, false);
+            NormalizeRendererMaterials(root, null, false, false);
         }
 
         private static void NormalizeRendererMaterials(GameObject root, Color? tintOverride, bool emissive)
+        {
+            NormalizeRendererMaterials(root, tintOverride, emissive, false);
+        }
+
+        private static void NormalizeRendererMaterials(GameObject root, Color? tintOverride, bool emissive, bool allowUvFallback)
         {
             var standardShader = Shader.Find("Standard");
             if (root == null || standardShader == null)
@@ -432,14 +463,14 @@ namespace MossHarbor.Art
                 var runtimeMaterials = new Material[originalMaterials.Length];
                 for (var i = 0; i < originalMaterials.Length; i++)
                 {
-                    runtimeMaterials[i] = CreateBuiltInMaterial(originalMaterials[i], standardShader, tintOverride, emissive);
+                    runtimeMaterials[i] = CreateBuiltInMaterial(originalMaterials[i], standardShader, tintOverride, emissive, allowUvFallback);
                 }
 
                 renderer.materials = runtimeMaterials;
             }
         }
 
-        private static Material CreateBuiltInMaterial(Material source, Shader standardShader, Color? tintOverride, bool emissive)
+        private static Material CreateBuiltInMaterial(Material source, Shader standardShader, Color? tintOverride, bool emissive, bool allowUvFallback)
         {
             var material = new Material(standardShader)
             {
@@ -455,6 +486,10 @@ namespace MossHarbor.Art
             if (albedo != null)
             {
                 material.mainTexture = albedo;
+            }
+            else if (allowUvFallback)
+            {
+                material.mainTexture = GetOrCreateUvFallbackTexture();
             }
 
             material.color = baseColor;
@@ -516,6 +551,39 @@ namespace MossHarbor.Art
             }
 
             return Color.white;
+        }
+
+        private static Texture2D GetOrCreateUvFallbackTexture()
+        {
+            if (_uvFallbackTexture != null)
+            {
+                return _uvFallbackTexture;
+            }
+
+            const int size = 128;
+            var texture = new Texture2D(size, size, TextureFormat.RGBA32, false)
+            {
+                name = "Generated_UV_Fallback_Checker",
+                wrapMode = TextureWrapMode.Repeat,
+                filterMode = FilterMode.Point
+            };
+
+            for (var y = 0; y < size; y++)
+            {
+                for (var x = 0; x < size; x++)
+                {
+                    var checker = ((x / 16) + (y / 16)) % 2 == 0;
+                    var baseColor = checker ? new Color(0.92f, 0.22f, 0.36f, 1f) : new Color(0.18f, 0.72f, 0.88f, 1f);
+                    var u = x / (float)(size - 1);
+                    var v = y / (float)(size - 1);
+                    var uvTint = new Color(u, v, 1f - u * 0.4f, 1f);
+                    texture.SetPixel(x, y, Color.Lerp(baseColor, uvTint, 0.25f));
+                }
+            }
+
+            texture.Apply(false, true);
+            _uvFallbackTexture = texture;
+            return _uvFallbackTexture;
         }
     }
 }

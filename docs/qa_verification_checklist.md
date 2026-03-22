@@ -32,16 +32,16 @@
 
 | 지구 | 비용 | Normal 기준 |
 |------|------|------------|
-| Dock | BloomDust 5 | Easy: 3~4, Hard: 6~7 |
+| Dock | BloomDust 8 | Easy: 6, Hard: 10 |
 | Reed Fields | BloomDust 10 | — |
 | Tidal Vault | BloomDust 15 | — |
-| Glass Narrows | BloomDust 20 | — |
-| Sunken Arcade | BloomDust 25 | — |
-| Lighthouse Crown | BloomDust 30 | — |
+| Glass Narrows | BloomDust 22 | — |
+| Sunken Arcade | BloomDust 28 | — |
+| Lighthouse Crown | BloomDust 35 | — |
 
 - [ ] 각 지구 입장 시 BloomDust가 정확히 차감됨
-- [ ] 난이도 Easy 시 비용 0.7× 적용 (Dock: ~3)
-- [ ] 난이도 Hard 시 비용 1.3× 적용 (Dock: ~6)
+- [ ] 난이도 Easy 시 비용 0.7× 적용 (Dock: 6)
+- [ ] 난이도 Hard 시 비용 1.3× 적용 (Dock: 10)
 
 ### 2.3 난이도 토글
 
@@ -51,9 +51,11 @@
 
 ### 2.4 업그레이드 검증
 
-- [ ] Harbor Pump 구매: Scrap 15 소비, 버튼 `[Installed]` 전환
-- [ ] Route Scanner 구매: BloomDust 60 소비, 버튼 `[Installed]` 전환
-- [ ] Pearl Resonator 구매: CleanWater 20 소비, 버튼 `[Installed]` 전환
+- [ ] Harbor Pump 구매: Scrap 20 소비, 버튼 `[Installed]` 전환
+- [ ] Route Scanner 구매: BloomDust 80 소비, 버튼 `[Installed]` 전환
+- [ ] Pearl Resonator 구매: CleanWater 12 소비, 버튼 `[Installed]` 전환
+- [ ] Bio Press 사용: SeedPod 6 소비, CleanWater +2 증가
+- [ ] Harbor Pump 미설치 시 Bio Press 비활성/가이드 문구 표시
 - [ ] 자원 부족 시 업그레이드 버튼 비활성화
 - [ ] 이미 설치된 업그레이드 버튼 재클릭 불가
 - [ ] 업그레이드 상태 저장/복원 (앱 재시작 후 유지)
@@ -76,7 +78,7 @@
 | 지구 | Normal 타이머 | Easy (×1.3) | Hard (×0.8) |
 |------|-------------|-------------|-------------|
 | Dock | 210초 | 273초 | 168초 |
-| Reed Fields | 195초 | 253초 | 156초 |
+| Reed Fields | 185초 | 241초 | 148초 |
 | Tidal Vault | 180초 | 234초 | 144초 |
 | Glass Narrows | 180초 | 234초 | 144초 |
 | Sunken Arcade | 165초 | 214초 | 132초 |
@@ -100,7 +102,7 @@
 
 - [ ] `CollectPickups`: 지정 수량 수집 시 ObjectiveReady = true
 - [ ] `CollectResource`: 지정 자원 지정 수량 수집 시 ObjectiveReady = true
-- [ ] `HoldOut`: 타이머 경과로 목표 달성 (Glass Narrows 75초, Lighthouse Crown 90초)
+- [ ] `HoldOut`: 타이머 경과로 목표 달성 (Glass Narrows 60초, Lighthouse Crown 75초)
 
 ### 3.4 ObjectiveBeacon
 
@@ -208,8 +210,9 @@
 ## 8. 알려진 이슈
 
 - [ ] **SampleScene (Build Index 4)** 사용되지 않음 → Build Settings에서 제거 필요
-- [ ] **맵 경계 없음** → 플레이어가 픽업 방향에서 벗어나 무한 평면 이탈 가능
-- [ ] **SeedPod 소비처 없음** → Reed Fields에서 수집 가능하나 활용처 미정의
+- [x] **맵 경계 복귀 1차 적용 완료** → `PlayerController` 경계/낙하 감지 후 safe position 텔레포트 + cooldown 동작 확인
+- [ ] **맵 경계 파라미터 튜닝 필요** → 지구별 경계 반경/복귀 지점 데이터 외부화 필요
+- [ ] **SeedPod sink 튜닝 필요** → Bio Press(6:2) 도입 완료, 장기 플레이 누적량 기준 추가 조정 필요
 - [ ] **사운드 없음** → 수집, 비콘 활성화, UI 버튼, 배경음 전무
 - [ ] **정화/오염 시스템 미구현** → 위협 요소 없이 탐색과 수집만 존재
 - [ ] **ToolDef ScriptableObject** (`ScriptableObjects/Tool_Vacuum`) 로드되나 실제 정화 로직 없음
@@ -223,7 +226,7 @@
 - [ ] **시나리오 1: SeedPod Dead Stock 방지**
   - 1) Reed Fields, 2) Tidal Vault, 3) Glass Narrows 순으로 각 5회 Run.
   - 2) 각 Run 종료 시 SeedPod 누적량 / Dock 진입 횟수 / Harbor Pump 진행도 스냅샷 저장.
-  - 3) SeedPod는 사용되지 않아 50개 이상 누적되면 실패.
+  - 3) Bio Press 사용 루프 포함 시 SeedPod 순증이 50개 이상 누적되면 실패.
 
 - [ ] **시나리오 2: 3성 수학적 검증**
   - 1) Glass Narrows, Lighthouse Crown를 각각 10회 이상 클리어.
@@ -242,7 +245,7 @@
   - 2) Dock 완료 후 즉시 Reed Fields 첫 실패율과 이탈률을 측정.
   - 3) 이탈률이 35% 초과 시 P1 실패.
 
-- [ ] **시나나리오 5: 스타 요구량/재도전 유도 체크**
+- [ ] **시나리오 5: 스타 요구량/재도전 유도 체크**
   - 1) 게임 전체를 1성 기준으로 최소 3회 순환.
   - 2) Sunken Arcade 및 Lighthouse Crown 진입까지 필요한 누적 run 수를 측정.
   - 3) 목표: Sunken Arcade 5회 미만, Lighthouse Crown 10회 미만 진입 금지(필요 run 증가 유도).
@@ -250,13 +253,18 @@
 ### 9.3 P2 (회귀)
 
 - [ ] **시나리오 6: 실패 자원 보존율 회귀**
-  - 1) 난이도별(에이스/Normal/Hard) 실패 케이스 20회 수집.
+  - 1) 난이도별(Easy/Normal/Hard) 실패 케이스 20회 수집.
   - 2) 실패 후 `BloomDust`/`Scrap`/`SeedPod` 보존율을 수집해 평균을 계산.
   - 3) 설계치(70% ±5%?) 및 현재 구현 범위에서 이탈 시 회귀 이슈 등록.
 
 - [ ] **시나리오 7: 캐릭터/아트 로드 안정성 회귀**
   - 1) Hub/Expedition 씬 진입 시 플레이어 비주얼(`player_avatar`)과 오브젝트 렌더링 성공률 100% 확인.
   - 2) 캐릭터 텍스처 교체 시 UV 채널이 깨지지 않는지 2회 이상 교체 테스트.
+
+- [ ] **시나리오 8: 맵 경계 복귀 회귀**
+  - 1) Expedition 씬에서 boundary center/extent를 제한값으로 설정해 시작 위치를 고의로 경계 밖으로 배치.
+  - 2) 플레이 시작 후 1초 내 safe position으로 복귀하는지 확인.
+  - 3) clear -> Hub play/stop -> Expedition play/stop 이후 Error log가 0건인지 확인.
 
 ---
 

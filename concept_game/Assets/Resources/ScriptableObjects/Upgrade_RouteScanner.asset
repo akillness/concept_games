@@ -16,7 +16,7 @@ MonoBehaviour:
   displayName: Route Scanner
   description: Predicts cleaner routes to extend runs and increase BloomDust efficiency.
   costType: 0
-  costAmount: 60
+  costAmount: 80
   entryCostReduction: 0
   cleanWaterBonus: 0
   timerBonusSeconds: 25
