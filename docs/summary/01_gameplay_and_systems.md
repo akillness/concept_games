@@ -51,6 +51,9 @@
   - `seedPodDelta`
   - `bioPressUseCount`
   - `bioPressCleanWaterConverted`
+- SeedPod ratio automation:
+  - `SeedPodRefineryExperiment.DefaultQAFifteenRunPlan`
+  - `SeedPodRefineryExperiment.CompareCandidateProfiles(...)`
 - Boundary recovery:
   - district별 `BoundaryRecoveryProfile`
   - 경계 이탈/낙하 시 safe position 복귀
@@ -63,3 +66,15 @@
 1. SeedPod `6:2 / 5:2 / 6:3` 중 어떤 비율이 15-run 기준 재고 20~30 밴드를 유지하는가.
 2. Glass Narrows, Lighthouse Crown의 HoldOut과 3성 동선이 실제 플레이 로그에서도 기대 수준으로 유지되는가.
 3. 후반 지구 별점 게이트 `4/6/8`이 재도전 유인을 만들면서도 과도한 막힘을 만들지 않는가.
+
+## Current Experiment Baseline
+
+- 기본 비교 플랜:
+  - `Reed Fields(6) -> Tidal Vault(2) -> Glass Narrows(3)`를 5회 반복한 15-run QA 시나리오
+  - 가정: 허브 복귀당 refine 최대 1회
+- 현재 비교 결과:
+  - `high-yield (6:3)` -> baseline과 같은 재고 곡선, 더 높은 CleanWater 수익
+  - `baseline (6:2)` -> 현재 라이브 규칙
+  - `fast-sink (5:2)` -> 재고는 더 빨리 소모하지만 기본 QA 플랜 기준 target band 거리 손해가 큼
+- 해석:
+  - 자동 비교 하네스는 준비됐고, 다음 결정 포인트는 실제 플레이 로그를 같은 포맷으로 붙여서 이 순위가 유지되는지 확인하는 것이다.

@@ -30,11 +30,11 @@
   - `6:2 / 5:2 / 6:3` 비교
   - 15-run 기준 재고 20~30 밴드 유지
 - 구현:
-  - telemetry 수집 자동화
-  - 후보별 요약 리포트 생성
+  - `SeedPodRefineryExperiment` 하네스 추가 완료
+  - 후보별 자동 비교 리포트 생성 가능 상태
 - 검증:
-  - EditMode + 직접 플레이 시나리오
-  - 결과를 `docs/QA/`와 이 폴더에 동기화
+  - EditMode `50/50` 통과
+  - 다음 단계는 실제 플레이 telemetry를 같은 리포트 포맷으로 수집하는 것
 
 ### 2. Boundary Tuning Pass
 - 목표:

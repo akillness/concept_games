@@ -170,3 +170,21 @@
     - `UV Guardrail: OK | targets=4, meshes=2, readable=2, critical=0, warnings=0`
 - Conclusion:
   - 요약 폴더와 최신화된 설계/QA 문서는 현재 코드/런타임 기준과 다시 정합성이 맞는 상태다.
+
+## Ralph + BMAD-GDS SeedPod Ratio Automation Gate (2026-03-22)
+
+- Scope:
+  - SeedPod 후보 비율 `6:2 / 5:2 / 6:3` 비교용 15-run 하네스 추가
+  - EditMode 테스트와 런타임 스모크로 회귀 확인
+- Result:
+  - EditMode tests: **50/50 passed** (job: `eb42cfb70e4c4579bea5079e3808fa3d`)
+  - Runtime verification:
+    - Hub: `RuntimePlayerVisual` 존재 확인
+    - Expedition: `RuntimePlayerVisual`, `ObjectiveBeacon` 존재 확인
+  - Console verification:
+    - Hub/Expedition play/stop 기준 Error log **0건**
+- Experiment baseline:
+  - 기본 QA 플랜: `Reed(6) -> Vault(2) -> Narrows(3)` 5회 반복, 허브당 refine 최대 1회
+  - 비교 결과: `high-yield -> baseline -> fast-sink`
+- Conclusion:
+  - SeedPod 비율 비교를 위한 자동 평가 하네스가 코드와 테스트에 반영됐고, 현재 라이브 baseline을 바꾸기 전 검증 기반이 생겼다.

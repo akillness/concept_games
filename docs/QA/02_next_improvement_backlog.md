@@ -7,7 +7,10 @@
 
 ## Priority 1
 - SeedPod ratio 실험 자동화(6:2 / 5:2 / 6:3)
-  - 15-run 시뮬레이션 수집 스크립트 추가
+  - 상태: **partial done**
+  - `SeedPodRefineryExperiment` 기반 15-run 비교 하네스 추가
+  - 현재 기본 플랜 기준 비교 순위: `high-yield -> baseline -> fast-sink`
+  - 다음 단계: 실제 플레이 telemetry export와 같은 형식으로 비교 리포트 누적
   - 목표: SeedPod 재고 20~30 밴드 유지
 
 - UV guardrail 범위 확장

@@ -2,9 +2,6 @@ namespace MossHarbor.Hub
 {
     public static class SeedPodRefineryRules
     {
-        public const int SeedPodCost = 6;
-        public const int CleanWaterGain = 2;
-
         public static readonly SeedPodRefineProfile[] CandidateProfiles =
         {
             new SeedPodRefineProfile("baseline", 6, 2),
@@ -13,23 +10,40 @@ namespace MossHarbor.Hub
         };
 
         public static SeedPodRefineProfile BaselineProfile => CandidateProfiles[0];
+        public static int SeedPodCost => BaselineProfile.SeedPodCost;
+        public static int CleanWaterGain => BaselineProfile.CleanWaterGain;
 
         public static bool CanRefine(int harborPumpLevel, int currentSeedPods)
         {
-            return harborPumpLevel > 0 && currentSeedPods >= SeedPodCost;
+            return CanRefine(harborPumpLevel, currentSeedPods, BaselineProfile);
+        }
+
+        public static bool CanRefine(int harborPumpLevel, int currentSeedPods, SeedPodRefineProfile profile)
+        {
+            return harborPumpLevel > 0 && currentSeedPods >= profile.SeedPodCost;
         }
 
         public static bool TryRefine(int harborPumpLevel, int currentSeedPods, out int seedPodDelta, out int cleanWaterDelta)
         {
-            if (!CanRefine(harborPumpLevel, currentSeedPods))
+            return TryRefine(harborPumpLevel, currentSeedPods, BaselineProfile, out seedPodDelta, out cleanWaterDelta);
+        }
+
+        public static bool TryRefine(
+            int harborPumpLevel,
+            int currentSeedPods,
+            SeedPodRefineProfile profile,
+            out int seedPodDelta,
+            out int cleanWaterDelta)
+        {
+            if (!CanRefine(harborPumpLevel, currentSeedPods, profile))
             {
                 seedPodDelta = 0;
                 cleanWaterDelta = 0;
                 return false;
             }
 
-            seedPodDelta = -SeedPodCost;
-            cleanWaterDelta = CleanWaterGain;
+            seedPodDelta = -profile.SeedPodCost;
+            cleanWaterDelta = profile.CleanWaterGain;
             return true;
         }
     }
