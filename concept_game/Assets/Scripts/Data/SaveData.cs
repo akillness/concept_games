@@ -7,6 +7,8 @@ namespace MossHarbor.Data
     [Serializable]
     public sealed class SaveData
     {
+        public const int RunHistoryLimit = 12;
+
         public string profileId = "slot-0";
         public string currentScene = "Hub";
         public int selectedDistrictIndex;
@@ -20,6 +22,100 @@ namespace MossHarbor.Data
         public SerializableDictionary<string, bool> claimedQuests = new();
         public SeedPodTelemetry seedPodTelemetry = new();
         public RunSummary lastRunSummary = new();
+        public List<RunSummary> runHistory = new();
+
+        public void RecordRunSummary(RunSummary summary)
+        {
+            var snapshot = summary != null ? summary.CreateSnapshot() : new RunSummary();
+            lastRunSummary = snapshot;
+            runHistory ??= new List<RunSummary>();
+            runHistory.Add(snapshot.CreateSnapshot());
+            TrimRunHistory();
+        }
+
+        public string GetDistrictOperationsComparisonSummary(string districtId, int recentRuns = 3)
+        {
+            runHistory ??= new List<RunSummary>();
+
+            if (string.IsNullOrWhiteSpace(districtId))
+            {
+                return "No district history.";
+            }
+
+            var filtered = new List<RunSummary>();
+            for (var i = runHistory.Count - 1; i >= 0 && filtered.Count < Mathf.Max(1, recentRuns); i--)
+            {
+                var summary = runHistory[i];
+                if (summary != null && summary.districtId == districtId)
+                {
+                    filtered.Add(summary);
+                }
+            }
+
+            if (filtered.Count == 0)
+            {
+                return "No prior runs for this district.";
+            }
+
+            var completedRuns = 0;
+            var seedPodDeltaTotal = 0f;
+            var bioPressWaterTotal = 0f;
+            var boostPadTotal = 0f;
+            var objectiveReadyTotal = 0f;
+            var objectiveReadySamples = 0;
+            var coreTotal = 0;
+            var sideTotal = 0;
+            var elevatedTotal = 0;
+
+            foreach (var summary in filtered)
+            {
+                if (summary.completed)
+                {
+                    completedRuns++;
+                }
+
+                seedPodDeltaTotal += summary.seedPodDelta;
+                bioPressWaterTotal += summary.bioPressCleanWaterConverted;
+                boostPadTotal += summary.boostPadUseCount;
+                coreTotal += summary.coreRoutePickupCount;
+                sideTotal += summary.sideRoutePickupCount;
+                elevatedTotal += summary.elevatedRoutePickupCount;
+
+                if (summary.objectiveReadyAtSeconds > 0f)
+                {
+                    objectiveReadyTotal += summary.objectiveReadyAtSeconds;
+                    objectiveReadySamples++;
+                }
+            }
+
+            var dominantRoute = elevatedTotal >= sideTotal && elevatedTotal >= coreTotal
+                ? "Elevated"
+                : sideTotal > coreTotal
+                    ? "SideLane"
+                    : "Core";
+            var runCount = filtered.Count;
+            var objectiveReadyLabel = objectiveReadySamples > 0
+                ? $"{objectiveReadyTotal / objectiveReadySamples:0.0}s"
+                : "n/a";
+
+            return
+                $"Recent Runs: {runCount}\n" +
+                $"Completed: {completedRuns}/{runCount}\n" +
+                $"Avg SeedPod Delta: {seedPodDeltaTotal / runCount:0.0}\n" +
+                $"Avg Bio Press Water: {bioPressWaterTotal / runCount:0.0}\n" +
+                $"Avg Boost Uses: {boostPadTotal / runCount:0.0}\n" +
+                $"Avg Objective Ready: {objectiveReadyLabel}\n" +
+                $"Dominant Route: {dominantRoute}";
+        }
+
+        private void TrimRunHistory()
+        {
+            runHistory ??= new List<RunSummary>();
+            while (runHistory.Count > RunHistoryLimit)
+            {
+                runHistory.RemoveAt(0);
+            }
+        }
     }
 
     [Serializable]
@@ -121,6 +217,40 @@ namespace MossHarbor.Data
                 $"Bio Press Uses: {bioPressUseCount}\n" +
                 $"Bio Press CleanWater: {bioPressCleanWaterConverted}\n" +
                 $"{GetTraversalTelemetrySummary()}";
+        }
+
+        public RunSummary CreateSnapshot()
+        {
+            return new RunSummary
+            {
+                completed = completed,
+                districtId = districtId,
+                bloomDustCollected = bloomDustCollected,
+                scrapCollected = scrapCollected,
+                cleanWaterCollected = cleanWaterCollected,
+                memoryPearlCollected = memoryPearlCollected,
+                seedPodCollected = seedPodCollected,
+                seedPodDelta = seedPodDelta,
+                bioPressUseCount = bioPressUseCount,
+                bioPressCleanWaterConverted = bioPressCleanWaterConverted,
+                pickupsCollected = pickupsCollected,
+                coreRoutePickupCount = coreRoutePickupCount,
+                sideRoutePickupCount = sideRoutePickupCount,
+                elevatedRoutePickupCount = elevatedRoutePickupCount,
+                boostPadUseCount = boostPadUseCount,
+                objectiveReadyAtSeconds = objectiveReadyAtSeconds,
+                objectiveReadyGraceSeconds = objectiveReadyGraceSeconds,
+                durationSeconds = durationSeconds,
+                resultLabel = resultLabel,
+                objectiveType = objectiveType,
+                objectiveResourceType = objectiveResourceType,
+                objectiveTargetAmount = objectiveTargetAmount,
+                objectiveProgressAmount = objectiveProgressAmount,
+                objectiveTargetSeconds = objectiveTargetSeconds,
+                objectiveElapsedSeconds = objectiveElapsedSeconds,
+                objectiveDescription = objectiveDescription,
+                objectiveProgressText = objectiveProgressText,
+            };
         }
 
         private string GetFallbackObjectiveDescription(

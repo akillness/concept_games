@@ -6,7 +6,7 @@
 ## Current Status
 
 - 최신 운영 게이트:
-  - EditMode tests: **64/64 passed** (job: `0d0c3beb6b404c6fab40e0f483b4d8cb`)
+  - EditMode tests: **66/66 passed** (job: `dc1f6a7f7e4c4f268876785371aa4fed`)
   - Hub: `LastRunSummary`, `HubResources` 존재 확인
   - Results: `ResultsBody`, `ResultsNextAction` 존재 확인
   - Expedition: `ObjectiveBeacon`, `WestBoostPadDeckDecor`, `ExpeditionCameraDirector` 존재 확인
@@ -22,6 +22,9 @@
     - `RunSummary.GetOperationsSummary()`로 SeedPod/CleanWater 결과와 traversal telemetry를 통합
     - Hub / Results UI에서 `Rewards` + `Operations` 구조로 표기
     - side/elevated route의 signal scale과 pickup amount 상향 조정
+  - district trend pass:
+    - `SaveData.runHistory`에 최근 run snapshot 저장
+    - Results UI에서 district 평균 operations trend 비교 가능
 - 판정:
   - 전체 체크리스트 전수 완료는 아님
   - 현재 코드/문서 기준 운영 게이트는 통과
@@ -298,6 +301,27 @@
     - elevated route signal scale 상향 유지
 - Conclusion:
   - 운영 summary는 이제 경제(Bio Press)와 traversal(route/boost/objective-ready)을 같이 읽을 수 있고, 위험 루트 유도력도 UI/런타임 기준으로 강화됐다.
+
+## Ralph + OMU District Trend History Gate (2026-03-23)
+
+- Scope:
+  - 최근 run history를 저장해 district별 operations trend 비교 기준을 만든다
+  - Results UI에 현재 district 기준 평균 trend를 노출한다
+- Result:
+  - EditMode tests: **66/66 passed** (job: `dc1f6a7f7e4c4f268876785371aa4fed`)
+  - 신규/갱신 테스트:
+    - `SaveData_RecordRunSummary_AppendsSnapshotsAndTrimsHistory`
+    - `SaveData_GetDistrictOperationsComparisonSummary_AggregatesRecentDistrictRuns`
+  - Runtime verification:
+    - Results: `ResultsBody`, `ResultsNextAction` 확인
+    - Hub: `LastRunSummary`, `HubResources` 확인
+  - Console verification:
+    - Hub / Results play/stop 기준 error **0건**
+  - Data pipeline:
+    - `SaveData.runHistory` 최대 12개 snapshot 저장
+    - district별 최근 3회 기준 평균 `SeedPod Delta / Bio Press Water / Boost Uses / Objective Ready` 계산
+- Conclusion:
+  - 이제 실제 플레이 로그만 쌓이면 district별 operations 비교표를 같은 포맷으로 바로 확장할 수 있는 상태다.
 
 ## Ralph + OMU Collision Lift Verification Gate (2026-03-22)
 

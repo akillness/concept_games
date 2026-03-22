@@ -180,9 +180,8 @@ namespace MossHarbor.Core
 
         public void SetLastRunSummary(RunSummary summary)
         {
-            var resolvedSummary = summary ?? new RunSummary();
             Current.seedPodTelemetry.Reset();
-            Current.lastRunSummary = resolvedSummary;
+            Current.RecordRunSummary(summary);
             Save();
         }
 
@@ -240,6 +239,7 @@ namespace MossHarbor.Core
             data.claimedQuests ??= new SerializableDictionary<string, bool>();
             data.seedPodTelemetry ??= new SeedPodTelemetry();
             data.lastRunSummary ??= new RunSummary();
+            data.runHistory ??= new List<RunSummary>();
             EnsureTutorialState(data);
         }
 

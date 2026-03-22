@@ -2,7 +2,7 @@
 
 ## Current QA Gate
 
-- EditMode 테스트: `64/64 passed`
+- EditMode 테스트: `66/66 passed`
 - 직접 플레이:
   - Hub: `LastRunSummary`, `HubResources` 존재 확인
   - Results: `ResultsBody`, `ResultsNextAction` 존재 확인
@@ -23,6 +23,9 @@
   - `RunSummary.GetOperationsSummary()`로 SeedPod/CleanWater 결과와 traversal telemetry를 하나로 통합
   - Hub/Results UI에서 `Rewards`와 `Operations`를 분리 표기
   - side/elevated route의 signal scale과 pickup amount를 상향 조정
+- district trend pass:
+  - `SaveData.runHistory`에 최근 run snapshot 최대 12개 저장
+  - Results UI에 district별 평균 `SeedPod Delta / Bio Press Water / Boost Uses / Objective Ready` 비교 요약 추가
 
 ## Art And Asset State
 
@@ -97,9 +100,11 @@
   - `RunSummary.GetOperationsSummary()`로 SeedPod/CleanWater 결과와 route telemetry를 같은 summary에 노출
   - Hub/Results UI에서 Rewards / Operations 구조로 읽을 수 있게 유지
   - side/elevated route signal scale과 pickup reward를 상향 조정해 route 유도력을 보강
+  - `SaveData.RecordRunSummary()`와 `GetDistrictOperationsComparisonSummary()`로 district trend 비교 기반을 추가
 - 검증:
-  - EditMode `64/64` 통과
+  - EditMode `66/66` 통과
   - Hub / Results / Expedition play/stop 기준 console error `0`
+  - Results scene에서 `ResultsBody`, `ResultsNextAction` 존재 확인
   - route 선택률, 기믹 접촉률, beacon 도달 시간, Bio Press 사용률을 다음 실제 플레이 로그에서 다시 측정
 
 ### 3. UV Guardrail Expansion

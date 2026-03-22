@@ -146,6 +146,74 @@ namespace MossHarbor.Tests.EditMode
         }
 
         [Test]
+        public void SaveData_RecordRunSummary_AppendsSnapshotsAndTrimsHistory()
+        {
+            var data = new SaveData();
+
+            for (var i = 0; i < SaveData.RunHistoryLimit + 3; i++)
+            {
+                data.RecordRunSummary(new RunSummary
+                {
+                    districtId = i % 2 == 0 ? "dock" : "reed",
+                    resultLabel = $"Run {i}",
+                    boostPadUseCount = i,
+                });
+            }
+
+            Assert.AreEqual(SaveData.RunHistoryLimit, data.runHistory.Count);
+            Assert.AreEqual("Run 14", data.lastRunSummary.resultLabel);
+            Assert.AreEqual("Run 3", data.runHistory[0].resultLabel);
+            Assert.AreEqual("Run 14", data.runHistory[data.runHistory.Count - 1].resultLabel);
+        }
+
+        [Test]
+        public void SaveData_GetDistrictOperationsComparisonSummary_AggregatesRecentDistrictRuns()
+        {
+            var data = new SaveData();
+            data.RecordRunSummary(new RunSummary
+            {
+                districtId = "dock",
+                completed = true,
+                seedPodDelta = -6,
+                bioPressCleanWaterConverted = 2,
+                boostPadUseCount = 3,
+                objectiveReadyAtSeconds = 30f,
+                sideRoutePickupCount = 3,
+                elevatedRoutePickupCount = 1,
+            });
+            data.RecordRunSummary(new RunSummary
+            {
+                districtId = "reed",
+                completed = false,
+                seedPodDelta = -2,
+                bioPressCleanWaterConverted = 1,
+                boostPadUseCount = 1,
+                objectiveReadyAtSeconds = 0f,
+                coreRoutePickupCount = 2,
+            });
+            data.RecordRunSummary(new RunSummary
+            {
+                districtId = "dock",
+                completed = true,
+                seedPodDelta = -4,
+                bioPressCleanWaterConverted = 3,
+                boostPadUseCount = 5,
+                objectiveReadyAtSeconds = 24f,
+                elevatedRoutePickupCount = 4,
+            });
+
+            var text = data.GetDistrictOperationsComparisonSummary("dock");
+
+            StringAssert.Contains("Recent Runs: 2", text);
+            StringAssert.Contains("Completed: 2/2", text);
+            StringAssert.Contains("Avg SeedPod Delta: -5.0", text);
+            StringAssert.Contains("Avg Bio Press Water: 2.5", text);
+            StringAssert.Contains("Avg Boost Uses: 4.0", text);
+            StringAssert.Contains("Avg Objective Ready: 27.0s", text);
+            StringAssert.Contains("Dominant Route: Elevated", text);
+        }
+
+        [Test]
         public void RunSummary_GetObjectiveSummary_FallsBackToHoldoutFormatting()
         {
             var summary = new RunSummary

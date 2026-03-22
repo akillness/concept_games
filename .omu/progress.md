@@ -18,6 +18,7 @@
 - [x] objective-ready 직후 hazard 완충 추가
 - [x] SeedPod / CleanWater 결과와 route telemetry를 하나의 operations summary로 통합
 - [x] side/elevated route signal scale + pickup 보상값 재조정
+- [x] district별 operations trend 비교를 위한 run history 저장 추가
 
 ## Done This Sprint
 - [x] `ExpeditionLevelLayoutBuilder`로 넓은 ground, side lane, ramp, elevated deck, beacon bridge 구축
@@ -34,8 +35,9 @@
 - [x] `RunSummary`에 traversal telemetry(core/side/elevated/boost/objective-ready) 추가
 - [x] `ExpeditionCameraOcclusionRules`와 `ObjectiveReadyTransitionRules` 추가
 - [x] `RunSummary.GetOperationsSummary()` 추가로 Rewards/Operations 분리 표기
+- [x] `SaveData.runHistory`와 district trend 비교 요약 추가
 - [x] Hub/Results/Expedition play/stop 재검증 기준 console error 0
-- [x] EditMode 64/64 통과
+- [x] EditMode 66/66 통과
 - [x] 자산 기믹 검증 스크린샷 확보 (`concept_game/Assets/Screenshots/expedition_asset_gimmick_sceneview.png`)
 - [x] 최신 Expedition 리디자인 GIF와 poster를 `media/`에 추가하고 `README.md` 갱신
 - [x] `.survey/balance-evolution-expedition-redesign/` 패키지 작성
@@ -44,7 +46,7 @@
 
 ## Next Candidate Tasks
 - [ ] 넓은 레벨에서의 기믹 압박 밀도 재조정
-- [ ] operations summary를 district별 실제 플레이 로그 비교표로 확장
+- [ ] district별 실제 플레이 로그를 채워 comparison summary와 비교표를 완성
 - [ ] 넓어진 공간 기준 route 선택률 / 2층 도달 시간 / objective-ready 전환 시간을 재측정
 
 ## Done Before This Sprint

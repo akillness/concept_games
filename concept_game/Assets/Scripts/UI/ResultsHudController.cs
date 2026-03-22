@@ -73,6 +73,7 @@ namespace MossHarbor.UI
                     $"Objective\n{summary.GetObjectiveSummary(bundle)}\n\n" +
                     $"Rewards\n{summary.GetRewardSummary()}\n" +
                     $"Operations\n{summary.GetOperationsSummary()}\n" +
+                    $"District Trend\n{GameBootstrap.Instance.SaveService.Current.GetDistrictOperationsComparisonSummary(summary.districtId)}\n" +
                     $"Pickups: {summary.pickupsCollected}\n" +
                     $"Duration: {summary.durationSeconds:0.0}s";
             }
