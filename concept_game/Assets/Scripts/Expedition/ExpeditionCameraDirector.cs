@@ -10,6 +10,8 @@ namespace MossHarbor.Expedition
         [SerializeField] private float followSmooth = 7f;
         [SerializeField] private float cueBlendSpeed = 8f;
         [SerializeField] private float pickupCueCooldown = 1.25f;
+        [SerializeField] private float elevatedFollowHeightBonus = 2.4f;
+        [SerializeField] private float elevatedFollowPullback = 2.2f;
 
         private PlayerController _player;
         private Transform _beacon;
@@ -115,8 +117,13 @@ namespace MossHarbor.Expedition
         private void ResolveFollow(out Vector3 position, out Quaternion rotation)
         {
             var focus = _player.transform.position + Vector3.up * 1.4f;
-            var lookTarget = focus + _player.FacingDirection * 2.5f;
-            position = focus + followOffset;
+            var facing = ResolveFacing();
+            var elevatedBlend = ResolveElevationBlend();
+            var adaptiveOffset = followOffset
+                + Vector3.up * (elevatedBlend * elevatedFollowHeightBonus)
+                - facing * (elevatedBlend * elevatedFollowPullback);
+            var lookTarget = focus + facing * Mathf.Lerp(2.5f, 4.4f, elevatedBlend) + Vector3.up * (elevatedBlend * 0.45f);
+            position = focus + adaptiveOffset;
             rotation = Quaternion.LookRotation((lookTarget - position).normalized, Vector3.up);
         }
 
@@ -135,22 +142,39 @@ namespace MossHarbor.Expedition
             var dirToBeacon = Vector3.ProjectOnPlane(beaconPosition - _player.transform.position, Vector3.up).normalized;
             if (dirToBeacon.sqrMagnitude < 0.001f)
             {
-                dirToBeacon = _player.FacingDirection;
+                dirToBeacon = ResolveFacing();
             }
 
             var focus = _player.transform.position + Vector3.up * 1.8f;
-            position = focus - dirToBeacon * 3.6f + Vector3.up * 1.1f;
-            var lookTarget = beaconPosition + Vector3.up * 1.1f;
+            var shoulder = Vector3.Cross(Vector3.up, dirToBeacon).normalized;
+            position = focus - dirToBeacon * 2.35f + shoulder * 0.9f + Vector3.up * 0.62f;
+            var lookTarget = Vector3.Lerp(focus + dirToBeacon * 2f, beaconPosition + Vector3.up * 1.1f, 0.78f);
             rotation = Quaternion.LookRotation((lookTarget - position).normalized, Vector3.up);
         }
 
         private void ResolveBeaconActivation(out Vector3 position, out Quaternion rotation)
         {
-            var facing = _player.FacingDirection;
+            var facing = ResolveFacing();
             var focus = _player.transform.position + Vector3.up * 1.5f;
-            position = focus - facing * 2f + Vector3.up * 0.8f + Vector3.right * 0.75f;
-            var lookTarget = focus + facing * 4.5f;
+            position = focus - facing * 1.7f + Vector3.up * 0.68f + Vector3.right * 0.55f;
+            var lookTarget = focus + facing * 5.1f + Vector3.up * 0.3f;
             rotation = Quaternion.LookRotation((lookTarget - position).normalized, Vector3.up);
+        }
+
+        private Vector3 ResolveFacing()
+        {
+            var facing = _player.FacingDirection;
+            if (facing.sqrMagnitude <= 0.001f)
+            {
+                return Vector3.forward;
+            }
+
+            return facing.normalized;
+        }
+
+        private float ResolveElevationBlend()
+        {
+            return Mathf.InverseLerp(0.35f, 2.6f, _player.transform.position.y);
         }
     }
 }

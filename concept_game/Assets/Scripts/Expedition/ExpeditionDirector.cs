@@ -397,6 +397,8 @@ namespace MossHarbor.Expedition
 
         private void CreatePickup(string objectName, Vector3 position, ResourceType resourceType, int amount, PrimitiveType primitiveType, Color tint)
         {
+            var routeProfile = ExpeditionPickupRouteRules.Resolve(position, _levelLayoutPlan, resourceType, amount);
+            var adjustedAmount = routeProfile.AdjustedAmount;
             var pickup = RuntimeArtDirector.CreatePickupVisual(_runtimeContentRoot, objectName, position, resourceType, tint) ?? GameObject.CreatePrimitive(primitiveType);
             pickup.name = objectName;
             pickup.transform.SetParent(_runtimeContentRoot, false);
@@ -411,6 +413,12 @@ namespace MossHarbor.Expedition
                 }
             }
 
+            pickup.transform.localScale *= routeProfile.ScaleMultiplier;
+            if (routeProfile.IsPriorityRoute)
+            {
+                CreatePickupRouteSignal($"{objectName}_{routeProfile.TierLabel}_RouteSignal", position, tint, routeProfile);
+            }
+
             EnsureTriggerCollider(pickup, resourceType == ResourceType.Scrap ? 0.7f : 0.9f);
 
             var pickupComponent = pickup.GetComponent<SimplePickup>();
@@ -418,7 +426,29 @@ namespace MossHarbor.Expedition
             {
                 pickupComponent = pickup.AddComponent<SimplePickup>();
             }
-            pickupComponent.Configure(resourceType, amount, pickupRotateSpeed);
+            pickupComponent.Configure(resourceType, adjustedAmount, pickupRotateSpeed);
+        }
+
+        private void CreatePickupRouteSignal(string objectName, Vector3 position, Color tint, ExpeditionPickupRouteProfile routeProfile)
+        {
+            var basePath = routeProfile.IsElevatedRoute ? ArtResourcePaths.EnvironmentVillagePlatform : ArtResourcePaths.EnvironmentRoadWood;
+            var accentPath = routeProfile.IsElevatedRoute ? ArtResourcePaths.EnvironmentMossPatch : ArtResourcePaths.EnvironmentMudPatch;
+
+            RuntimeArtDirector.CreateEnvironmentDecor(
+                _runtimeContentRoot,
+                basePath,
+                objectName,
+                position + Vector3.down * 0.26f,
+                Vector3.zero,
+                routeProfile.IsElevatedRoute ? Vector3.one * 0.18f : Vector3.one * 0.22f);
+
+            RuntimeArtDirector.CreateEnvironmentDecor(
+                _runtimeContentRoot,
+                accentPath,
+                $"{objectName}_Accent",
+                position + Vector3.down * 0.34f,
+                new Vector3(0f, routeProfile.IsElevatedRoute ? 35f : 0f, 0f),
+                routeProfile.IsElevatedRoute ? Vector3.one * 0.24f : Vector3.one * 0.32f);
         }
 
         private void CreateObjectiveBeacon(Vector3 position)

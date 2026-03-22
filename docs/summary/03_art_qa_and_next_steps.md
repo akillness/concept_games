@@ -2,15 +2,19 @@
 
 ## Current QA Gate
 
-- EditMode 테스트: `53/53 passed`
+- EditMode 테스트: `59/59 passed`
 - 직접 플레이:
   - Expedition runtime layout 확인
+  - `WestBoostPadDeckDecor`, `WestBoostPadLiftDecor`, `WestBoostPadExitLanding`, `EastBoostPadLiftPath`, `BeaconPlatformNorthRail` 존재 확인
   - `ExpeditionCameraDirector` 바인딩 확인
 - 콘솔:
-  - `The referenced script (Unknown)` 경고 재확인 필요
+  - Expedition play/stop 재검증 기준 error `0`
 - UV guardrail:
   - `critical=0`
   - `warnings=0`
+- 자산 기믹 패스:
+  - boost pad / lift path visible layer를 환경 프리팹으로 교체
+  - elevated / side lane pickup에 route signal + reward weighting 적용
 
 ## Art And Asset State
 
@@ -19,6 +23,9 @@
   - `Leopard.fbx` readable 상태 정리 완료
 - 비콘 비주얼:
   - `Art/Props/objective_beacon` 로드 검증됨
+- Expedition 환경 기믹:
+  - `road_wood`, `village_platform`, `rock_cluster`, `mud_patch`, `moss_patch`를 runtime decor로 사용
+  - collision 지형과 visible decor를 분리해 traversal 신뢰성과 외형 자연스러움을 같이 유지
 - 남은 과제:
   - 플레이어 외 핵심 프리팹/메시로 UV guardrail 적용 범위 확대
   - district별 핵심 환경 프리팹 로드 체크 확대
@@ -49,12 +56,29 @@
 - 목표:
   - 넓어진 공간 위에 실제 플레이 압축도를 더 높인다
 - 구현:
-  - pickup/hazard/boost 배치 밀도 재조정
-  - 상층/하층 왕복 동선에 위험-보상 루트 추가
-  - 카메라 cue 지속시간과 위치 튜닝
+  - `TraversalBoostPad`를 `solid surface + trigger child`로 분리해 승차 가능 상태로 정리
+  - `BoostPadLiftPath`와 `ExitLanding`을 추가해 2층 진입을 collision 기반 상승 루프로 보강
+  - `PlayerController.OnControllerColliderHit`로 gimmick collision activation 연결
+  - `West/EastRamp` landing, `MainGround/ElevatedDeck/BeaconPlatform` rail 추가로 임의 낙하 루트 제한
+  - 상층 진입 시 follow bias, objective/beacon over-shoulder cue 보강
+  - boost path / landing / flank에 환경 프리팹 decor를 얹어 asset-based gimmick으로 전환
 - 검증:
-  - Unity MCP play mode 기준 GIF/README 증적 업데이트
-  - objective-ready / beacon-activate 시점 직접 재검증
+  - EditMode `59/59` 통과
+  - Unity MCP play/stop 재검증 기준 console error `0`
+  - `TraversalBoostPadPlayModeTests.WestBoostPad_LaunchesPlayerTowardUpperLanding` 통과
+  - scene/multiview capture: `expedition_traversal_iteration1_multiview.png`, `expedition_traversal_iteration2_sceneview.png`, `expedition_traversal_iteration2_westpad_sceneview.png`, `expedition_boostlift_sceneview.png`, `expedition_asset_gimmick_sceneview.png`
+
+### 2.6. Survey-Driven Balance Pass
+- 목표:
+  - 경제/공간/난이도/카메라를 하나의 밸런스 루프로 다시 묶는다
+- 구현:
+  - `.survey/balance-evolution-expedition-redesign/` 결과를 기준으로 위험 루트 보상 신호 강화
+  - `ExpeditionPickupRouteRules`로 elevated / side lane pickup 보상 가중치와 route signal 분기 추가
+  - SeedPod / CleanWater telemetry를 실제 플레이 루프에 연결
+  - Collect -> HoldOut 전환 구간의 난이도 감쇠 장치 추가
+  - 카메라 occlusion / concealment fallback 검토
+- 검증:
+  - route 선택률, 기믹 접촉률, beacon 도달 시간, Bio Press 사용률을 다시 측정
 
 ### 3. UV Guardrail Expansion
 - 목표:

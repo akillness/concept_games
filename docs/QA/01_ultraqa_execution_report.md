@@ -1,4 +1,4 @@
-# UltraQA Execution Report (2026-03-22)
+# UltraQA Execution Report (2026-03-23)
 
 ## Goal
 `--tests` + play verification 기반으로 QA 사이클을 돌려 릴리즈 블로커를 제거한다.
@@ -6,11 +6,14 @@
 ## Current Status
 
 - 최신 운영 게이트:
-  - EditMode tests: **45/45 passed** (job: `322c0d63a9734ae78e42ebf8ccbd0ded`)
+  - EditMode tests: **59/59 passed** (job: `c443d6760ec74ef29e1a767ed63e2f9c`)
   - Hub: `RuntimePlayerVisual` 존재 확인
-  - Expedition: `RuntimePlayerVisual`, `ObjectiveBeacon` 존재 확인
+  - Expedition: `RuntimePlayerVisual`, `ObjectiveBeacon`, `WestBoostPadDeckDecor`, `WestBoostPadLiftDecor`, `WestBoostPadExitLanding`, `EastBoostPadLiftPath`, `BeaconPlatformNorthRail` 존재 확인
   - play/stop 재실행 기준 console error **0건**
   - `Audit Player UV Guardrail`: `critical=0`, `warnings=0`
+  - asset gimmick pass:
+    - 기능 충돌 지형은 유지하고 visible layer를 환경 프리팹으로 교체
+    - 위험 루트 pickup에 보상 가중치와 route signal decor 추가
 - 판정:
   - 전체 체크리스트 전수 완료는 아님
   - 현재 코드/문서 기준 운영 게이트는 통과
@@ -207,3 +210,84 @@
   - play mode 콘솔에서 `The referenced script (Unknown) on this Behaviour is missing!` 경고가 반복되어 후속 추적이 필요함
 - Conclusion:
   - 레벨 리디자인과 카메라 연출은 런타임에 반영됐고, 최신 플레이 증적은 README 기준선으로 갱신됐다.
+
+## Ralph + OMU Traversal / Boundary / Camera Iteration Gate (2026-03-22)
+
+- Scope:
+  - `TraversalBoostPad`를 밟을 수 있는 구조로 바꾸고 외곽 추락을 제한
+  - `task-estimation` 기준 2회 반복으로 구현/검증/문서 동기화
+- Iteration 1:
+  - 범위:
+    - `solid pad + pulse visual + trigger child`
+    - ramp landing
+    - perimeter rail
+
+## Ralph + OMU Asset Gimmick / Route Reward Gate (2026-03-23)
+
+- Scope:
+  - 단순 primitive 중심 boost path를 자산 기반 환경 기믹으로 자연스럽게 감싼다
+  - side lane / elevated route 진입 이유를 pickup reward와 route signal로 강화한다
+  - 기존 collision 기반 2층 진입 루프가 유지되는지 재검증한다
+- Result:
+  - EditMode tests: **59/59 passed** (job: `c443d6760ec74ef29e1a767ed63e2f9c`)
+  - 신규/갱신 테스트:
+    - `ExpeditionPickupRouteRulesTests` 3건 통과
+    - `TraversalBoostPadPlayModeTests.WestBoostPad_LaunchesPlayerTowardUpperLanding` 통과
+    - `ExpeditionLevelLayoutBuilderTests`에서 `WestBoostPadDeckDecor`, `WestBoostPadLiftDecor`, `WestBoostPadExitDecor` 존재 확인
+  - Runtime verification:
+    - `WestBoostPadDeckDecor`, `WestBoostPadLiftDecor`, `WestBoostPadExitLanding`, `EastBoostPadLiftPath` 존재 확인
+    - clean Expedition play/stop 재검증 기준 console error **0건**
+  - Asset dressing:
+    - `road_wood`, `village_platform`, `rock_cluster`, `mud_patch`, `moss_patch`를 runtime decor로 배치
+    - boost path는 기능 collider와 visible decor를 분리해 충돌 신뢰성과 자연스러운 외형을 동시에 유지
+  - Reward signaling:
+    - elevated route pickup은 추가 보상과 더 큰 시그널로 표시
+    - side lane pickup은 보상 가중치와 진입 표식을 별도로 부여
+- Evidence:
+  - `concept_game/Assets/Screenshots/expedition_asset_gimmick_sceneview.png`
+- Conclusion:
+  - 2층 진입은 여전히 collision-first로 동작하고, 기믹/지형 표현은 환경 자산 기반으로 한 단계 자연스러워졌다.
+  - Result:
+    - EditMode tests: **55/55 passed** (job: `7854bcd892fb4fd8ac463d57854f6dcb`)
+    - Runtime verification:
+      - `WestBoostPad`, `WestBoostPadTrigger`, `MainGroundWestRail`, `ObjectiveBeacon` 존재 확인
+    - Evidence:
+      - `concept_game/Assets/Screenshots/expedition_traversal_iteration1_multiview.png`
+- Iteration 2:
+  - 범위:
+    - elevated follow bias
+    - objective/beacon over-shoulder cue
+    - clean replay verification
+  - Result:
+    - EditMode tests: **55/55 passed** (job: `a2482bb4dc4f407e938699cd668d3c5c`)
+    - Runtime verification:
+      - `EastBoostPadTrigger`, `BeaconPlatformNorthRail`, `ExpeditionCameraDirector` 존재 확인
+    - Console verification:
+      - clear -> play -> stop 기준 Error log **0건**
+    - Evidence:
+      - `concept_game/Assets/Screenshots/expedition_traversal_iteration2_sceneview.png`
+      - `concept_game/Assets/Screenshots/expedition_traversal_iteration2_westpad_sceneview.png`
+- Conclusion:
+  - 기믹 승차, 착지 안정성, 외곽 낙하 제한, 카메라 연출 보정이 현재 Expedition 레벨 기본선으로 반영됐다.
+
+## Ralph + OMU Collision Lift Verification Gate (2026-03-22)
+
+- Scope:
+  - 2층 진입이 trigger 의존이 아니라 gimmick collision 경로로 실제 성립하도록 보강
+- Implementation:
+  - `PlayerController.OnControllerColliderHit`에서 `TraversalBoostPad` 활성화
+  - `TraversalBoostPadTriggerRelay` 추가로 trigger 보조 경로 유지
+  - `West/EastBoostPadLiftPath`, `ExitLanding` 추가
+  - `ApplyExternalImpulse`에서 수직 impulse를 `_verticalSpeed`로 분리
+- Result:
+  - EditMode tests: **56/56 passed** (job: `9525c1ee67fd4f25a3ef8c1e8774b76a`)
+  - 신규 behavior verification:
+    - `TraversalBoostPadPlayModeTests.WestBoostPad_LaunchesPlayerTowardUpperLanding` 통과
+  - Runtime verification:
+    - `WestBoostPadLiftPath`, `WestBoostPadExitLanding`, `EastBoostPadLiftPath` 존재 확인
+  - Console verification:
+    - clear -> play -> stop 기준 Error log **0건**
+  - Evidence:
+    - `concept_game/Assets/Screenshots/expedition_boostlift_sceneview.png`
+- Conclusion:
+  - 2층 이동은 이제 collision-first gimmick 루프로 구성되고, 테스트로 회귀가 막힌 상태다.

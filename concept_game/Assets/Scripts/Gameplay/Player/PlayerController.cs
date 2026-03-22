@@ -182,13 +182,24 @@ namespace MossHarbor.Gameplay.Player
                 return;
             }
 
-            if (worldVelocity.sqrMagnitude >= _externalVelocity.sqrMagnitude)
+            var horizontalImpulse = Vector3.ProjectOnPlane(worldVelocity, Vector3.up);
+            if (horizontalImpulse.sqrMagnitude >= _externalVelocity.sqrMagnitude)
             {
-                _externalVelocity = worldVelocity;
-                return;
+                _externalVelocity = horizontalImpulse;
+            }
+            else
+            {
+                _externalVelocity += horizontalImpulse * 0.35f;
             }
 
-            _externalVelocity += worldVelocity * 0.35f;
+            if (worldVelocity.y > 0f)
+            {
+                _verticalSpeed = Mathf.Max(_verticalSpeed, worldVelocity.y);
+            }
+            else if (worldVelocity.y < 0f)
+            {
+                _verticalSpeed += worldVelocity.y;
+            }
         }
 
         public static BoundaryRecoveryProfile ResolveBoundaryRecoveryProfile(
@@ -256,6 +267,22 @@ namespace MossHarbor.Gameplay.Player
                     modelRoot.rotation = Quaternion.Slerp(modelRoot.rotation, targetRotation, rotationSharpness * Time.deltaTime);
                 }
             }
+        }
+
+        private void OnControllerColliderHit(ControllerColliderHit hit)
+        {
+            if (hit == null)
+            {
+                return;
+            }
+
+            var boostPad = hit.collider.GetComponent<TraversalBoostPad>();
+            if (boostPad == null)
+            {
+                boostPad = hit.collider.GetComponentInParent<TraversalBoostPad>();
+            }
+
+            boostPad?.TryBoostPlayer(this);
         }
     }
 }

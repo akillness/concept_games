@@ -1,36 +1,22 @@
 # Goal
-
-`Project Moss Harbor`의 밸런스/QA 워크플로를 `$omu` 표준 단계로 재실행해, 팀 분석 결과를 정리하고 `$ultraqa` 기반 실제 검증(테스트+플레이)을 통과시키며, `docs/QA` 문서 패키지와 `survey` 비교안을 작성한다. 캐릭터 UV 정보 누락 시 런타임 대체 UV 텍스처를 생성/적용 가능한 안전장치를 코드에 추가한다.
+- Expedition의 2층 진입 기믹과 위험/보상 루트를 단순 primitive 중심이 아니라 실제 환경 어셋을 활용한 자연스러운 배치로 재구성한다.
+- 상층/우회 루트 보상 신호를 강화하고, 기존 collision 기반 2층 진입이 유지되는지 검증한다.
+- 검증 통과 후 문서 동기화와 git push까지 완료한다.
 
 # Implementation Steps
-
-1. `team` 산출물 검증
-   - `design/19_balance_survey.md`, `docs/qa_verification_checklist.md` 변경 품질 점검
-   - 중복/오탈자/구버전 수치 정리
-2. 밸런스/UV 코드 보강
-   - `RuntimeArtDirector`에 UV/알베도 누락 fallback 텍스처 생성 로직 추가
-   - 밸런스 문서의 수치와 현재 코드(`DistrictBalanceDefaults`, `RewardCalculator`) 정합성 맞춤
-3. `technical-writing` 문서화
-   - `docs/QA/`에 QA 운영 문서, UltraQA 로그, 합의된 개선 항목 작성
-4. `ultraqa` 사이클 실행
-   - Unity 테스트 실행(`run_tests`)
-   - 콘솔 에러 점검(`read_console`)
-   - 플레이 모드/씬 동작 검증(직접 플레이 루프 + 캡처)
-   - 실패 시 수정 후 재검증(최대 5사이클)
-5. `survey` 비교안 작성
-   - 개선 전/후 QA-밸런스 접근 비교
-   - 다음 개선 제안 정리
+1. 현재 사용 가능한 환경/프롭 어셋을 조사하고, BoostPad/LiftPath/RouteSignal에 대응할 수 있는 어셋 후보를 선정한다.
+2. Runtime 레벨 빌더와 아트 런타임 배치를 수정해 primitive-only 기믹을 어셋 기반 장식/지형으로 감싼다.
+3. 상층/외곽 lane pickup 보상 신호와 시각 마커를 함께 정리한다.
+4. EditMode/PlayMode/Unity MCP runtime 검증을 수행한다.
+5. QA/summary/.omu 문서를 최신화하고 커밋/푸시한다.
 
 # Risks
-
-- Unity 에디터 상태(컴파일/리로드 타이밍)로 테스트 결과가 지연될 수 있음
-- 팀 자동 병합 커밋에 문서 중복/형식 오염이 포함됐을 수 있음
-- UV 이슈는 모델 데이터 자체 문제면 코드 fallback만으로 완전 해결이 어려울 수 있음
+- 런타임에서 사용 가능한 어셋이 프리팹이 아니라 mesh/resource 조합일 수 있어 배치 코드가 예상보다 복잡할 수 있다.
+- 어셋 장식이 collider를 방해하면 기존 2층 진입 검증이 다시 깨질 수 있다.
+- 장식 오브젝트가 많아지면 시야/가독성이 떨어질 수 있다.
 
 # Completion Criteria
-
-- `docs/QA/` 폴더 생성 및 핵심 QA 문서 2개 이상 작성 완료
-- UltraQA 검증 결과(테스트/콘솔/플레이)가 문서로 남고 주요 실패 이슈가 0 또는 명시적 잔여 리스크로 정리됨
-- `design/19` 및 `docs/qa_verification_checklist`가 최신 밸런스 값과 일치
-- UV 누락 대응 로직(생성+적용)이 코드로 반영되고 검증 기록이 남음
-- `.survey/...` 비교 문서에 다음 개선 제안이 포함됨
+- 2층 진입 collision 루프가 유지된다.
+- 기믹과 위험/보상 루트가 환경 어셋 기반으로 더 자연스럽게 보인다.
+- 테스트와 Unity runtime 검증이 통과한다.
+- 문서와 상태 파일이 최신화되고 git push가 완료된다.

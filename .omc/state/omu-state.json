@@ -1,51 +1,15 @@
 {
   "mode": "omu",
-  "phase": "done",
-  "task": "team/omu/ralph/ultraqa 기반 QA 중심 게임 밸런스 개선 + docs/QA + survey 비교 + UV 맵 보강",
+  "phase": "verify",
+  "task": "자산 기반 expedition 기믹 / 위험 루트 보상 신호 보강",
   "plan_approved": true,
-  "plan_gate_status": "approved_manual_user_intent",
-  "team_available": true,
+  "plan_gate_status": "approved_manual",
+  "team_available": false,
   "retry_count": 0,
   "last_error": null,
-  "checkpoint": "boundary-uv-verified",
-  "created_at": "2026-03-22T02:03:10Z",
-  "updated_at": "2026-03-22T03:21:57Z",
-  "user_authorized_deletions": true,
-  "unity_verify": {
-    "tests_passed": true,
-    "console_errors": 0,
-    "latest_test_job": "bf8703e1376e4fa5b8bfdba0a32e4e6a",
-    "playmode_screenshots": [
-      "Assets/Screenshots/qa_hub_playmode.png",
-      "Assets/Screenshots/qa_expedition_playmode.png",
-      "Assets/Screenshots/qa_hub_playmode_r2.png",
-      "Assets/Screenshots/qa_expedition_playmode_r2.png",
-      "Assets/Screenshots/qa_hub_playmode_r3.png",
-      "Assets/Screenshots/qa_expedition_playmode_r3.png",
-      "Assets/Screenshots/qa_hub_seedpod_sink_r2.png",
-      "Assets/Screenshots/qa_hub_playmode_r4.png",
-      "Assets/Screenshots/qa_expedition_playmode_r4.png",
-      "Assets/Screenshots/qa_expedition_boundary_recovery_r4.png"
-    ],
-    "retry_count": 5,
-    "console_method": "clear_then_hub_play_stop_then_expedition_play_stop"
-  },
-  "seedpod_sink": {
-    "enabled": true,
-    "rule": "6 SeedPod -> 2 CleanWater",
-    "harbor_pump_required": true,
-    "verified_in_hub_ui": true
-  },
-  "boundary_recovery": {
-    "enabled": true,
-    "rule": "out_of_bounds_or_below_floor -> safe_position_teleport",
-    "cooldown_seconds": 1.25,
-    "verified": true
-  },
-  "uv_mesh_fallback": {
-    "enabled": true,
-    "runtime_mesh_suffix": "_RuntimeUv",
-    "non_readable_mesh_guard": true,
-    "verified": true
-  }
+  "checkpoint": "asset_gimmick_verified",
+  "game_stage": "개발",
+  "omu_docs_loaded": true,
+  "created_at": "2026-03-22T13:35:00Z",
+  "updated_at": "2026-03-22T15:23:46Z"
 }

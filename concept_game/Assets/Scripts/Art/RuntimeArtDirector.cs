@@ -212,6 +212,30 @@ namespace MossHarbor.Art
             return instance;
         }
 
+        public static GameObject CreateEnvironmentDecor(Transform parent, string resourcePath, string objectName, Vector3 worldPosition, Vector3 worldEulerAngles, Vector3 localScale)
+        {
+            if (parent == null || string.IsNullOrWhiteSpace(resourcePath))
+            {
+                return null;
+            }
+
+            var prefab = Resources.Load<GameObject>(resourcePath);
+            if (prefab == null)
+            {
+                return null;
+            }
+
+            var instance = Object.Instantiate(prefab, parent);
+            instance.name = objectName;
+            instance.transform.position = worldPosition;
+            instance.transform.eulerAngles = worldEulerAngles;
+            instance.transform.localScale = localScale;
+            DisableColliders(instance);
+            StabilizeRigidbodies(instance);
+            NormalizeRendererMaterials(instance);
+            return instance;
+        }
+
         private static Transform EnsureChildRoot(Transform parent, string childName)
         {
             var existing = parent.Find(childName);

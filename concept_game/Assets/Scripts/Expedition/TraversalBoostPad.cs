@@ -11,43 +11,79 @@ namespace MossHarbor.Expedition
         [SerializeField] private float cooldownSeconds = 0.75f;
         [SerializeField] private float pulseScale = 1.08f;
         [SerializeField] private float pulseSpeed = 2.4f;
+        [SerializeField] private Transform pulseVisual;
 
         private Vector3 _baseScale;
         private float _nextTriggerTime;
 
-        public void Configure(Vector3 direction, float strength, float lift)
+        public void Configure(Vector3 direction, float strength, float lift, Transform visual = null)
         {
             boostDirection = direction;
             boostStrength = strength;
             verticalLift = lift;
+            pulseVisual = visual;
         }
 
         private void Start()
         {
-            _baseScale = transform.localScale;
+            if (pulseVisual == null)
+            {
+                pulseVisual = transform;
+            }
+
+            _baseScale = pulseVisual.localScale;
         }
 
         private void Update()
         {
+            if (pulseVisual == null)
+            {
+                return;
+            }
+
             var pulse = Mathf.Lerp(1f, pulseScale, (Mathf.Sin(Time.time * pulseSpeed * Mathf.PI) + 1f) * 0.5f);
-            transform.localScale = new Vector3(_baseScale.x, _baseScale.y, _baseScale.z * pulse);
+            pulseVisual.localScale = new Vector3(_baseScale.x * pulse, _baseScale.y, _baseScale.z * pulse);
+        }
+
+        public bool TryBoostPlayer(PlayerController player)
+        {
+            if (Time.time < _nextTriggerTime)
+            {
+                return false;
+            }
+
+            if (player == null)
+            {
+                return false;
+            }
+
+            var worldDirection = Vector3.ProjectOnPlane(boostDirection, Vector3.up);
+            if (worldDirection.sqrMagnitude < 0.001f)
+            {
+                worldDirection = transform.forward;
+            }
+
+            player.ApplyExternalImpulse(worldDirection.normalized * boostStrength + Vector3.up * verticalLift);
+            _nextTriggerTime = Time.time + cooldownSeconds;
+            return true;
+        }
+
+        public void TryBoostCollider(Collider other)
+        {
+            if (other != null && other.TryGetComponent<PlayerController>(out var player))
+            {
+                TryBoostPlayer(player);
+            }
         }
 
         private void OnTriggerEnter(Collider other)
         {
-            if (Time.time < _nextTriggerTime)
-            {
-                return;
-            }
+            TryBoostCollider(other);
+        }
 
-            if (!other.TryGetComponent<PlayerController>(out var player))
-            {
-                return;
-            }
-
-            var worldDirection = transform.TransformDirection(boostDirection.normalized);
-            player.ApplyExternalImpulse(worldDirection * boostStrength + Vector3.up * verticalLift);
-            _nextTriggerTime = Time.time + cooldownSeconds;
+        private void OnTriggerStay(Collider other)
+        {
+            TryBoostCollider(other);
         }
     }
 }
