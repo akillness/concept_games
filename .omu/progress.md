@@ -13,6 +13,9 @@
 - [x] 자산 기반 환경 기믹으로 boost path / lift path visible layer 치환
 - [x] 위험 루트 pickup 보상 신호 강화
 - [x] Unity MCP verification + README 최신 GIF sync
+- [x] route / boost / objective-ready telemetry 요약 추가
+- [x] 카메라 occlusion fallback 추가
+- [x] objective-ready 직후 hazard 완충 추가
 
 ## Done This Sprint
 - [x] `ExpeditionLevelLayoutBuilder`로 넓은 ground, side lane, ramp, elevated deck, beacon bridge 구축
@@ -26,7 +29,9 @@
 - [x] `RuntimeArtDirector.CreateEnvironmentDecor` 추가로 runtime 환경 프리팹 decor 배치 지원
 - [x] `ExpeditionPickupRouteRules` 추가로 elevated / side lane route 보상 가중치와 signal decor 적용
 - [x] `Camera.main` 미탐지 fallback과 비콘 완료 지연 처리
-- [x] EditMode 59/59 통과
+- [x] `RunSummary`에 traversal telemetry(core/side/elevated/boost/objective-ready) 추가
+- [x] `ExpeditionCameraOcclusionRules`와 `ObjectiveReadyTransitionRules` 추가
+- [x] EditMode 63/63 통과
 - [x] Expedition play/stop 재검증 기준 console error 0
 - [x] 자산 기믹 검증 스크린샷 확보 (`concept_game/Assets/Screenshots/expedition_asset_gimmick_sceneview.png`)
 - [x] 최신 Expedition 리디자인 GIF와 poster를 `media/`에 추가하고 `README.md` 갱신
@@ -36,9 +41,8 @@
 
 ## Next Candidate Tasks
 - [ ] SeedPod / CleanWater 실제 플레이 telemetry 수집
-- [ ] Collect -> HoldOut 전환 스파이크 완화
-- [ ] 카메라 occlusion / concealment 안정화
 - [ ] 넓은 레벨에서의 기믹 압박 밀도 재조정
+- [ ] route telemetry를 바탕으로 side/elevated 보상값 재튜닝
 
 ## Done Before This Sprint
 - [x] SeedPod telemetry / ratio experiment harness

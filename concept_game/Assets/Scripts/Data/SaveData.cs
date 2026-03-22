@@ -36,6 +36,12 @@ namespace MossHarbor.Data
         public int bioPressUseCount;
         public int bioPressCleanWaterConverted;
         public int pickupsCollected;
+        public int coreRoutePickupCount;
+        public int sideRoutePickupCount;
+        public int elevatedRoutePickupCount;
+        public int boostPadUseCount;
+        public float objectiveReadyAtSeconds;
+        public float objectiveReadyGraceSeconds;
         public float durationSeconds;
         public string resultLabel = "No runs yet";
         public ExpeditionObjectiveType objectiveType = ExpeditionObjectiveType.CollectPickups;
@@ -88,6 +94,24 @@ namespace MossHarbor.Data
                 $"SeedPod Delta: {seedPodDelta}\n" +
                 $"Bio Press Uses: {bioPressUseCount}\n" +
                 $"Bio Press CleanWater: {bioPressCleanWaterConverted}";
+        }
+
+        public string GetTraversalTelemetrySummary()
+        {
+            var dominantRoute = elevatedRoutePickupCount >= sideRoutePickupCount && elevatedRoutePickupCount >= coreRoutePickupCount
+                ? "Elevated"
+                : sideRoutePickupCount > coreRoutePickupCount
+                    ? "SideLane"
+                    : "Core";
+
+            return
+                $"Core Route Pickups: {coreRoutePickupCount}\n" +
+                $"Side Route Pickups: {sideRoutePickupCount}\n" +
+                $"Elevated Route Pickups: {elevatedRoutePickupCount}\n" +
+                $"Boost Pad Uses: {boostPadUseCount}\n" +
+                $"Objective Ready At: {objectiveReadyAtSeconds:0.0}s\n" +
+                $"Grace Window: {objectiveReadyGraceSeconds:0.0}s\n" +
+                $"Dominant Route: {dominantRoute}";
         }
 
         private string GetFallbackObjectiveDescription(

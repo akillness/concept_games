@@ -72,6 +72,7 @@ namespace MossHarbor.UI
                     $"Quest: {questName}\n" +
                     $"Objective\n{summary.GetObjectiveSummary(bundle)}\n\n" +
                     $"Rewards\n{summary.GetRewardSummary()}\n" +
+                    $"Traversal\n{summary.GetTraversalTelemetrySummary()}\n" +
                     $"Pickups: {summary.pickupsCollected}\n" +
                     $"Duration: {summary.durationSeconds:0.0}s";
             }

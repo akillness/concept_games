@@ -15,6 +15,7 @@ namespace MossHarbor.Expedition
 
         private Vector3 _baseScale;
         private float _nextTriggerTime;
+        private ExpeditionDirector _director;
 
         public void Configure(Vector3 direction, float strength, float lift, Transform visual = null)
         {
@@ -32,6 +33,7 @@ namespace MossHarbor.Expedition
             }
 
             _baseScale = pulseVisual.localScale;
+            _director = FindFirstObjectByType<ExpeditionDirector>();
         }
 
         private void Update()
@@ -64,6 +66,8 @@ namespace MossHarbor.Expedition
             }
 
             player.ApplyExternalImpulse(worldDirection.normalized * boostStrength + Vector3.up * verticalLift);
+            _director ??= FindFirstObjectByType<ExpeditionDirector>();
+            _director?.RegisterBoostPadUse(name);
             _nextTriggerTime = Time.time + cooldownSeconds;
             return true;
         }

@@ -23,12 +23,19 @@ namespace MossHarbor.Expedition
         private int _scrapCollected;
         private int _seedPodCollected;
         private int _pickupsCollected;
+        private int _coreRoutePickupCount;
+        private int _sideRoutePickupCount;
+        private int _elevatedRoutePickupCount;
+        private int _boostPadUseCount;
         private Transform _runtimeContentRoot;
         private ObjectiveService _objectiveService;
         private ExpeditionLevelLayoutPlan _levelLayoutPlan;
         private ExpeditionCameraDirector _cameraDirector;
         private ObjectiveBeacon _objectiveBeacon;
         private bool _objectiveReadyCuePlayed;
+        private float _objectiveReadyAtSeconds = -1f;
+        [SerializeField] private float objectiveReadyGraceSeconds = 2.25f;
+        [SerializeField] private float objectiveReadyHazardMultiplier = 0.45f;
         private bool _beaconCompletionQueued;
         private float _beaconCompletionTime;
 
@@ -93,6 +100,7 @@ namespace MossHarbor.Expedition
             _objectiveService?.Tick(Time.deltaTime);
             if (!_objectiveReadyCuePlayed && ObjectiveReady)
             {
+                _objectiveReadyAtSeconds = _objectiveReadyAtSeconds < 0f ? GetElapsedRunSeconds() : _objectiveReadyAtSeconds;
                 _cameraDirector?.PlayObjectiveReadyCue(_objectiveBeacon != null ? _objectiveBeacon.transform : null);
                 _objectiveReadyCuePlayed = true;
             }
@@ -193,7 +201,7 @@ namespace MossHarbor.Expedition
             }
         }
 
-        public void Collect(ResourceType resourceType, int amount, Transform collector = null)
+        public void Collect(ResourceType resourceType, int amount, Transform collector = null, ExpeditionRouteTier routeTier = ExpeditionRouteTier.Core)
         {
             if (!_runActive)
             {
@@ -214,8 +222,28 @@ namespace MossHarbor.Expedition
             }
 
             _pickupsCollected++;
+            RegisterRoutePickup(routeTier);
             _objectiveService?.RegisterCollection(resourceType, amount);
             _cameraDirector?.RegisterPickupCue(resourceType, collector);
+        }
+
+        public void RegisterBoostPadUse(string boostPadName)
+        {
+            if (!_runActive)
+            {
+                return;
+            }
+
+            _boostPadUseCount++;
+        }
+
+        public float GetObjectiveReadyHazardMultiplier()
+        {
+            return ObjectiveReadyTransitionRules.ResolveHazardMultiplier(
+                ObjectiveReady,
+                GetSecondsSinceObjectiveReady(),
+                objectiveReadyGraceSeconds,
+                objectiveReadyHazardMultiplier);
         }
 
         public void ActivateObjectiveBeacon()
@@ -250,6 +278,12 @@ namespace MossHarbor.Expedition
                 seedPodCollected = seedPodCollected,
                 seedPodDelta = seedPodCollected,
                 pickupsCollected = _pickupsCollected,
+                coreRoutePickupCount = _coreRoutePickupCount,
+                sideRoutePickupCount = _sideRoutePickupCount,
+                elevatedRoutePickupCount = _elevatedRoutePickupCount,
+                boostPadUseCount = _boostPadUseCount,
+                objectiveReadyAtSeconds = _objectiveReadyAtSeconds >= 0f ? _objectiveReadyAtSeconds : 0f,
+                objectiveReadyGraceSeconds = objectiveReadyGraceSeconds,
                 durationSeconds = durationSeconds,
                 districtId = districtDefinition != null ? districtDefinition.districtId : "dock",
                 resultLabel = resultLabel,
@@ -426,7 +460,7 @@ namespace MossHarbor.Expedition
             {
                 pickupComponent = pickup.AddComponent<SimplePickup>();
             }
-            pickupComponent.Configure(resourceType, adjustedAmount, pickupRotateSpeed);
+            pickupComponent.Configure(resourceType, adjustedAmount, pickupRotateSpeed, routeProfile.Tier);
         }
 
         private void CreatePickupRouteSignal(string objectName, Vector3 position, Color tint, ExpeditionPickupRouteProfile routeProfile)
@@ -515,6 +549,44 @@ namespace MossHarbor.Expedition
             }
 
             return null;
+        }
+
+        private void RegisterRoutePickup(ExpeditionRouteTier routeTier)
+        {
+            switch (routeTier)
+            {
+                case ExpeditionRouteTier.Elevated:
+                    _elevatedRoutePickupCount++;
+                    break;
+                case ExpeditionRouteTier.SideLane:
+                    _sideRoutePickupCount++;
+                    break;
+                default:
+                    _coreRoutePickupCount++;
+                    break;
+            }
+        }
+
+        private float GetElapsedRunSeconds()
+        {
+            var baseTimer = districtDefinition != null ? districtDefinition.runTimerSeconds : 180f;
+            var difficulty = _bootstrap != null ? _bootstrap.SaveService.Current.selectedDifficulty : DifficultyLevel.Normal;
+            var routeScannerUpgrade = Resources.Load<HubUpgradeDef>(ContentPaths.RouteScannerUpgrade);
+            var routeScannerBonus = _bootstrap != null && _bootstrap.SaveService.GetHubUpgradeLevel(UpgradeIds.RouteScanner) > 0 && routeScannerUpgrade != null
+                ? routeScannerUpgrade.timerBonusSeconds
+                : 0f;
+            var totalTimer = baseTimer * DifficultyConfig.TimerMultiplier(difficulty) + routeScannerBonus;
+            return Mathf.Max(0f, totalTimer - _remainingTime);
+        }
+
+        private float GetSecondsSinceObjectiveReady()
+        {
+            if (_objectiveReadyAtSeconds < 0f)
+            {
+                return -1f;
+            }
+
+            return Mathf.Max(0f, GetElapsedRunSeconds() - _objectiveReadyAtSeconds);
         }
 
         private static void EnsureTriggerCollider(GameObject root, float radius)

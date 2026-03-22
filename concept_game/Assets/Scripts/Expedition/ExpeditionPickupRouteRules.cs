@@ -3,22 +3,35 @@ using UnityEngine;
 
 namespace MossHarbor.Expedition
 {
+    public enum ExpeditionRouteTier
+    {
+        Core = 0,
+        SideLane = 1,
+        Elevated = 2,
+    }
+
     public readonly struct ExpeditionPickupRouteProfile
     {
-        public ExpeditionPickupRouteProfile(bool isPriorityRoute, bool isElevatedRoute, float scaleMultiplier, int adjustedAmount, string tierLabel)
+        public ExpeditionPickupRouteProfile(bool isPriorityRoute, bool isElevatedRoute, float scaleMultiplier, int adjustedAmount, ExpeditionRouteTier tier)
         {
             IsPriorityRoute = isPriorityRoute;
             IsElevatedRoute = isElevatedRoute;
             ScaleMultiplier = scaleMultiplier;
             AdjustedAmount = adjustedAmount;
-            TierLabel = tierLabel;
+            Tier = tier;
         }
 
         public bool IsPriorityRoute { get; }
         public bool IsElevatedRoute { get; }
         public float ScaleMultiplier { get; }
         public int AdjustedAmount { get; }
-        public string TierLabel { get; }
+        public ExpeditionRouteTier Tier { get; }
+        public string TierLabel => Tier switch
+        {
+            ExpeditionRouteTier.Elevated => "elevated",
+            ExpeditionRouteTier.SideLane => "side-lane",
+            _ => "core"
+        };
     }
 
     public static class ExpeditionPickupRouteRules
@@ -27,7 +40,7 @@ namespace MossHarbor.Expedition
         {
             if (plan == null)
             {
-                return new ExpeditionPickupRouteProfile(false, false, 1f, baseAmount, "core");
+                return new ExpeditionPickupRouteProfile(false, false, 1f, baseAmount, ExpeditionRouteTier.Core);
             }
 
             var elevatedThreshold = Mathf.Max(1.25f, plan.elevatedHeight * 0.75f);
@@ -44,7 +57,7 @@ namespace MossHarbor.Expedition
                     true,
                     1.32f,
                     AdjustAmount(baseAmount, resourceType, 2),
-                    "elevated");
+                    ExpeditionRouteTier.Elevated);
             }
 
             if (isSideLaneRoute)
@@ -54,10 +67,10 @@ namespace MossHarbor.Expedition
                     false,
                     1.18f,
                     AdjustAmount(baseAmount, resourceType, 1),
-                    "side-lane");
+                    ExpeditionRouteTier.SideLane);
             }
 
-            return new ExpeditionPickupRouteProfile(false, false, 1f, baseAmount, "core");
+            return new ExpeditionPickupRouteProfile(false, false, 1f, baseAmount, ExpeditionRouteTier.Core);
         }
 
         private static int AdjustAmount(int baseAmount, ResourceType resourceType, int bonusSteps)

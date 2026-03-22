@@ -1,15 +1,23 @@
 {
   "mode": "omu",
-  "phase": "verify",
-  "task": "자산 기반 expedition 기믹 / 위험 루트 보상 신호 보강",
+  "phase": "cleanup",
+  "task": "route telemetry / camera occlusion fallback / objective-ready grace 구현 및 검증",
   "plan_approved": true,
   "plan_gate_status": "approved_manual",
   "team_available": false,
   "retry_count": 0,
   "last_error": null,
-  "checkpoint": "asset_gimmick_verified",
+  "checkpoint": "verify-complete",
   "game_stage": "개발",
   "omu_docs_loaded": true,
+  "unity_verify": {
+    "tests_passed": true,
+    "console_errors": 0,
+    "retry_count": 0,
+    "editmode_job_id": "6937adb8821a427a8c9cdf1d8a615aeb",
+    "editmode_total": 63,
+    "editmode_failed": 0
+  },
   "created_at": "2026-03-22T13:35:00Z",
-  "updated_at": "2026-03-22T15:23:46Z"
+  "updated_at": "2026-03-22T15:47:09Z"
 }

@@ -12,6 +12,9 @@ namespace MossHarbor.Expedition
         [SerializeField] private float pickupCueCooldown = 1.25f;
         [SerializeField] private float elevatedFollowHeightBonus = 2.4f;
         [SerializeField] private float elevatedFollowPullback = 2.2f;
+        [SerializeField] private float occlusionProbeRadius = 0.32f;
+        [SerializeField] private float occlusionPadding = 0.35f;
+        [SerializeField] private float minimumOcclusionDistance = 2.1f;
 
         private PlayerController _player;
         private Transform _beacon;
@@ -90,6 +93,8 @@ namespace MossHarbor.Expedition
             }
 
             ResolvePose(out var targetPosition, out var targetRotation);
+            targetPosition = ApplyOcclusionFallback(targetPosition);
+            targetRotation = Quaternion.LookRotation((ResolveLookTarget(targetRotation, targetPosition) - targetPosition).normalized, Vector3.up);
             var blend = (_activeCue == CameraCue.Follow ? followSmooth : cueBlendSpeed) * Time.deltaTime;
             transform.position = Vector3.Lerp(transform.position, targetPosition, 1f - Mathf.Exp(-blend));
             transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, 1f - Mathf.Exp(-blend));
@@ -159,6 +164,22 @@ namespace MossHarbor.Expedition
             position = focus - facing * 1.7f + Vector3.up * 0.68f + Vector3.right * 0.55f;
             var lookTarget = focus + facing * 5.1f + Vector3.up * 0.3f;
             rotation = Quaternion.LookRotation((lookTarget - position).normalized, Vector3.up);
+        }
+
+        private Vector3 ApplyOcclusionFallback(Vector3 desiredPosition)
+        {
+            var focus = _player.transform.position + Vector3.up * 1.45f;
+            return ExpeditionCameraOcclusionRules.ResolveAdjustedPosition(
+                focus,
+                desiredPosition,
+                occlusionProbeRadius,
+                occlusionPadding,
+                minimumOcclusionDistance);
+        }
+
+        private Vector3 ResolveLookTarget(Quaternion targetRotation, Vector3 targetPosition)
+        {
+            return targetPosition + targetRotation * Vector3.forward * 8f;
         }
 
         private Vector3 ResolveFacing()

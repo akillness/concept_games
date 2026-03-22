@@ -11,6 +11,7 @@ namespace MossHarbor.Expedition
 
         private Transform _pivot;
         private float _nextRepulseTime;
+        private ExpeditionDirector _director;
 
         public void Configure(Transform pivot, float nextRotateSpeed, float nextPushStrength)
         {
@@ -25,6 +26,8 @@ namespace MossHarbor.Expedition
             {
                 return;
             }
+
+            _director ??= FindFirstObjectByType<ExpeditionDirector>();
 
             transform.RotateAround(_pivot.position, Vector3.up, rotateSpeed * Time.deltaTime);
         }
@@ -47,7 +50,8 @@ namespace MossHarbor.Expedition
                 pushDirection = transform.right;
             }
 
-            player.ApplyExternalImpulse(pushDirection.normalized * pushStrength + Vector3.up * 1.8f);
+            var hazardMultiplier = _director != null ? _director.GetObjectiveReadyHazardMultiplier() : 1f;
+            player.ApplyExternalImpulse(pushDirection.normalized * (pushStrength * hazardMultiplier) + Vector3.up * (1.8f * hazardMultiplier));
             _nextRepulseTime = Time.time + repulseCooldown;
         }
     }

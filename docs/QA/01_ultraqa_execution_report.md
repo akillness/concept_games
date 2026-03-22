@@ -6,14 +6,17 @@
 ## Current Status
 
 - 최신 운영 게이트:
-  - EditMode tests: **59/59 passed** (job: `c443d6760ec74ef29e1a767ed63e2f9c`)
+  - EditMode tests: **63/63 passed** (job: `6937adb8821a427a8c9cdf1d8a615aeb`)
   - Hub: `RuntimePlayerVisual` 존재 확인
-  - Expedition: `RuntimePlayerVisual`, `ObjectiveBeacon`, `WestBoostPadDeckDecor`, `WestBoostPadLiftDecor`, `WestBoostPadExitLanding`, `EastBoostPadLiftPath`, `BeaconPlatformNorthRail` 존재 확인
+  - Expedition: `RuntimePlayerVisual`, `ObjectiveBeacon`, `WestBoostPadDeckDecor`, `ExpeditionCameraDirector` 존재 확인
   - play/stop 재실행 기준 console error **0건**
   - `Audit Player UV Guardrail`: `critical=0`, `warnings=0`
   - asset gimmick pass:
     - 기능 충돌 지형은 유지하고 visible layer를 환경 프리팹으로 교체
     - 위험 루트 pickup에 보상 가중치와 route signal decor 추가
+  - telemetry / camera pass:
+    - `RunSummary`에 route/boost/objective-ready telemetry 기록 추가
+    - camera occlusion fallback, objective-ready hazard grace window 반영
 - 판정:
   - 전체 체크리스트 전수 완료는 아님
   - 현재 코드/문서 기준 운영 게이트는 통과
@@ -247,17 +250,34 @@
   - `concept_game/Assets/Screenshots/expedition_asset_gimmick_sceneview.png`
 - Conclusion:
   - 2층 진입은 여전히 collision-first로 동작하고, 기믹/지형 표현은 환경 자산 기반으로 한 단계 자연스러워졌다.
-  - Result:
-    - EditMode tests: **55/55 passed** (job: `7854bcd892fb4fd8ac463d57854f6dcb`)
-    - Runtime verification:
-      - `WestBoostPad`, `WestBoostPadTrigger`, `MainGroundWestRail`, `ObjectiveBeacon` 존재 확인
-    - Evidence:
-      - `concept_game/Assets/Screenshots/expedition_traversal_iteration1_multiview.png`
-- Iteration 2:
-  - 범위:
-    - elevated follow bias
-    - objective/beacon over-shoulder cue
-    - clean replay verification
+
+## Ralph + OMU Telemetry / Camera / Grace Gate (2026-03-23)
+
+- Scope:
+  - `RunSummary`에 route 선택, boost pad 사용, objective-ready timing telemetry를 추가한다
+  - `ExpeditionCameraDirector`에 geometry occlusion fallback을 추가한다
+  - objective-ready 직후 hazard 압박을 짧게 감쇠한다
+- Result:
+  - EditMode tests: **63/63 passed** (job: `6937adb8821a427a8c9cdf1d8a615aeb`)
+  - 신규/갱신 테스트:
+    - `SerializableDictionaryTests.RunSummary_GetTraversalTelemetrySummary_ReportsDominantRouteAndBoostUsage`
+    - `ExpeditionCameraOcclusionRulesTests.ResolveAdjustedPosition_PullsCameraForwardWhenGeometryBlocksView`
+    - `ObjectiveReadyTransitionRulesTests.ResolveHazardMultiplier_*`
+  - Runtime verification:
+    - `ObjectiveBeacon` 존재 확인
+    - `WestBoostPadDeckDecor` 존재 확인
+    - `ExpeditionCameraDirector` component 존재 확인
+  - Console verification:
+    - Expedition play/stop 재검증 기준 Error log **0건**
+  - Telemetry additions:
+    - `coreRoutePickupCount`, `sideRoutePickupCount`, `elevatedRoutePickupCount`
+    - `boostPadUseCount`
+    - `objectiveReadyAtSeconds`, `objectiveReadyGraceSeconds`
+  - Camera / pacing additions:
+    - follow/cue 카메라가 구조물에 가려질 때 전진 fallback 적용
+    - objective-ready 후 `2.25초` 동안 hazard push를 감쇠
+- Conclusion:
+  - route/boost/objective 전환 데이터를 결과 화면에서 읽을 수 있게 됐고, 상층 구조물 구간의 카메라 가독성과 HoldOut 전환 안정성이 함께 개선됐다.
   - Result:
     - EditMode tests: **55/55 passed** (job: `a2482bb4dc4f407e938699cd668d3c5c`)
     - Runtime verification:

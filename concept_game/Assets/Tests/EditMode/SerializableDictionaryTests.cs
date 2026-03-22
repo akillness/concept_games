@@ -97,6 +97,30 @@ namespace MossHarbor.Tests.EditMode
         }
 
         [Test]
+        public void RunSummary_GetTraversalTelemetrySummary_ReportsDominantRouteAndBoostUsage()
+        {
+            var summary = new RunSummary
+            {
+                coreRoutePickupCount = 1,
+                sideRoutePickupCount = 3,
+                elevatedRoutePickupCount = 2,
+                boostPadUseCount = 4,
+                objectiveReadyAtSeconds = 28.5f,
+                objectiveReadyGraceSeconds = 2.25f,
+            };
+
+            var text = summary.GetTraversalTelemetrySummary();
+
+            StringAssert.Contains("Core Route Pickups: 1", text);
+            StringAssert.Contains("Side Route Pickups: 3", text);
+            StringAssert.Contains("Elevated Route Pickups: 2", text);
+            StringAssert.Contains("Boost Pad Uses: 4", text);
+            StringAssert.Contains("Objective Ready At: 28.5s", text);
+            StringAssert.Contains("Grace Window: 2.3s", text);
+            StringAssert.Contains("Dominant Route: SideLane", text);
+        }
+
+        [Test]
         public void RunSummary_GetObjectiveSummary_FallsBackToHoldoutFormatting()
         {
             var summary = new RunSummary

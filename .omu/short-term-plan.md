@@ -18,10 +18,12 @@
 - [x] ramp/deck 접합 landing 및 외곽 rail로 추락 경로 제한
 - [x] boost path / landing visible layer를 환경 자산 기반 decor로 치환
 - [x] elevated / side lane pickup에 보상 신호 강화 적용
+- [x] route / boost / objective-ready telemetry를 Results 기준으로 기록
+- [x] Expedition 카메라 occlusion fallback 적용
+- [x] objective-ready 직후 hazard grace window 적용
 - [x] 플레이 관점 테스트 전략 기준선 문서화 (`docs/QA/05_play_testing_strategy.md`)
 - [x] 2회 반복 추정/검증 문서화 (`docs/QA/06_expedition_traversal_estimation.md`)
 - [x] Unity MCP 검증 및 README 최신 GIF 동기화
 - [ ] SeedPod / CleanWater 실제 플레이 telemetry 붙이기
-- [ ] 목표 유형 전환 스파이크 완화: Collect -> HoldOut 진입 감쇠
-- [ ] Expedition 카메라 occlusion / concealment 안정화
 - [ ] 넓어진 공간의 압박 약화 여부를 기믹 밀도와 경로 시간으로 재측정
+- [ ] route telemetry를 실제 플레이 로그와 연결해 보상값 재조정

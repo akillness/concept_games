@@ -14,6 +14,7 @@ namespace MossHarbor.Expedition
         [SerializeField] private float approachScaleMultiplier = 1.3f;
         [SerializeField] private float approachRange = 3f;
         [SerializeField] private float collectShrinkDuration = 0.15f;
+        [SerializeField] private ExpeditionRouteTier routeTier = ExpeditionRouteTier.Core;
 
         private ExpeditionDirector _director;
         private Vector3 _basePosition;
@@ -32,11 +33,12 @@ namespace MossHarbor.Expedition
                 _playerTransform = player.transform;
         }
 
-        public void Configure(ResourceType nextResourceType, int nextAmount, float nextRotateSpeed)
+        public void Configure(ResourceType nextResourceType, int nextAmount, float nextRotateSpeed, ExpeditionRouteTier nextRouteTier = ExpeditionRouteTier.Core)
         {
             resourceType = nextResourceType;
             amount = nextAmount;
             rotateSpeed = nextRotateSpeed;
+            routeTier = nextRouteTier;
         }
 
         private void Update()
@@ -76,7 +78,7 @@ namespace MossHarbor.Expedition
             if (!other.TryGetComponent<PlayerController>(out _))
                 return;
 
-            _director?.Collect(resourceType, amount, other.transform);
+            _director?.Collect(resourceType, amount, other.transform, routeTier);
             _isCollecting = true;
             _collectTimer = 0f;
         }
