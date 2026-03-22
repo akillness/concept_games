@@ -1,7 +1,7 @@
 {
   "mode": "ralph",
-  "session_id": "omu-telemetry-camera-grace-2026-03-22",
-  "request": "route telemetry, camera occlusion fallback, objective-ready grace 구현 및 검증",
+  "session_id": "omu-operations-summary-route-retune-2026-03-23",
+  "request": "operations summary 통합 및 route signal/reward retune 구현과 검증",
   "status": "verified",
   "iteration": 5,
   "max_iterations": 10,
@@ -11,9 +11,9 @@
       "iteration": 5,
       "passed": true,
       "score": 1.0,
-      "timestamp": "2026-03-22T15:47:09Z",
-      "notes": "Unity MCP verification passed. EditMode 63/63 passed (6937adb8821a427a8c9cdf1d8a615aeb); play/stop console error 0; ObjectiveBeacon, WestBoostPadDeckDecor, ExpeditionCameraDirector verified."
+      "timestamp": "2026-03-22T23:08:25Z",
+      "notes": "Unity MCP verification passed. EditMode 64/64 passed (0d0c3beb6b404c6fab40e0f483b4d8cb); Hub/Results/Expedition play-stop console error 0; LastRunSummary, HubResources, ResultsBody, ResultsNextAction, ObjectiveBeacon, WestBoostPadDeckDecor, ExpeditionCameraDirector verified. Operations summary integration and route retune verified."
     }
   ],
-  "updated_at": "2026-03-22T15:47:09Z"
+  "updated_at": "2026-03-22T23:08:25Z"
 }

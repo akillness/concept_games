@@ -23,6 +23,7 @@ namespace MossHarbor.Tests.EditMode
             Assert.That(profile.IsElevatedRoute, Is.True);
             Assert.That(profile.AdjustedAmount, Is.GreaterThan(10));
             Assert.That(profile.ScaleMultiplier, Is.GreaterThan(1f));
+            Assert.That(profile.SignalScaleMultiplier, Is.GreaterThan(1f));
         }
 
         [Test]
@@ -39,8 +40,9 @@ namespace MossHarbor.Tests.EditMode
 
             Assert.That(profile.IsPriorityRoute, Is.True);
             Assert.That(profile.IsElevatedRoute, Is.False);
-            Assert.That(profile.AdjustedAmount, Is.GreaterThan(4));
+            Assert.That(profile.AdjustedAmount, Is.GreaterThanOrEqualTo(8));
             Assert.That(profile.TierLabel, Is.EqualTo("side-lane"));
+            Assert.That(profile.SignalScaleMultiplier, Is.GreaterThan(1f));
         }
 
         [Test]

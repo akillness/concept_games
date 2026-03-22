@@ -12,11 +12,12 @@ namespace MossHarbor.Expedition
 
     public readonly struct ExpeditionPickupRouteProfile
     {
-        public ExpeditionPickupRouteProfile(bool isPriorityRoute, bool isElevatedRoute, float scaleMultiplier, int adjustedAmount, ExpeditionRouteTier tier)
+        public ExpeditionPickupRouteProfile(bool isPriorityRoute, bool isElevatedRoute, float scaleMultiplier, float signalScaleMultiplier, int adjustedAmount, ExpeditionRouteTier tier)
         {
             IsPriorityRoute = isPriorityRoute;
             IsElevatedRoute = isElevatedRoute;
             ScaleMultiplier = scaleMultiplier;
+            SignalScaleMultiplier = signalScaleMultiplier;
             AdjustedAmount = adjustedAmount;
             Tier = tier;
         }
@@ -24,6 +25,7 @@ namespace MossHarbor.Expedition
         public bool IsPriorityRoute { get; }
         public bool IsElevatedRoute { get; }
         public float ScaleMultiplier { get; }
+        public float SignalScaleMultiplier { get; }
         public int AdjustedAmount { get; }
         public ExpeditionRouteTier Tier { get; }
         public string TierLabel => Tier switch
@@ -40,7 +42,7 @@ namespace MossHarbor.Expedition
         {
             if (plan == null)
             {
-                return new ExpeditionPickupRouteProfile(false, false, 1f, baseAmount, ExpeditionRouteTier.Core);
+                return new ExpeditionPickupRouteProfile(false, false, 1f, 1f, baseAmount, ExpeditionRouteTier.Core);
             }
 
             var elevatedThreshold = Mathf.Max(1.25f, plan.elevatedHeight * 0.75f);
@@ -55,7 +57,8 @@ namespace MossHarbor.Expedition
                 return new ExpeditionPickupRouteProfile(
                     true,
                     true,
-                    1.32f,
+                    1.34f,
+                    1.22f,
                     AdjustAmount(baseAmount, resourceType, 2),
                     ExpeditionRouteTier.Elevated);
             }
@@ -65,12 +68,13 @@ namespace MossHarbor.Expedition
                 return new ExpeditionPickupRouteProfile(
                     true,
                     false,
+                    1.24f,
                     1.18f,
-                    AdjustAmount(baseAmount, resourceType, 1),
+                    AdjustAmount(baseAmount, resourceType, 2),
                     ExpeditionRouteTier.SideLane);
             }
 
-            return new ExpeditionPickupRouteProfile(false, false, 1f, baseAmount, ExpeditionRouteTier.Core);
+            return new ExpeditionPickupRouteProfile(false, false, 1f, 1f, baseAmount, ExpeditionRouteTier.Core);
         }
 
         private static int AdjustAmount(int baseAmount, ResourceType resourceType, int bonusSteps)

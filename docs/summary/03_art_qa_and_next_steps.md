@@ -2,13 +2,14 @@
 
 ## Current QA Gate
 
-- EditMode 테스트: `63/63 passed`
+- EditMode 테스트: `64/64 passed`
 - 직접 플레이:
-  - Expedition runtime layout 확인
-  - `WestBoostPadDeckDecor`, `ObjectiveBeacon` 존재 확인
-  - `ExpeditionCameraDirector` component 존재 확인
+  - Hub: `LastRunSummary`, `HubResources` 존재 확인
+  - Results: `ResultsBody`, `ResultsNextAction` 존재 확인
+  - Expedition: `WestBoostPadDeckDecor`, `ObjectiveBeacon` 존재 확인
+  - Expedition: `ExpeditionCameraDirector` component 존재 확인
 - 콘솔:
-  - Expedition play/stop 재검증 기준 error `0`
+  - Hub / Results / Expedition play/stop 재검증 기준 error `0`
 - UV guardrail:
   - `critical=0`
   - `warnings=0`
@@ -18,6 +19,10 @@
 - telemetry / camera pass:
   - `RunSummary`에 route/boost/objective-ready telemetry 추가
   - camera occlusion fallback 및 objective-ready hazard grace 적용
+- operations summary / route retune pass:
+  - `RunSummary.GetOperationsSummary()`로 SeedPod/CleanWater 결과와 traversal telemetry를 하나로 통합
+  - Hub/Results UI에서 `Rewards`와 `Operations`를 분리 표기
+  - side/elevated route의 signal scale과 pickup amount를 상향 조정
 
 ## Art And Asset State
 
@@ -68,7 +73,7 @@
 - 검증:
   - EditMode `59/59` 통과
   - Unity MCP play/stop 재검증 기준 console error `0`
-  - `TraversalBoostPadPlayModeTests.WestBoostPad_LaunchesPlayerTowardUpperLanding` 통과
+  - 현재 PlayMode 회귀는 `TraversalBoostPadPlayModeTests.WestBoostPad_AppliesLaunchImpulseTowardUpperLanding` 기준으로 유지
   - scene/multiview capture: `expedition_traversal_iteration1_multiview.png`, `expedition_traversal_iteration2_sceneview.png`, `expedition_traversal_iteration2_westpad_sceneview.png`, `expedition_boostlift_sceneview.png`, `expedition_asset_gimmick_sceneview.png`
 
 ### 2.6. Survey-Driven Balance Pass
@@ -89,10 +94,13 @@
 - 목표:
   - route telemetry를 실제 플레이 의사결정에 연결한다
 - 구현:
-  - side/elevated route 선택률과 boost pad 사용률을 결과 화면 및 QA 리포트에서 읽을 수 있게 유지
-  - 다음 단계로 SeedPod / CleanWater 실제 플레이 로그를 같은 포맷에 합친다
+  - `RunSummary.GetOperationsSummary()`로 SeedPod/CleanWater 결과와 route telemetry를 같은 summary에 노출
+  - Hub/Results UI에서 Rewards / Operations 구조로 읽을 수 있게 유지
+  - side/elevated route signal scale과 pickup reward를 상향 조정해 route 유도력을 보강
 - 검증:
-  - route 선택률, 기믹 접촉률, beacon 도달 시간, Bio Press 사용률을 다시 측정
+  - EditMode `64/64` 통과
+  - Hub / Results / Expedition play/stop 기준 console error `0`
+  - route 선택률, 기믹 접촉률, beacon 도달 시간, Bio Press 사용률을 다음 실제 플레이 로그에서 다시 측정
 
 ### 3. UV Guardrail Expansion
 - 목표:

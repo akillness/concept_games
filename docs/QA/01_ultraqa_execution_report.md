@@ -6,10 +6,11 @@
 ## Current Status
 
 - 최신 운영 게이트:
-  - EditMode tests: **63/63 passed** (job: `6937adb8821a427a8c9cdf1d8a615aeb`)
-  - Hub: `RuntimePlayerVisual` 존재 확인
-  - Expedition: `RuntimePlayerVisual`, `ObjectiveBeacon`, `WestBoostPadDeckDecor`, `ExpeditionCameraDirector` 존재 확인
-  - play/stop 재실행 기준 console error **0건**
+  - EditMode tests: **64/64 passed** (job: `0d0c3beb6b404c6fab40e0f483b4d8cb`)
+  - Hub: `LastRunSummary`, `HubResources` 존재 확인
+  - Results: `ResultsBody`, `ResultsNextAction` 존재 확인
+  - Expedition: `ObjectiveBeacon`, `WestBoostPadDeckDecor`, `ExpeditionCameraDirector` 존재 확인
+  - Hub / Results / Expedition play/stop 재실행 기준 console error **0건**
   - `Audit Player UV Guardrail`: `critical=0`, `warnings=0`
   - asset gimmick pass:
     - 기능 충돌 지형은 유지하고 visible layer를 환경 프리팹으로 교체
@@ -17,6 +18,10 @@
   - telemetry / camera pass:
     - `RunSummary`에 route/boost/objective-ready telemetry 기록 추가
     - camera occlusion fallback, objective-ready hazard grace window 반영
+  - operations summary / route retune pass:
+    - `RunSummary.GetOperationsSummary()`로 SeedPod/CleanWater 결과와 traversal telemetry를 통합
+    - Hub / Results UI에서 `Rewards` + `Operations` 구조로 표기
+    - side/elevated route의 signal scale과 pickup amount 상향 조정
 - 판정:
   - 전체 체크리스트 전수 완료는 아님
   - 현재 코드/문서 기준 운영 게이트는 통과
@@ -259,36 +264,40 @@
   - objective-ready 직후 hazard 압박을 짧게 감쇠한다
 - Result:
   - EditMode tests: **63/63 passed** (job: `6937adb8821a427a8c9cdf1d8a615aeb`)
-  - 신규/갱신 테스트:
-    - `SerializableDictionaryTests.RunSummary_GetTraversalTelemetrySummary_ReportsDominantRouteAndBoostUsage`
-    - `ExpeditionCameraOcclusionRulesTests.ResolveAdjustedPosition_PullsCameraForwardWhenGeometryBlocksView`
-    - `ObjectiveReadyTransitionRulesTests.ResolveHazardMultiplier_*`
   - Runtime verification:
-    - `ObjectiveBeacon` 존재 확인
-    - `WestBoostPadDeckDecor` 존재 확인
-    - `ExpeditionCameraDirector` component 존재 확인
+    - `ObjectiveBeacon`, `WestBoostPadDeckDecor`, `ExpeditionCameraDirector` 확인
   - Console verification:
-    - Expedition play/stop 재검증 기준 Error log **0건**
-  - Telemetry additions:
-    - `coreRoutePickupCount`, `sideRoutePickupCount`, `elevatedRoutePickupCount`
-    - `boostPadUseCount`
-    - `objectiveReadyAtSeconds`, `objectiveReadyGraceSeconds`
-  - Camera / pacing additions:
-    - follow/cue 카메라가 구조물에 가려질 때 전진 fallback 적용
-    - objective-ready 후 `2.25초` 동안 hazard push를 감쇠
+    - play/stop 재검증 기준 console error **0건**
 - Conclusion:
-  - route/boost/objective 전환 데이터를 결과 화면에서 읽을 수 있게 됐고, 상층 구조물 구간의 카메라 가독성과 HoldOut 전환 안정성이 함께 개선됐다.
-  - Result:
-    - EditMode tests: **55/55 passed** (job: `a2482bb4dc4f407e938699cd668d3c5c`)
-    - Runtime verification:
-      - `EastBoostPadTrigger`, `BeaconPlatformNorthRail`, `ExpeditionCameraDirector` 존재 확인
-    - Console verification:
-      - clear -> play -> stop 기준 Error log **0건**
-    - Evidence:
-      - `concept_game/Assets/Screenshots/expedition_traversal_iteration2_sceneview.png`
-      - `concept_game/Assets/Screenshots/expedition_traversal_iteration2_westpad_sceneview.png`
+  - route/boost/objective-ready telemetry, occlusion fallback, objective-ready grace window이 런타임과 테스트 기준으로 반영됐다.
+
+## Ralph + OMU Operations Summary / Route Retune Gate (2026-03-23)
+
+- Scope:
+  - SeedPod / CleanWater 결과와 route telemetry를 하나의 operations summary로 합친다
+  - side lane / elevated route의 signal scale과 pickup amount를 재조정한다
+  - Hub / Results / Expedition까지 summary 노출과 런타임 게이트를 다시 검증한다
+- Result:
+  - EditMode tests: **64/64 passed** (job: `0d0c3beb6b404c6fab40e0f483b4d8cb`)
+  - 신규/갱신 테스트:
+    - `SerializableDictionaryTests.RunSummary_GetOperationsSummary_CombinesSeedPodAndTraversalTelemetry`
+    - `ExpeditionPickupRouteRulesTests.Resolve_SideLaneRoute_IncreasesAmountWithoutElevatedFlag`
+    - `TraversalBoostPadPlayModeTests.WestBoostPad_AppliesLaunchImpulseTowardUpperLanding`
+  - Runtime verification:
+    - Hub: `LastRunSummary`, `HubResources` 확인
+    - Results: `ResultsBody`, `ResultsNextAction` 확인
+    - Expedition: `WestBoostPadDeckDecor`, `ObjectiveBeacon`, `ExpeditionCameraDirector` 확인
+  - Console verification:
+    - Hub / Results / Expedition play/stop 기준 error **0건**
+  - Summary integration:
+    - `RunSummary.GetOperationsSummary()` 추가
+    - `HubHudController`, `ResultsHudController`에서 `Rewards` / `Operations` 분리 표기
+  - Route retune:
+    - side lane route signal scale 상향
+    - side lane pickup amount 상향
+    - elevated route signal scale 상향 유지
 - Conclusion:
-  - 기믹 승차, 착지 안정성, 외곽 낙하 제한, 카메라 연출 보정이 현재 Expedition 레벨 기본선으로 반영됐다.
+  - 운영 summary는 이제 경제(Bio Press)와 traversal(route/boost/objective-ready)을 같이 읽을 수 있고, 위험 루트 유도력도 UI/런타임 기준으로 강화됐다.
 
 ## Ralph + OMU Collision Lift Verification Gate (2026-03-22)
 

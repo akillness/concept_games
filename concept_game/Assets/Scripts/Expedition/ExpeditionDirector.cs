@@ -474,7 +474,7 @@ namespace MossHarbor.Expedition
                 objectName,
                 position + Vector3.down * 0.26f,
                 Vector3.zero,
-                routeProfile.IsElevatedRoute ? Vector3.one * 0.18f : Vector3.one * 0.22f);
+                (routeProfile.IsElevatedRoute ? Vector3.one * 0.18f : Vector3.one * 0.22f) * routeProfile.SignalScaleMultiplier);
 
             RuntimeArtDirector.CreateEnvironmentDecor(
                 _runtimeContentRoot,
@@ -482,7 +482,7 @@ namespace MossHarbor.Expedition
                 $"{objectName}_Accent",
                 position + Vector3.down * 0.34f,
                 new Vector3(0f, routeProfile.IsElevatedRoute ? 35f : 0f, 0f),
-                routeProfile.IsElevatedRoute ? Vector3.one * 0.24f : Vector3.one * 0.32f);
+                (routeProfile.IsElevatedRoute ? Vector3.one * 0.24f : Vector3.one * 0.32f) * routeProfile.SignalScaleMultiplier);
         }
 
         private void CreateObjectiveBeacon(Vector3 position)

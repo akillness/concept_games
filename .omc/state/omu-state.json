@@ -1,23 +1,23 @@
 {
   "mode": "omu",
   "phase": "cleanup",
-  "task": "route telemetry / camera occlusion fallback / objective-ready grace 구현 및 검증",
+  "task": "operations summary \ud1b5\ud569 + route signal/reward retune \uad6c\ud604 \ubc0f \uac80\uc99d",
   "plan_approved": true,
-  "plan_gate_status": "approved_manual",
+  "plan_gate_status": "manual_approval_required",
   "team_available": false,
   "retry_count": 0,
   "last_error": null,
   "checkpoint": "verify-complete",
-  "game_stage": "개발",
+  "game_stage": "\uac1c\ubc1c",
   "omu_docs_loaded": true,
   "unity_verify": {
     "tests_passed": true,
     "console_errors": 0,
     "retry_count": 0,
-    "editmode_job_id": "6937adb8821a427a8c9cdf1d8a615aeb",
-    "editmode_total": 63,
+    "editmode_job_id": "0d0c3beb6b404c6fab40e0f483b4d8cb",
+    "editmode_total": 64,
     "editmode_failed": 0
   },
   "created_at": "2026-03-22T13:35:00Z",
-  "updated_at": "2026-03-22T15:47:09Z"
+  "updated_at": "2026-03-22T23:08:25Z"
 }

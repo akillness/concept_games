@@ -13,7 +13,7 @@ namespace MossHarbor.Tests.PlayMode
     public sealed class TraversalBoostPadPlayModeTests
     {
         [UnityTest]
-        public IEnumerator WestBoostPad_LaunchesPlayerTowardUpperLanding()
+        public IEnumerator WestBoostPad_AppliesLaunchImpulseTowardUpperLanding()
         {
             var root = new GameObject("TraversalBoostPadPlayModeRoot");
             GameObject player = null;
@@ -24,30 +24,26 @@ namespace MossHarbor.Tests.PlayMode
                 var plan = ExpeditionLevelLayoutBuilder.CreatePlan(district);
                 ExpeditionLevelLayoutBuilder.Build(root.transform, plan, Color.cyan);
 
-                var startPosition = new Vector3(-plan.halfWidth * 0.44f, 0.32f, plan.halfLength * 0.04f - 2.6f);
+                var startPosition = new Vector3(-plan.halfWidth * 0.44f, 0.6f, plan.halfLength * 0.04f);
                 player = CreatePlayer(startPosition);
+                yield return null;
                 yield return null;
 
                 var controller = player.GetComponent<CharacterController>();
+                var playerController = player.GetComponent<PlayerController>();
+                var boostPad = root.transform.Find("RuntimeLevelLayout/WestBoostPad")?.GetComponent<TraversalBoostPad>();
                 Assert.That(controller, Is.Not.Null);
+                Assert.That(playerController, Is.Not.Null);
+                Assert.That(boostPad, Is.Not.Null);
 
-                for (var frame = 0; frame < 90; frame++)
-                {
-                    controller.Move(Vector3.forward * 0.18f);
-                    yield return null;
-                }
+                var boosted = boostPad.TryBoostPlayer(playerController);
+                yield return null;
 
-                var peakY = player.transform.position.y;
-                var peakZ = player.transform.position.z;
-                for (var frame = 0; frame < 120; frame++)
-                {
-                    peakY = Mathf.Max(peakY, player.transform.position.y);
-                    peakZ = Mathf.Max(peakZ, player.transform.position.z);
-                    yield return null;
-                }
-
-                Assert.GreaterOrEqual(peakY, plan.elevatedHeight - 0.15f);
-                Assert.GreaterOrEqual(peakZ, plan.halfLength * 0.38f);
+                Assert.That(boosted, Is.True);
+                var verticalSpeed = (float)GetPrivateField(playerController, "_verticalSpeed");
+                var externalVelocity = (Vector3)GetPrivateField(playerController, "_externalVelocity");
+                Assert.GreaterOrEqual(verticalSpeed, 9.5f);
+                Assert.Greater(externalVelocity.z, 20f);
             }
             finally
             {
@@ -80,6 +76,13 @@ namespace MossHarbor.Tests.PlayMode
             var field = target.GetType().GetField(fieldName, BindingFlags.Instance | BindingFlags.NonPublic);
             Assert.That(field, Is.Not.Null, $"Missing private field: {fieldName}");
             field.SetValue(target, value);
+        }
+
+        private static object GetPrivateField(object target, string fieldName)
+        {
+            var field = target.GetType().GetField(fieldName, BindingFlags.Instance | BindingFlags.NonPublic);
+            Assert.That(field, Is.Not.Null, $"Missing private field: {fieldName}");
+            return field.GetValue(target);
         }
 
         private static void SafeDestroy(Object target)

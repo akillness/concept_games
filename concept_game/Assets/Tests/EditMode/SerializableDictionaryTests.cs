@@ -121,6 +121,31 @@ namespace MossHarbor.Tests.EditMode
         }
 
         [Test]
+        public void RunSummary_GetOperationsSummary_CombinesSeedPodAndTraversalTelemetry()
+        {
+            var summary = new RunSummary
+            {
+                seedPodDelta = -6,
+                bioPressUseCount = 1,
+                bioPressCleanWaterConverted = 2,
+                coreRoutePickupCount = 0,
+                sideRoutePickupCount = 2,
+                elevatedRoutePickupCount = 1,
+                boostPadUseCount = 3,
+                objectiveReadyAtSeconds = 31.2f,
+                objectiveReadyGraceSeconds = 2.25f,
+            };
+
+            var text = summary.GetOperationsSummary();
+
+            StringAssert.Contains("SeedPod Delta: -6", text);
+            StringAssert.Contains("Bio Press Uses: 1", text);
+            StringAssert.Contains("Bio Press CleanWater: 2", text);
+            StringAssert.Contains("Side Route Pickups: 2", text);
+            StringAssert.Contains("Boost Pad Uses: 3", text);
+        }
+
+        [Test]
         public void RunSummary_GetObjectiveSummary_FallsBackToHoldoutFormatting()
         {
             var summary = new RunSummary

@@ -114,6 +114,15 @@ namespace MossHarbor.Data
                 $"Dominant Route: {dominantRoute}";
         }
 
+        public string GetOperationsSummary()
+        {
+            return
+                $"SeedPod Delta: {seedPodDelta}\n" +
+                $"Bio Press Uses: {bioPressUseCount}\n" +
+                $"Bio Press CleanWater: {bioPressCleanWaterConverted}\n" +
+                $"{GetTraversalTelemetrySummary()}";
+        }
+
         private string GetFallbackObjectiveDescription(
             DistrictContentBundle bundle,
             ExpeditionObjectiveType resolvedType,

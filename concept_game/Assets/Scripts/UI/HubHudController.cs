@@ -58,6 +58,7 @@ namespace MossHarbor.UI
                     $"Last Run: {summary.resultLabel}\n" +
                     $"Objective\n{summary.GetObjectiveSummary(lastRunBundle)}\n" +
                     $"Rewards\n{summary.GetRewardSummary()}\n" +
+                    $"Operations\n{summary.GetOperationsSummary()}\n" +
                     $"Pickups: {summary.pickupsCollected}\n" +
                     $"Duration: {summary.durationSeconds:0.0}s";
             }
