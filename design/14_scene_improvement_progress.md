@@ -52,16 +52,18 @@
 
 ## 밸런스 수치 변경 (Phase 2)
 
+> 아래 표는 2026-03-22 기준 현재 코드(`DistrictBalanceDefaults.cs`, `RewardCalculator.cs`)와 QA 게이트 기준으로 정리한 최신 프로토타입 수치다.
+
 ### 디스트릭트별 핵심 수치
 
 | District | EntryCost | Timer | Bloom | Scrap | SeedPod | Objective | Stars |
 |----------|-----------|-------|-------|-------|---------|-----------|-------|
-| **Dock** | 5 | 210s | 3×12 | 1×5 | — | CollectPickups(3) | 0 |
-| **Reed Fields** | 10 | 195s | 2×10 | 2×5 | 2×3 | CollectResource(SeedPod,5) | 1 |
+| **Dock** | 8 | 210s | 3×12 | 1×5 | — | CollectPickups(3) | 0 |
+| **Reed Fields** | 10 | 185s | 2×10 | 2×5 | 2×3 | CollectResource(SeedPod,5) | 1 |
 | **Tidal Vault** | 15 | 180s | 2×10 | 2×6 | 1×2 | CollectResource(CleanWater,3) | 2 |
-| **Glass Narrows** | 20 | 180s | 2×12 | 2×7 | 1×3 | HoldOut(75s) | 3 |
-| **Sunken Arcade** | 25 | 165s | 3×14 | 3×8 | 1×3 | CollectPickups(5) | 4 |
-| **Lighthouse Crown** | 30 | 150s | 3×15 | 3×10 | 2×4 | HoldOut(90s) | 5 |
+| **Glass Narrows** | 22 | 180s | 2×12 | 2×7 | 1×3 | HoldOut(60s) | 4 |
+| **Sunken Arcade** | 28 | 165s | 3×14 | 3×8 | 1×3 | CollectPickups(5) | 6 |
+| **Lighthouse Crown** | 35 | 150s | 3×15 | 3×10 | 2×4 | HoldOut(75s) | 8 |
 
 ### 환경 테마
 
@@ -82,12 +84,12 @@
 | ★★☆ (2성) | 1성 + 픽업 수집률 ≥ twoStarPickupRatio (65~80%) |
 | ★★★ (3성) | 2성 + 소요시간/총시간 ≤ threeStarTimeRatio (45~65%) |
 
-### 실패 시 자원 보존 (디자인 문서 07 준수)
+### 실패 시 자원 보존 (DifficultyConfig 기준)
 
 | 자원 | 보존율 | 구현 |
 |------|--------|------|
-| BloomDust | 수집량 + completionBonus×50% | RewardCalculator.CalculateFailure |
-| Scrap | 수집량의 70% | RewardCalculator.CalculateFailure |
+| BloomDust | 수집량의 85% / 70% / 50% (Easy/Normal/Hard) | RewardCalculator.CalculateFailure |
+| Scrap | 수집량의 85% / 70% / 50% (Easy/Normal/Hard) | RewardCalculator.CalculateFailure |
 | CleanWater | 0 (업그레이드 보너스 미적용) | RewardCalculator.CalculateFailure |
 | MemoryPearl | 0 (업그레이드 보너스 미적용) | RewardCalculator.CalculateFailure |
 
@@ -106,7 +108,7 @@ SceneFlowService: 즉시 전환 (피드백 없음)
 
 ### After
 ```
-RewardCalculator: 보상 계산 전담 (성공/실패 분리, 70% scrap 보존)
+RewardCalculator: 보상 계산 전담 (성공/실패 분리, 난이도별 85/70/50 보존)
 UpgradeIds: 상수 1곳에서 관리
 DistrictBalanceDefaults: 6개 디스트릭트 밸런스 데이터
 StarRatingCalculator: 별점 계산 (완료/픽업률/시간)
@@ -120,8 +122,8 @@ SceneFadeController: 페이드 전환 (0.35s in/out)
 
 | 변경 | 호환성 |
 |------|--------|
-| DistrictDef 새 필드 | ✅ 기본값 설정, 기존 .asset 자동 호환 |
-| RunSummary.seedPodCollected | ✅ default 0, 기존 세이브 자동 호환 |
+| DistrictDef 새 필드 (`boundaryRecovery`) | ✅ 기본값 설정, 기존 .asset 자동 호환 |
+| RunSummary 신규 필드 (`seedPodCollected`, `seedPodDelta`, `bioPressUseCount`, `bioPressCleanWaterConverted`) | ✅ default 0, 기존 세이브 자동 호환 |
 | DistrictBalanceDefaults | ✅ 런타임 적용, .asset 파일 변경 불필요 |
 
 ---

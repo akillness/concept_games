@@ -6,7 +6,23 @@
 
 ## 게임 한 줄 요약
 
-`Project Moss Harbor`는 오염된 부유 정원 항구를 복원하는 탑다운 3D 캐주얼 어드벤처다. 플레이어는 12~18분 길이의 원정에서 슬러지를 정화하고 자원을 회수하며, 허브로 돌아와 시장/정원/거주 구역을 복구한다. 총 6개 지구, 약 8시간 분량의 본편, 이후 자유 복원 모드를 제공한다.
+`Project Moss Harbor`는 오염된 부유 정원 항구를 복원하는 탑다운 3D 캐주얼 어드벤처다. 장기 목표는 6개 지구와 허브 복원을 축으로 한 8시간 분량의 본편이며, 현재 프로토타입은 약 3분 길이의 반복 원정과 허브 업그레이드/복원 루프를 중심으로 검증 중이다.
+
+## 현재 프로토타입 기준선 (2026-03-22)
+
+- 현재 플레이 가능 루프: `Boot -> Hub -> Expedition_Runtime -> Results -> Hub`
+- 현재 운영 게이트:
+  - EditMode `45/45` 통과
+  - Hub/Expedition 플레이 재검증 완료
+  - 콘솔 error `0`
+  - UV guardrail `critical=0`, `warnings=0`
+- 최근 완료:
+  - SeedPod telemetry 확장
+  - district별 `BoundaryRecoveryProfile` 외부화
+  - UV import guardrail 도입 및 플레이어 메시 readable 정리
+- 다음 계획 진입점: [docs/summary/00_index.md](/Users/jangyoung/.superset/projects/concept_games/docs/summary/00_index.md)
+
+> 초기 design 문서 일부는 원안 목표치와 분석 이력을 함께 보존한다. 현재 구현값과 다음 작업 계획은 `docs/summary/`, `docs/QA/`, `README.md`를 우선 기준으로 본다.
 
 ## 문서 순서
 

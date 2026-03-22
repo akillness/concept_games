@@ -671,15 +671,15 @@ private static void LoadWithFade(string sceneName)
 
 | 속성 | Dock | Reed Fields | Tidal Vault | Glass Narrows | Sunken Arcade | Lighthouse Crown |
 |------|------|-----------|------------|--------------|--------------|-----------------|
-| **진입료** | 5 | 10 | 15 | 20 | 25 | 30 |
-| **타이머** | 210s | 195s | 180s | 180s | 165s | 150s |
+| **진입료** | 8 | 10 | 15 | 22 | 28 | 35 |
+| **타이머** | 210s | 185s | 180s | 180s | 165s | 150s |
 | **Bloom** | 3×12 | 2×10 | 2×10 | 2×12 | 3×14 | 3×15 |
 | **Scrap** | 1×5 | 2×5 | 2×6 | 2×7 | 3×8 | 3×10 |
 | **SeedPod** | 0 | 2×3 | 1×2 | 1×3 | 1×3 | 2×4 |
-| **목표 타입** | CollectPickups(3) | CollectResource(SeedPod,5) | CollectResource(CleanWater,3) | HoldOut(75s) | CollectPickups(5) | HoldOut(90s) |
-| **필요 별점** | 0 | 1 | 2 | 3 | 4 | 5 |
+| **목표 타입** | CollectPickups(3) | CollectResource(SeedPod,5) | CollectResource(CleanWater,3) | HoldOut(60s) | CollectPickups(5) | HoldOut(75s) |
+| **필요 별점** | 0 | 1 | 2 | 4 | 6 | 8 |
 | **권장 Power** | 1 | 1 | 2 | 3 | 3 | 4 |
-| **완료보너스 Bloom** | 25 | 30 | 35 | 40 | 50 | 60 |
+| **완료보너스 Bloom** | 20 | 30 | 35 | 40 | 50 | 60 |
 | **완료보너스 Scrap** | 6 | 8 | 10 | 12 | 15 | 20 |
 
 ---
@@ -719,12 +719,12 @@ private static void LoadWithFade(string sceneName)
 
 | 지구 | 2성 픽업 비율 | 3성 시간 비율 | 예시 (180s 기준) |
 |------|--|--|--|
-| Dock | 0.80 | 0.65 | 3성: 117초 이내 |
-| Reed Fields | 0.75 | 0.60 | 3성: 117초 이내 |
+| Dock | 0.80 | 0.65 | 3성: 136.5초 이내 |
+| Reed Fields | 0.75 | 0.60 | 3성: 111초 이내 |
 | Tidal Vault | 0.75 | 0.55 | 3성: 99초 이내 |
 | Glass Narrows | 0.70 | 0.50 | 3성: 90초 이내 |
 | Sunken Arcade | 0.70 | 0.50 | 3성: 82.5초 이내 |
-| Lighthouse Crown | 0.65 | 0.45 | 3성: 67.5초 이내 |
+| Lighthouse Crown | 0.65 | 0.65 | 3성: 97.5초 이내 |
 
 ---
 
@@ -751,9 +751,9 @@ durationSeconds = district.runTimerSeconds
 **실패 시 RewardCalculator.CalculateFailure()**:
 
 ```
-bloomDustFinal = bloomDustCollected + (completionBonusBloomDust * 0.5 반올림)
+bloomDustFinal = bloomDustCollected * FailResourceRetention(difficulty) 반올림
 
-scrapFinal = scrapCollected * 0.7 반올림
+scrapFinal = scrapCollected * FailResourceRetention(difficulty) 반올림
 
 cleanWater = 0
 memoryPearl = 0
@@ -767,8 +767,8 @@ durationSeconds = 위와 동일
 
 | 자원 | 보존율 | 계산식 |
 |------|--------|--------|
-| BloomDust | 50% (완료보너스) | collected + (completionBonus × 0.5) |
-| Scrap | 70% | collected × 0.7 |
+| BloomDust | 85% / 70% / 50% | collected × retention (Easy / Normal / Hard) |
+| Scrap | 85% / 70% / 50% | collected × retention (Easy / Normal / Hard) |
 | CleanWater | 0% | 0 (업그레이드 미적용) |
 | MemoryPearl | 0% | 0 (업그레이드 미적용) |
 
@@ -785,13 +785,15 @@ durationSeconds = 위와 동일
 **신규 필드 기본값** (Unity 직렬화 자동 적용):
 
 ```csharp
+// Boundary Recovery
+public BoundaryRecoveryProfile boundaryRecovery = new();
+
 // Environment (Header 블록)
 public Color fogColor = new Color(0.55f, 0.72f, 0.78f, 1f);
 public float fogDensity = 0.022f;
 public Color ambientColor = new Color(0.42f, 0.56f, 0.62f, 1f);
 public Color sunColor = new Color(0.82f, 0.92f, 0.96f, 1f);
 public float sunIntensity = 1.35f;
-public float mapScale = 1f;
 
 // Pickup Distribution
 public int seedPodPickupCount = 0;
@@ -812,6 +814,9 @@ public float threeStarTimeRatio = 0.6f;
 **신규 필드**:
 ```csharp
 public int seedPodCollected = 0;
+public int seedPodDelta = 0;
+public int bioPressUseCount = 0;
+public int bioPressCleanWaterConverted = 0;
 ```
 
 **호환성**:
@@ -857,7 +862,7 @@ public int seedPodCollected = 0;
   - 세이브 상태 업데이트 확인
 
 - [ ] **기존 세이브 로드**: 이전 버전 세이브 파일 로드 시 에러 없음
-  - RunSummary.seedPodCollected = 0 자동 설정
+  - RunSummary 신규 telemetry 필드 기본값 0 자동 설정
   - 모든 UI 정상 표시
 
 ### 7.2 디스트릭트별 원정
@@ -874,7 +879,7 @@ public int seedPodCollected = 0;
   - 환경 테마 (deep blue fog)
   - CleanWater 리소스 타입 정상 작동
 
-- [ ] Glass Narrows: HoldOut(75s) 목표
+- [ ] Glass Narrows: HoldOut(60s) 목표
   - 타이머 정확성 (180s)
   - 목표 비콘 정위치 (districtColor = crystal ice)
 
@@ -882,8 +887,8 @@ public int seedPodCollected = 0;
   - 환경 테마 (warm amber)
   - 타이머 짧음 (165s) 확인
 
-- [ ] Lighthouse Crown (최종): HoldOut(90s) 목표
-  - 필요 별점 5개 확인
+- [ ] Lighthouse Crown (최종): HoldOut(75s) 목표
+  - 필요 별점 8개 확인
   - 모든 환경 테마 적용 (night indigo)
 
 ### 7.3 별점 시각화

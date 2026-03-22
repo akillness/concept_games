@@ -120,6 +120,7 @@ media/
 
 ## Design Docs
 
+- planning summary: [docs/summary/00_index.md](docs/summary/00_index.md)
 - 기획 인덱스: [design/00_index.md](design/00_index.md)
 - 하이 콘셉트: [design/01_high_concept.md](design/01_high_concept.md)
 - 코어 루프: [design/03_core_loop_and_progression.md](design/03_core_loop_and_progression.md)

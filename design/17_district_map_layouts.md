@@ -10,9 +10,9 @@
 ```
 [Dock] ──(1★)──> [Reed Fields] ──(2★)──> [Tidal Vault]
                                               │
-                                           (3★)
+                                           (4★)
                                               ▼
-[Lighthouse Crown] <──(5★)── [Sunken Arcade] <──(4★)── [Glass Narrows]
+[Lighthouse Crown] <──(8★)── [Sunken Arcade] <──(6★)── [Glass Narrows]
 ```
 
 허브 구역 매핑:
@@ -22,9 +22,9 @@
 | dock | 안개 부두 | 선착장 (Dock Wharf) | 0 |
 | reed_fields | 갈대 습지 | 온실 (Greenhouse) | 1 |
 | tidal_vault | 조수 금고 | 중앙 시장 (Central Market) | 2 |
-| glass_narrows | 유리 해협 | 거주구 (Housing Quarter) | 3 |
-| sunken_arcade | 침수 아케이드 | 상업구 (Commerce District) | 4 |
-| lighthouse_crown | 등대 왕관 | 전망 정원 (Vista Garden) | 5 |
+| glass_narrows | 유리 해협 | 거주구 (Housing Quarter) | 4 |
+| sunken_arcade | 침수 아케이드 | 상업구 (Commerce District) | 6 |
+| lighthouse_crown | 등대 왕관 | 전망 정원 (Vista Garden) | 8 |
 
 ---
 
@@ -57,7 +57,7 @@
 | 직경 | ~20m |
 | 난이도 | 튜토리얼 |
 | requiredStars | 0 |
-| 입장 비용 | 5 BloomDust |
+| 입장 비용 | 8 BloomDust |
 | 타이머 | 210초 |
 | 목표 유형 | CollectPickups (3개) |
 | 완료 보상 | BloomDust +25, Scrap +6 |
@@ -238,10 +238,10 @@
 |------|----|
 | 직경 | ~30m |
 | 난이도 | 상급 |
-| requiredStars | 3 |
-| 입장 비용 | 20 BloomDust |
+| requiredStars | 4 |
+| 입장 비용 | 22 BloomDust |
 | 타이머 | 180초 |
-| 목표 유형 | HoldOut (75초 거점 유지) |
+| 목표 유형 | HoldOut (60초 거점 유지) |
 | 완료 보상 | BloomDust +40, Scrap +12 |
 | 픽업 구성 | B×2 (12ea), S×2 (7ea), SP×1 (3ea) |
 
@@ -276,7 +276,7 @@
 
 **기믹 동선**
 - 해협 구조: 좌우 수로 분리, 유리 수로를 통한 장거리 이동
-- HoldOut 75초: 비콘 도착 후 적 웨이브 75초 저항
+- HoldOut 60초: 비콘 도착 후 적 웨이브 60초 저항
 - 최적 루트 (수집 후 거점 방어): B1 → SP1 → S2 → S1 → B2 → Beacon(4,15) → HoldOut
 - Beacon (4, 15) — 맵 북동 외곽, radius=11 원의 외부. 수집 완료 후 이동에 ~15m 추가 이동
 - 자원 회수 우선순위 판단 필요: HoldOut 전에 얼마나 수집하느냐가 핵심 판단
@@ -288,8 +288,8 @@
 | 항목 | 값 |
 |------|----|
 | 2성 조건 | targetPickupCount×0.70 = 3.5 → 4개 이상 수집 |
-| 3성 조건 | 180초 × 0.50 = 90초 이내 완료 (HoldOut 75초 포함 → 수집을 15초 이내에 완료해야 함) |
-| HoldOut | 75초 — 비콘 위치에서 거점 방어 |
+| 3성 조건 | 180초 × 0.50 = 90초 이내 완료 (HoldOut 60초 포함 → 수집/이동에 30초 사용 가능) |
+| HoldOut | 60초 — 비콘 위치에서 거점 방어 |
 
 ---
 
@@ -301,8 +301,8 @@
 |------|----|
 | 직경 | ~22m |
 | 난이도 | 상급 |
-| requiredStars | 4 |
-| 입장 비용 | 25 BloomDust |
+| requiredStars | 6 |
+| 입장 비용 | 28 BloomDust |
 | 타이머 | 165초 |
 | 목표 유형 | CollectPickups (5개) |
 | 완료 보상 | BloomDust +50, Scrap +15 |
@@ -367,10 +367,10 @@ S2(-6.7,-4.5)  |     SP1(+5,-6.2)
 |------|----|
 | 직경 | ~35m |
 | 난이도 | 최고급 (최종 지구) |
-| requiredStars | 5 |
-| 입장 비용 | 30 BloomDust |
+| requiredStars | 8 |
+| 입장 비용 | 35 BloomDust |
 | 타이머 | 150초 |
-| 목표 유형 | HoldOut (90초 거점 유지) |
+| 목표 유형 | HoldOut (75초 거점 유지) |
 | 완료 보상 | BloomDust +60, Scrap +20 |
 | 픽업 구성 | B×3 (15ea), S×3 (10ea), SP×2 (4ea) |
 
@@ -409,11 +409,11 @@ S2(-6.7,-4.5)  |     SP1(+5,-6.2)
 
 **기믹 동선**
 - 방사형 복합 구조: 8개 픽업이 45° 간격으로 원형 배치 → 어느 방향으로도 이동 가능
-- HoldOut 90초: 전체 게임 중 최장 거점 방어 구간
+- HoldOut 75초: 최종 지구의 장기 거점 방어 구간
 - Beacon (0, 18) — 맵 정북 최외곽 (radius=13 원보다 5m 추가). B3(0,13)에서 직선 5m
 - 최적 루트 (HoldOut 우선): B2 → B3 → Beacon 진입 → HoldOut 중 S1/S2/SP1 부분 수집
 - 전체 수집 루트 (3성 도전): B1 → B2 → B3 → S1 → S2 → S3 → SP1 → SP2 → Beacon
-  - 총 이동 거리: ~120m → 150초 기준 매우 빡빡 (3성 조건: 150×0.45 = 67.5초)
+  - 총 이동 거리: ~120m → 150초 기준 매우 빡빡 (3성 조건: 150×0.65 = 97.5초)
 - 다중 목표 압박: 긴 원정 + HoldOut 90초 + 복합 지형
 - 환경 위험: 해안 절벽, 야간 파도, 다중 목표 압박, 복합 지형
 
@@ -422,10 +422,10 @@ S2(-6.7,-4.5)  |     SP1(+5,-6.2)
 | 항목 | 값 |
 |------|----|
 | 2성 조건 | targetPickupCount×0.65 = 3.9 → 4개 이상 수집 |
-| 3성 조건 | 150초 × 0.45 = 67.5초 이내 완료 (HoldOut 90초 포함 — 사실상 HoldOut만으로 시간 초과 → 3성은 빠른 수집 필수) |
-| HoldOut | 90초 — 최장 거점 방어 |
+| 3성 조건 | 150초 × 0.65 = 97.5초 이내 완료 (HoldOut 75초 포함 — 수집/이동에 22.5초 여유) |
+| HoldOut | 75초 — 최장 거점 방어 |
 
-> **설계 노트**: 3성 조건 (67.5초)이 HoldOut (90초)보다 짧으므로, 3성을 달성하려면 수집을 전혀 하지 않고 즉시 Beacon으로 달려 HoldOut을 시작해야 함. 수집 vs 속도 간 전략적 선택이 핵심.
+> **설계 노트**: Lighthouse Crown의 3성은 이제 수학적으로 달성 가능하다. 다만 75초 HoldOut과 긴 이동 동선이 그대로 남아 있어, 수집 루트 최적화 없이 3성을 얻기는 여전히 어렵다.
 
 ---
 

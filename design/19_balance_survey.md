@@ -3,7 +3,7 @@
 > BMAD-GDS 밸런스 분석 — 현재 구현 상태 기반 경제 흐름, 난이도 곡선, 진행 속도 평가 및 튜닝 권고.
 > 관심사 분리: 이 문서는 밸런스(수치/경제)만 다룬다. 기획은 design/20, QA는 docs/qa_verification_checklist.md 참조.
 > 모든 수치는 `DistrictBalanceDefaults.cs` 및 `RewardCalculator.cs` 직접 계산값 기준.
-> 주의: 본문 1~9장은 분석 시점 스냅샷/권고 이력을 포함한다. 현재 적용된 최신 값은 10장 패치 로그와 `docs/qa_verification_checklist.md`를 기준으로 판단한다.
+> 주의: 본문 1~9장은 분석 시점 스냅샷/권고 이력을 포함한다. 현재 적용된 최신 값은 10장 패치 로그, `docs/qa_verification_checklist.md`, `docs/summary/01_gameplay_and_systems.md`를 기준으로 판단한다. 역사 비교를 위해 남아 있는 75/90초 예시는 현재 플레이 스펙(60/75초)과 구분해서 읽어야 한다.
 
 ---
 
@@ -107,13 +107,13 @@
 | 지구 | 2성 픽업 비율 | 3성 시간 비율 | 난이도 지수 | 3성 컷 (초) | 실제 부담 |
 |------|-------------|-------------|-----------|-----------|---------|
 | Dock | 0.80 | 0.65 | **0.520** | 210×0.65=**137초 이내** | 낮음 |
-| Reed Fields | 0.75 | 0.60 | **0.450** | 195×0.60=**117초 이내** | 낮음 |
+| Reed Fields | 0.75 | 0.60 | **0.450** | 185×0.60=**111초 이내** | 낮음 |
 | Tidal Vault | 0.75 | 0.55 | **0.413** | 180×0.55=**99초 이내** | 중간 |
-| Glass Narrows | 0.70 | 0.50 | **0.350** | 180×0.50=**90초 이내** | 높음 (HoldOut 75초 내 포함) |
+| Glass Narrows | 0.70 | 0.50 | **0.350** | 180×0.50=**90초 이내** | 높음 (HoldOut 60초 내 포함) |
 | Sunken Arcade | 0.70 | 0.50 | **0.350** | 165×0.50=**82.5초 이내** | 높음 |
-| Lighthouse Crown | 0.65 | ~~0.45~~ **0.65** | **0.423** | 150×0.65=**97.5초 이내** | 달성 가능 (HoldOut 90초 < 97.5초) ✓ |
+| Lighthouse Crown | 0.65 | ~~0.45~~ **0.65** | **0.423** | 150×0.65=**97.5초 이내** | 달성 가능 (HoldOut 75초 < 97.5초) ✓ |
 
-> **설계 모순**: Lighthouse Crown의 3성 컷 67.5초가 HoldOut 요구 시간 90초보다 짧다. 즉 HoldOut 목표를 완수하는 것만으로도 3성 달성이 불가능하다. 의도된 설계(수집 포기 후 즉시 HoldOut 진입)라면 design/17에 명시된 대로이나, 일반 플레이어에게는 3성 달성 경로가 불투명하게 느껴질 수 있다.
+> **해소된 모순**: Lighthouse Crown의 과거 3성 컷(67.5초)과 HoldOut(90초) 충돌은 수정됐다. 현재는 HoldOut 75초, 3성 컷 97.5초로 수학적 달성이 가능하며, 남은 과제는 실제 플레이 체감 검증이다.
 
 ### 1.3 업그레이드 경제 분석
 
@@ -129,12 +129,12 @@
 
 | 자원 | 보존율 | 계산식 |
 |------|--------|--------|
-| BloomDust | 수집분 100% + 완료보너스 50% | `bloomDustCollected + RoundToInt(completionBonusBloomDust * 0.5)` |
-| Scrap | 수집분 70% | `RoundToInt(scrapCollected * 0.7)` |
+| BloomDust | 수집분 85% / 70% / 50% | `RoundToInt(bloomDustCollected * retention)` |
+| Scrap | 수집분 85% / 70% / 50% | `RoundToInt(scrapCollected * retention)` |
 | CleanWater | **0%** | 미지급 |
 | MemoryPearl | **0%** | 미지급 |
 
-> 설계 문서 design/07에 "획득 자원의 70%를 보존"으로 명시되어 있으나 실제 코드는 자원마다 다르다: BD는 픽업분 전액 + 보너스 절반, Scrap은 70%로 일치. 실질 보존율은 설계 의도보다 후하다.
+> 2026-03-22 기준 실제 코드는 `DifficultyConfig.FailResourceRetention()`을 따라 Easy/Normal/Hard에 각각 85%/70%/50%를 적용한다. 이전의 "BloomDust는 수집분 전액 + 보너스 절반" 구현은 정리됐다.
 
 ---
 
@@ -153,7 +153,7 @@
 - **세션 시간**: Moss Harbor의 ~3분 세션은 장르 평균(10-15분)보다 현저히 짧다. 이는 반복 플레이를 전제한 설계이나, 짧은 세션이 "허브 복귀 → 업그레이드" 루프와 맞물려야 만족감이 유지된다. 현재 업그레이드 3종 뿐이라 루프 소진이 빠를 수 있다.
 - **자원 종류**: 5종은 장르 내 최다 수준이다. Spiritfarer의 다양한 재료도 맥락(NPC 요리/공예)이 명확해 인지 부하가 낮지만, Moss Harbor의 5종은 소비처가 불균등(SeedPod 미소비)해 인지 부하가 체감 난이도를 올릴 수 있다.
 - **실패 페널티**: Celeste의 즉사 재시작과 Spiritfarer의 무페널티 중간에 위치한다. 자원 일부 손실은 적절한 중간 지점이나, BD 보존이 후해 페널티 체감이 약하다.
-- **스타 시스템**: Celeste의 B-Side와 유사하게 "이미 클리어한 구간을 더 높은 조건으로 재도전"하는 구조다. 재도전 동기 설계는 유효하나, 스타 요구량(0-1-2-3-4-5)이 선형 누적이라 후반 진입 벽이 낮다.
+- **스타 시스템**: Celeste의 B-Side와 유사하게 "이미 클리어한 구간을 더 높은 조건으로 재도전"하는 구조다. 재도전 동기 설계는 유효하나, 적용 전에는 스타 요구량(0-1-2-3-4-5)이 선형 누적이라 후반 진입 벽이 낮았다. 현재 구현값은 [0, 1, 2, 4, 6, 8]로 상향된 상태다.
 
 ---
 
@@ -165,16 +165,16 @@
 
 모든 지구에서 단 1런으로 다음 지구 진입 비용을 회수한다. 최소 비용/수익 비율이 Dock 기준 1120% (비용 5, 수익 61)로, 경제적 긴장감이 없다. 플레이어가 "무엇이 부족한지"를 느낄 기회가 없고 자원 관리의 전략적 의미가 희석된다.
 
-설계 문서(design/06) 원안의 "신규 기능 해금은 2~3회 원정 내 달성"은 현재 수치로는 모두 1~2런으로 달성되어 원안보다 훨씬 쉽다. 특히 설계 원안(design/06)과 현 구현 수치가 크게 다르다: 원안 Dock 입장 비용 10BD / 완료 30BD vs. 현재 5BD / 25BD.
+설계 문서(design/06) 원안의 "신규 기능 해금은 2~3회 원정 내 달성"은 현재 수치로는 모두 1~2런으로 달성되어 원안보다 훨씬 쉽다. 특히 설계 원안(design/06)과 현 구현 수치가 크게 다르다: 원안 Dock 입장 비용 10BD / 완료 30BD vs. 현재 8BD / 20BD.
 
 > **수정 (2026-03-22)**: 입장 비용 전반 인상 — Dock 5→**8**, Glass Narrows 20→**22**, Sunken Arcade 25→**28**, Lighthouse Crown 30→**35**. `DistrictBalanceDefaults.cs` 반영 완료.
 > 신규 비용 기준 Dock 순이익: 61 - 8 = **+53 BD** (1320% → 663%). 경제 긴장감 일부 회복.
 
 **[RESOLVED] P0-B: Lighthouse Crown 3성 수학적 불가 구조**
 
-3성 달성 조건(67.5초 이내 완료)이 HoldOut 목표 시간(90초)보다 짧다. HoldOut이 필수 목표이므로 3성은 달성 불가능하다. 의도된 설계라면 UI/문서에서 명시적으로 안내해야 하며, 의도되지 않았다면 `threeStarTimeRatio`를 0.45 이상으로 조정해야 한다.
+분석 당시에는 3성 달성 조건(67.5초 이내 완료)이 HoldOut 목표 시간(90초)보다 짧아 구조적 모순이 있었다. 현재는 해당 모순이 해소된 상태다.
 
-> **수정 (2026-03-22)**: `threeStarTimeRatio` 0.45 → **0.65** 로 상향. 새 3성 컷 = 150 × 0.65 = **97.5초**, HoldOut 90초를 초과하므로 수학적 달성 가능 구조 복원. `DistrictBalanceDefaults.cs` 반영 완료.
+> **수정 (2026-03-22)**: `threeStarTimeRatio` 0.45 → **0.65** 로 상향. 새 3성 컷 = 150 × 0.65 = **97.5초**, 현재 HoldOut 75초를 초과하므로 수학적 달성 가능 구조가 유지된다. `DistrictBalanceDefaults.cs` 반영 완료.
 
 ### 3.2 P1 (Important — 다음 마일스톤 전 수정)
 
@@ -189,7 +189,7 @@ SeedPod 소비처 부재 이슈는 `Bio Press`(Harbor Pump 연동, 6 SeedPod -> 
 
 **P1-B: 스타 요구량 선형 구조로 인한 진행 벽 부재**
 
-현재 스타 요구량: [0, 1, 2, 3, 4, 5] — 등차수열. 각 지구를 1회 클리어(1성)하면 다음 지구에 즉시 진입할 수 있어 반복 플레이 동기가 낮다. 1성 클리어만으로 게임 전체를 선형 통과할 수 있는 구조다.
+적용 전 스타 요구량은 [0, 1, 2, 3, 4, 5] — 등차수열이었다. 각 지구를 1회 클리어(1성)하면 다음 지구에 즉시 진입할 수 있어 반복 플레이 동기가 낮았다. 현재 구현값은 [0, 1, 2, 4, 6, 8]이다.
 
 **P1-C: MemoryPearl 접근성 과도하게 낮음**
 
@@ -211,7 +211,7 @@ fogDensity, pickupSpawnRadius 등 환경 수치 변화가 있으나, 각 지구 
 
 **P2-C: 실패 BloomDust 보존 로직이 설계 문서와 불일치**
 
-RewardCalculator.CalculateFailure는 `bloomDustCollected + RoundToInt(completionBonusBloomDust * 0.5)`를 반환한다. 즉 수집분은 100% 보존되고 보너스의 50%가 추가된다. 설계 문서(design/07)의 "획득 자원의 70% 보존"과 다르며, 실질 보존율이 설계 의도보다 높아 실패 페널티가 더욱 약해진다.
+이전에는 `RewardCalculator.CalculateFailure`가 `bloomDustCollected + RoundToInt(completionBonusBloomDust * 0.5)`를 반환해 실패 페널티가 약했다. 현재는 `DifficultyConfig.FailResourceRetention()` 기준으로 수집분에만 85%/70%/50%를 적용한다.
 
 ---
 
@@ -258,17 +258,17 @@ RewardCalculator.CalculateFailure는 `bloomDustCollected + RoundToInt(completion
 
 | 지구 | 현재 HoldOut | 권고 HoldOut | 이유 |
 |------|------------|------------|-----|
-| Glass Narrows | 75초 | **60초** | 180초 타이머 내 수집(~30초) + 이동(~15초) + HoldOut(75초) = 120초 여유 60초 → 60초로 하향 시 여유 75초 확보 |
-| Lighthouse Crown | 90초 | **75초** | 150초 타이머와의 비율 완화, 3성 컷(67.5초)과의 모순 해소 가능성 |
+| Glass Narrows | **60초** | 유지 | 180초 타이머 내 수집/이동 여유를 확보하는 현재 적용값 |
+| Lighthouse Crown | **75초** | 유지 | 150초 타이머와 3성 컷 97.5초 기준에서 수학적 달성 가능성을 만든 현재 적용값 |
 
 **3성 시간 비율 조정:**
 
 | 지구 | 현재 threeStarTimeRatio | 권고값 | 이유 |
 |------|------------------------|--------|-----|
-| Glass Narrows | 0.50 (90초 컷) | **0.45** (81초 컷) | HoldOut 60초 + 수집/이동 21초로 달성 가능한 범위 |
-| Lighthouse Crown | 0.45 (67.5초 컷) | **수정 불필요** | HoldOut 75초로 조정 시 구조적 모순 해소 |
+| Glass Narrows | **0.50** (90초 컷) | 유지 | HoldOut 60초 포함 기준에서 수집/이동 30초를 남기는 현재값 |
+| Lighthouse Crown | **0.65** (97.5초 컷) | 유지 | HoldOut 75초 이후 수집/이동 22.5초를 확보하는 현재값 |
 
-> Lighthouse Crown HoldOut을 90→75초로 줄이면, 3성 컷 67.5초 내에 HoldOut(75초)이 여전히 초과된다. 근본 해결책은 threeStarTimeRatio를 0.55 이상으로 상향(82.5초 컷)하거나, "HoldOut 목표는 3성 조건에서 시간 측정에서 제외"하는 규칙을 명시하는 것이다.
+> 2026-03-22 적용 후 기준값은 Glass Narrows `60초 / 0.50`, Lighthouse Crown `75초 / 0.65`다. 현재 남은 과제는 "수학적 불가 구조 해소"가 아니라, 이 값들이 실제 플레이 로그에서도 의도한 난이도를 만드는지 검증하는 것이다.
 
 ---
 
@@ -278,11 +278,11 @@ RewardCalculator.CalculateFailure는 `bloomDustCollected + RoundToInt(completion
 |------|------|---------|--------|-----------|-----|
 | 1 | **SeedPod sink 튜닝** | `HubManager.TryRefineSeedPods()` + 허브 UI | 높음 | 중간 | 6:2 비율 실측 튜닝, P1-A 후속 |
 | 2 | ~~**스타 요구량 비선형 재배치**~~ **[DONE]** | `DistrictBalanceDefaults.cs` `requiredStars` | 높음 | 낮음 | Glass Narrows 3→4, Sunken Arcade 4→6, Lighthouse Crown 5→8 |
-| 3 | ~~**Lighthouse Crown 3성 모순 해소**~~ **[DONE]** | `DistrictBalanceDefaults.cs` `threeStarTimeRatio` | 높음 | 낮음 | threeStarTimeRatio 0.45→0.65 (3성 컷 97.5s > HoldOut 90s) |
+| 3 | ~~**Lighthouse Crown 3성 모순 해소**~~ **[DONE]** | `DistrictBalanceDefaults.cs` `threeStarTimeRatio` | 높음 | 낮음 | threeStarTimeRatio 0.45→0.65 (3성 컷 97.5s > HoldOut 75s) |
 | 4 | **실패 BD/Scrap 보존 로직 개선** | `RewardCalculator.CalculateFailure()` | 중간 | 낮음 | **[DONE]** DifficultyLevel 파라미터 추가, FailResourceRetention 적용 |
 | 5 | ~~**입장 비용 미세 조정**~~ **[DONE]** | `DistrictBalanceDefaults.cs` `expeditionEntryCost` | 중간 | 낮음 | Dock 5→8, Glass Narrows 20→22, Sunken Arcade 25→28, Lighthouse Crown 30→35 |
 | 6 | **완료 보너스 조정** | `DistrictBalanceDefaults.cs` `completionBonusBloomDust` | 중간 | 낮음 | Dock 25→20 |
-| 7 | **HoldOut 시간 하향** | `DistrictBalanceDefaults.cs` `objectiveHoldSeconds` | 중간 | 낮음 | Glass Narrows 75→60, Lighthouse 90→75 |
+| 7 | ~~**HoldOut 시간 하향**~~ **[DONE]** | `DistrictBalanceDefaults.cs` `objectiveHoldSeconds` | 중간 | 낮음 | Glass Narrows 75→60, Lighthouse 90→75 |
 | 8 | **Harbor Pump 비용 상향** | HubUpgradeDef ScriptableObject | 낮음 | 낮음 | Scrap 15→20 |
 | 9 | **Pearl Resonator 비용 하향** | HubUpgradeDef ScriptableObject | 낮음 | 낮음 | CleanWater 20→12 |
 | 10 | **Reed Fields 타이머 완화** | `DistrictBalanceDefaults.cs` `runTimerSeconds` | 낮음 | 낮음 | 195→185초 |

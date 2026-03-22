@@ -26,3 +26,16 @@
 ## Priority 3
 - 실패 보존율 UX 피드백 보강
   - 실패 결과 화면에서 보존률 계산 근거 표시
+
+## BMAD-GDS + Unity-MCP Execution Frame
+- planning baseline:
+  - `docs/summary/00_index.md`
+  - `docs/summary/03_art_qa_and_next_steps.md`
+- parallel work lanes:
+  - lane A: SeedPod ratio automation + telemetry report
+  - lane B: district boundary tuning + runtime replay verification
+  - lane C: UV guardrail scope expansion + asset audit
+- Unity MCP usage:
+  - EditMode test gate: `run_tests`
+  - runtime verification: `manage_editor`, `manage_scene`, `find_gameobjects`, `read_console`
+  - visual evidence: `manage_camera.screenshot`

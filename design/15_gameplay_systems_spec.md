@@ -108,12 +108,12 @@ Boot → Hub → Expedition_Runtime → Results → Hub (loop)
 
 | District | Required Stars | Entry Cost (BloomDust) | Timer | Objective Type | Bloom Pickups | Scrap Pickups | SeedPod Pickups | Completion Bonus (Bloom/Scrap) | 2-Star Ratio | 3-Star Time Ratio |
 |----------|---------------|------------------------|-------|----------------|---------------|---------------|-----------------|-------------------------------|-------------|-------------------|
-| **dock** | 0 | ~~5~~ **8** | 210s | CollectPickups(3) | 3×12 | 1×5 | — | 25 / 6 | 0.80 | 0.65 |
-| **reed_fields** | 1 | 10 | 195s | CollectResource(SeedPod, 5) | 2×10 | 2×5 | 2×3 | 30 / 8 | 0.75 | 0.60 |
+| **dock** | 0 | ~~5~~ **8** | 210s | CollectPickups(3) | 3×12 | 1×5 | — | ~~25~~ **20** / 6 | 0.80 | 0.65 |
+| **reed_fields** | 1 | 10 | ~~195s~~ **185s** | CollectResource(SeedPod, 5) | 2×10 | 2×5 | 2×3 | 30 / 8 | 0.75 | 0.60 |
 | **tidal_vault** | 2 | 15 | 180s | CollectResource(CleanWater, 3) | 2×10 | 2×6 | 1×2 | 35 / 10 | 0.75 | 0.55 |
-| **glass_narrows** | ~~3~~ **4** | ~~20~~ **22** | 180s | HoldOut(75s) | 2×12 | 2×7 | 1×3 | 40 / 12 | 0.70 | 0.50 |
+| **glass_narrows** | ~~3~~ **4** | ~~20~~ **22** | 180s | HoldOut(60s) | 2×12 | 2×7 | 1×3 | 40 / 12 | 0.70 | 0.50 |
 | **sunken_arcade** | ~~4~~ **6** | ~~25~~ **28** | 165s | CollectPickups(5) | 3×14 | 3×8 | 1×3 | 50 / 15 | 0.70 | 0.50 |
-| **lighthouse_crown** | ~~5~~ **8** | ~~30~~ **35** | 150s | HoldOut(90s) | 3×15 | 3×10 | 2×4 | 60 / 20 | 0.65 | ~~0.45~~ **0.65** |
+| **lighthouse_crown** | ~~5~~ **8** | ~~30~~ **35** | 150s | HoldOut(75s) | 3×15 | 3×10 | 2×4 | 60 / 20 | 0.65 | ~~0.45~~ **0.65** |
 
 ### 환경 테마
 
@@ -195,24 +195,24 @@ timeRatio      = durationSeconds / runTimerSeconds  (runTimerSeconds == 0이면 
 ### 7.2 Reed Fields (갈대 습지)
 
 **Easy**
-> "초보 플레이어로서, Reed Fields에 7 BloomDust를 내고 진입하면, 254초 동안 SeedPod 4개를 수집한다. 실패해도 자원의 85%를 보존한다."
-- 타이머: 195 × 1.3 = 253.5 → 254초
+> "초보 플레이어로서, Reed Fields에 7 BloomDust를 내고 진입하면, 241초 동안 SeedPod 4개를 수집한다. 실패해도 자원의 85%를 보존한다."
+- 타이머: 185 × 1.3 = 240.5 → 241초
 - 픽업 목표: 5 - 1 = 4개 (SeedPod 기준)
 - 입장 비용: round(10 × 0.7) = 7 BloomDust
 - 2성 기준: pickupRatio ≥ 0.65 (기본 0.75 - 0.10)
 - 3성 기준: timeRatio ≤ 0.70 (기본 0.60 + 0.10)
 
 **Normal**
-> "일반 플레이어로서, Reed Fields에 10 BloomDust를 내고 진입하면, 195초 동안 SeedPod 5개를 수집한다. 총 6개의 픽업(2B+2S+2SP)이 배치되어 있다."
-- 타이머: 195초
+> "일반 플레이어로서, Reed Fields에 10 BloomDust를 내고 진입하면, 185초 동안 SeedPod 5개를 수집한다. 총 6개의 픽업(2B+2S+2SP)이 배치되어 있다."
+- 타이머: 185초
 - 픽업 목표: 5개 (SeedPod)
 - 입장 비용: 10 BloomDust
 - 2성 기준: pickupRatio ≥ 0.75 (총 픽업 6개 중 4.5개 이상)
-- 3성 기준: timeRatio ≤ 0.60 (195s × 0.60 = 117초 이내)
+- 3성 기준: timeRatio ≤ 0.60 (185s × 0.60 = 111초 이내)
 
 **Hard**
-> "숙련 플레이어로서, Reed Fields에 13 BloomDust를 내고 진입하면, 156초 동안 SeedPod 6개를 수집한다. 실패 시 자원의 50%만 보존된다."
-- 타이머: 195 × 0.8 = 156초
+> "숙련 플레이어로서, Reed Fields에 13 BloomDust를 내고 진입하면, 148초 동안 SeedPod 6개를 수집한다. 실패 시 자원의 50%만 보존된다."
+- 타이머: 185 × 0.8 = 148초
 - 픽업 목표: 5 + 1 = 6개
 - 입장 비용: round(10 × 1.3) = 13 BloomDust
 - 2성 기준: pickupRatio ≥ 0.80 (기본 0.75 + 0.05)
@@ -249,25 +249,25 @@ timeRatio      = durationSeconds / runTimerSeconds  (runTimerSeconds == 0이면 
 > **필요 별점: ~~3~~ → 4** (2026-03-22 업데이트)
 
 **Easy**
-> "초보 플레이어로서, Glass Narrows에 15 BloomDust를 내고 진입하면, 234초 동안 75초를 버티며 픽업을 수집한다. 실패해도 자원의 85%를 보존한다."
+> "초보 플레이어로서, Glass Narrows에 15 BloomDust를 내고 진입하면, 234초 동안 60초를 버티며 픽업을 수집한다. 실패해도 자원의 85%를 보존한다."
 - 타이머: 180 × 1.3 = 234초
-- 목표: HoldOut 75초 (난이도 무관 동일)
+- 목표: HoldOut 60초 (난이도 무관 동일)
 - 입장 비용: round(22 × 0.7) = **15** BloomDust
 - 2성 기준: pickupRatio ≥ 0.60 (기본 0.70 - 0.10)
 - 3성 기준: timeRatio ≤ 0.60 (기본 0.50 + 0.10)
 
 **Normal**
-> "일반 플레이어로서, Glass Narrows에 22 BloomDust를 내고 진입하면, 180초 동안 75초를 버티며 픽업을 수집한다. 총 5개의 픽업(2B+2S+1SP)이 배치되어 있다."
+> "일반 플레이어로서, Glass Narrows에 22 BloomDust를 내고 진입하면, 180초 동안 60초를 버티며 픽업을 수집한다. 총 5개의 픽업(2B+2S+1SP)이 배치되어 있다."
 - 타이머: 180초
-- 목표: HoldOut 75초
+- 목표: HoldOut 60초
 - 입장 비용: **22** BloomDust
 - 2성 기준: pickupRatio ≥ 0.70 (총 픽업 5개 중 3.5개 이상)
 - 3성 기준: timeRatio ≤ 0.50 (180s × 0.50 = 90초 이내)
 
 **Hard**
-> "숙련 플레이어로서, Glass Narrows에 29 BloomDust를 내고 진입하면, 144초 동안 75초를 버티며 픽업을 수집한다. 실패 시 자원의 50%만 보존된다."
+> "숙련 플레이어로서, Glass Narrows에 29 BloomDust를 내고 진입하면, 144초 동안 60초를 버티며 픽업을 수집한다. 실패 시 자원의 50%만 보존된다."
 - 타이머: 180 × 0.8 = 144초
-- 목표: HoldOut 75초
+- 목표: HoldOut 60초
 - 입장 비용: round(22 × 1.3) = **29** BloomDust
 - 2성 기준: pickupRatio ≥ 0.75 (기본 0.70 + 0.05)
 - 3성 기준: timeRatio ≤ 0.45 (기본 0.50 - 0.05)
@@ -303,28 +303,28 @@ timeRatio      = durationSeconds / runTimerSeconds  (runTimerSeconds == 0이면 
 ### 7.6 Lighthouse Crown (등대 왕관)
 
 > **필요 별점: ~~5~~ → 8** (2026-03-22 업데이트)
-> **3성 기준 수정**: `threeStarTimeRatio` ~~0.45~~ → **0.65** — 3성 컷 97.5초 (HoldOut 90초 달성 후 7.5초 여유)
+> **3성 기준 수정**: `threeStarTimeRatio` ~~0.45~~ → **0.65** — 3성 컷 97.5초 (HoldOut 75초 달성 후 22.5초 여유)
 
 **Easy**
-> "초보 플레이어로서, Lighthouse Crown에 25 BloomDust를 내고 진입하면, 195초 동안 90초를 버티며 픽업을 수집한다. 실패해도 자원의 85%를 보존한다."
+> "초보 플레이어로서, Lighthouse Crown에 25 BloomDust를 내고 진입하면, 195초 동안 75초를 버티며 픽업을 수집한다. 실패해도 자원의 85%를 보존한다."
 - 타이머: 150 × 1.3 = 195초
-- 목표: HoldOut 90초 (난이도 무관 동일)
+- 목표: HoldOut 75초 (난이도 무관 동일)
 - 입장 비용: round(35 × 0.7) = **25** BloomDust
 - 2성 기준: pickupRatio ≥ 0.55 (기본 0.65 - 0.10)
 - 3성 기준: timeRatio ≤ **0.75** (기본 **0.65** + 0.10)
 
 **Normal**
-> "일반 플레이어로서, Lighthouse Crown에 35 BloomDust를 내고 진입하면, 150초 동안 90초를 버티며 픽업을 수집한다. 총 8개의 픽업(3B+3S+2SP)이 배치되어 있다."
+> "일반 플레이어로서, Lighthouse Crown에 35 BloomDust를 내고 진입하면, 150초 동안 75초를 버티며 픽업을 수집한다. 총 8개의 픽업(3B+3S+2SP)이 배치되어 있다."
 - 타이머: 150초
-- 목표: HoldOut 90초
+- 목표: HoldOut 75초
 - 입장 비용: **35** BloomDust
 - 2성 기준: pickupRatio ≥ 0.65 (총 픽업 8개 중 5.2개 이상)
 - 3성 기준: timeRatio ≤ **0.65** (150s × 0.65 = **97.5초** 이내)
 
 **Hard**
-> "숙련 플레이어로서, Lighthouse Crown에 46 BloomDust를 내고 진입하면, 120초 동안 90초를 버티며 픽업을 수집한다. 실패 시 자원의 50%만 보존된다."
+> "숙련 플레이어로서, Lighthouse Crown에 46 BloomDust를 내고 진입하면, 120초 동안 75초를 버티며 픽업을 수집한다. 실패 시 자원의 50%만 보존된다."
 - 타이머: 150 × 0.8 = 120초
-- 목표: HoldOut 90초
+- 목표: HoldOut 75초
 - 입장 비용: round(35 × 1.3) = **46** BloomDust
 - 2성 기준: pickupRatio ≥ 0.70 (기본 0.65 + 0.05)
 - 3성 기준: timeRatio ≤ **0.60** (기본 **0.65** - 0.05)
