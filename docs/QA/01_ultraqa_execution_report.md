@@ -118,3 +118,24 @@
   - `concept_game/Assets/Screenshots/qa_hub_playmode_r5.png`
   - `concept_game/Assets/Screenshots/qa_expedition_playmode_r5.png`
   - `concept_game/Assets/Screenshots/qa_expedition_playmode_r6.png`
+
+## Ralph + BMAD-GDS Checklist Gate (2026-03-22)
+
+- Scope:
+  - 업데이트된 QA 문서/체크리스트 정합성 점검
+  - README 반영 전 실제 플레이 증적 재수집
+- Result:
+  - EditMode tests: **45/45 passed** (job: `1fa84586c72348d0b9e21c41c9e76a7a`)
+  - Runtime object verification:
+    - Hub: `RuntimePlayerVisual` 존재 확인
+    - Expedition: `RuntimePlayerVisual`, `ObjectiveBeacon` 존재 확인
+  - Console verification:
+    - 캡처 제외 play/stop 재실행 기준 Error log **0건**
+  - UV guardrail:
+    - `Audit Player UV Guardrail` 결과 `critical=0`, `warnings=0`
+- Checklist status:
+  - 전체 전수 완료는 아님
+  - 현재 운영 게이트는 통과
+- Evidence (README captures):
+  - `concept_game/Assets/Screenshots/qa_hub_playmode_readme.png`
+  - `concept_game/Assets/Screenshots/qa_expedition_playmode_readme.png`

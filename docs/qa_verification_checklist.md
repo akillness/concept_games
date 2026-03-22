@@ -4,6 +4,18 @@
 > 관심사 분리: 밸런스는 design/19, 레벨디자인은 design/20 참조.
 > 실제 구현 코드(SceneFlowService, PlayerController, ExpeditionDirector, DistrictBalanceDefaults) 기반.
 
+## Completion Status (2026-03-22 BMAD-GDS QA Gate)
+
+- [ ] 전체 체크리스트 전수 완료
+- [x] 현재 운영 게이트 통과
+- [x] EditMode 테스트 45/45 통과
+- [x] Hub/Expedition Play 진입 및 런타임 오브젝트 생성 확인
+- [x] `RuntimePlayerVisual`(Hub/Expedition), `ObjectiveBeacon`(Expedition) 존재 확인
+- [x] play/stop 재검증 기준 콘솔 error 0건
+- [x] `Audit Player UV Guardrail` 결과 `critical=0`, `warnings=0`
+
+> 판정: 전체 체크리스트는 아직 미완료다. 다만 현재 코드/문서 기준의 핵심 운영 게이트는 통과했으며, 남은 항목은 전환/UI/저장/장기세션 전수 검증이다.
+
 ---
 
 ## 1. 씬 전환 검증
@@ -196,9 +208,9 @@
 
 ## 7. 아트/비주얼 검증
 
-- [ ] 플레이어 비주얼 prefab `Art/Characters/player_avatar` 로드 성공
+- [x] 플레이어 비주얼 prefab `Art/Characters/player_avatar` 로드 성공
 - [ ] 픽업 비주얼 prefab `Art/Props/pickup_bloom`, `pickup_scrap` 로드 성공
-- [ ] 비콘 비주얼 prefab `Art/Props/objective_beacon` 로드 성공
+- [x] 비콘 비주얼 prefab `Art/Props/objective_beacon` 로드 성공
 - [ ] 환경 소품 prefab 8종 (`hub_island`, `pier`, `moss_patch`, `mud_patch`, `road_cobble`, `road_wood`, `rock_cluster`, `village_platform`) 로드 성공
 - [ ] 허브 랜턴 3개 생성 및 PointLight 동작
 - [ ] 원정 신호 랜턴 2개 생성 및 PointLight 동작

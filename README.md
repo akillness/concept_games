@@ -14,6 +14,18 @@
 - MP4 다운로드: [media/moss-harbor-gameplay.mp4](media/moss-harbor-gameplay.mp4)
 - 대표 이미지: [media/moss-harbor-gameplay-poster.png](media/moss-harbor-gameplay-poster.png)
 
+## Live Play Captures
+
+허브 실제 플레이 캡처:
+
+![Hub live play capture](concept_game/Assets/Screenshots/qa_hub_playmode_readme.png)
+
+원정 실제 플레이 캡처:
+
+![Expedition live play capture](concept_game/Assets/Screenshots/qa_expedition_playmode_readme.png)
+
+최신 QA 증적과 체크리스트 상태는 [docs/QA/01_ultraqa_execution_report.md](docs/QA/01_ultraqa_execution_report.md), [docs/qa_verification_checklist.md](docs/qa_verification_checklist.md)에서 확인할 수 있습니다.
+
 ## Core Loop
 
 1. 허브에서 목표와 해금 상태를 확인합니다.
@@ -35,6 +47,9 @@
 - 픽업 오브젝트 bob/proximity scale/수집 shrink 애니메이션
 - 비콘 pulse 애니메이션 (목표 달성 시 활성화)
 - 씬 전환 이벤트 시스템과 비동기 페이드 효과
+- SeedPod 비율 검증용 run summary telemetry (`seedPodDelta`, `bioPressUseCount`, `bioPressCleanWaterConverted`)
+- district별 `BoundaryRecoveryProfile` 기반 경계 복귀
+- 에디터 UV import guardrail (`Tools/Moss Harbor/Validation/Audit Player UV Guardrail`)
 - 6개 지구별 맵 레이아웃과 기믹 동선 설계 (기획 문서)
 - 10개 시스템 구현 상태 추적 및 기획-코드 매핑 문서
 
@@ -65,9 +80,9 @@
 | Dock (안개 부두) | 즉시 | 픽업 수집 | ~3.5분 |
 | Reed Fields (갈대 습지) | 1★ | 자원 수집 (SeedPod) | ~3.3분 |
 | Tidal Vault (조수 금고) | 2★ | 자원 수집 (CleanWater) | ~3분 |
-| Glass Narrows (유리 해협) | 3★ | 거점 방어 (75초) | ~3분 |
-| Sunken Arcade (침수 아케이드) | 4★ | 픽업 수집 | ~2.8분 |
-| Lighthouse Crown (등대 왕관) | 5★ | 거점 방어 (90초) | ~2.5분 |
+| Glass Narrows (유리 해협) | 4★ | 거점 방어 (60초) | ~3분 |
+| Sunken Arcade (침수 아케이드) | 6★ | 픽업 수집 | ~2.8분 |
+| Lighthouse Crown (등대 왕관) | 8★ | 거점 방어 (75초) | ~2.5분 |
 
 ## Open In Unity
 
