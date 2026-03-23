@@ -63,6 +63,7 @@ namespace MossHarbor.Tests.EditMode
                 var deckDecor = root.transform.Find("RuntimeLevelLayout/WestBoostPadDeckDecor");
                 var liftDecor = root.transform.Find("RuntimeLevelLayout/WestBoostPadLiftDecor");
                 var exitDecor = root.transform.Find("RuntimeLevelLayout/WestBoostPadExitDecor");
+                var landingMarker = root.transform.Find("RuntimeLevelLayout/WestBoostPadLandingMarker");
 
                 Assert.That(pad, Is.Not.Null);
                 Assert.That(trigger, Is.Not.Null);
@@ -73,6 +74,7 @@ namespace MossHarbor.Tests.EditMode
                 Assert.That(deckDecor, Is.Not.Null);
                 Assert.That(liftDecor, Is.Not.Null);
                 Assert.That(exitDecor, Is.Not.Null);
+                Assert.That(landingMarker, Is.Not.Null);
                 Assert.That(pad.GetComponent<BoxCollider>(), Is.Not.Null);
                 Assert.That(pad.GetComponent<BoxCollider>().isTrigger, Is.False);
                 Assert.That(pad.GetComponent<TraversalBoostPad>(), Is.Not.Null);
@@ -81,6 +83,99 @@ namespace MossHarbor.Tests.EditMode
                 Assert.That(trigger.GetComponent<Rigidbody>(), Is.Not.Null);
                 Assert.That(trigger.GetComponent<Rigidbody>().isKinematic, Is.True);
                 Assert.That(trigger.GetComponent<TraversalBoostPadTriggerRelay>(), Is.Not.Null);
+            }
+            finally
+            {
+                Object.DestroyImmediate(root);
+            }
+        }
+
+        [Test]
+        public void Build_BridgeSweeper_DoesNotCoverAllElevatedAnchors()
+        {
+            var root = new GameObject("TestRoot");
+            try
+            {
+                var plan = ExpeditionLevelLayoutBuilder.CreatePlan(CreateDistrict(10f));
+
+                ExpeditionLevelLayoutBuilder.Build(root.transform, plan, Color.magenta);
+
+                var pivot = root.transform.Find("RuntimeLevelLayout/BridgeSweeper_Pivot");
+                var beam = root.transform.Find("RuntimeLevelLayout/BridgeSweeper");
+                Assert.That(pivot, Is.Not.Null);
+                Assert.That(beam, Is.Not.Null);
+
+                var influenceRadius = Vector3.Distance(beam.position, pivot.position) + beam.localScale.z * 0.5f;
+                var coveredElevatedAnchors = 0;
+                foreach (var anchor in plan.pickupAnchors)
+                {
+                    if (anchor.y <= 1f)
+                    {
+                        continue;
+                    }
+
+                    if (Vector3.Distance(new Vector3(anchor.x, 0f, anchor.z), new Vector3(pivot.position.x, 0f, pivot.position.z)) <= influenceRadius)
+                    {
+                        coveredElevatedAnchors++;
+                    }
+                }
+
+                Assert.LessOrEqual(coveredElevatedAnchors, 1);
+            }
+            finally
+            {
+                Object.DestroyImmediate(root);
+            }
+        }
+
+        [Test]
+        public void Build_BridgeSweeper_LeavesBeaconBackEdgeOutsideFootprint()
+        {
+            var root = new GameObject("TestRoot");
+            try
+            {
+                var plan = ExpeditionLevelLayoutBuilder.CreatePlan(CreateDistrict(13f));
+
+                ExpeditionLevelLayoutBuilder.Build(root.transform, plan, Color.yellow);
+
+                var pivot = root.transform.Find("RuntimeLevelLayout/BridgeSweeper_Pivot");
+                var beam = root.transform.Find("RuntimeLevelLayout/BridgeSweeper");
+                Assert.That(pivot, Is.Not.Null);
+                Assert.That(beam, Is.Not.Null);
+
+                var influenceRadius = Vector3.Distance(beam.position, pivot.position) + beam.localScale.z * 0.5f;
+                var beaconBackEdge = plan.beaconPosition + Vector3.back * 2.7f;
+                var distance = Vector3.Distance(new Vector3(beaconBackEdge.x, 0f, beaconBackEdge.z), new Vector3(pivot.position.x, 0f, pivot.position.z));
+
+                Assert.Greater(distance, influenceRadius);
+            }
+            finally
+            {
+                Object.DestroyImmediate(root);
+            }
+        }
+
+        [Test]
+        public void Build_SweepHazards_UseRecoverableImpulseTuning()
+        {
+            var root = new GameObject("TestRoot");
+            try
+            {
+                var plan = ExpeditionLevelLayoutBuilder.CreatePlan(CreateDistrict(10f));
+
+                ExpeditionLevelLayoutBuilder.Build(root.transform, plan, Color.red);
+
+                var centralSweeper = root.transform.Find("RuntimeLevelLayout/CentralSweeper")?.GetComponent<SweepHazard>();
+                var bridgeSweeper = root.transform.Find("RuntimeLevelLayout/BridgeSweeper")?.GetComponent<SweepHazard>();
+
+                Assert.That(centralSweeper, Is.Not.Null);
+                Assert.That(bridgeSweeper, Is.Not.Null);
+                Assert.LessOrEqual(centralSweeper.PushStrength, 4.5f);
+                Assert.LessOrEqual(centralSweeper.VerticalLift, 0.7f);
+                Assert.GreaterOrEqual(centralSweeper.RepulseCooldown, 0.7f);
+                Assert.LessOrEqual(bridgeSweeper.PushStrength, centralSweeper.PushStrength);
+                Assert.LessOrEqual(bridgeSweeper.VerticalLift, centralSweeper.VerticalLift);
+                Assert.GreaterOrEqual(bridgeSweeper.RepulseCooldown, centralSweeper.RepulseCooldown);
             }
             finally
             {

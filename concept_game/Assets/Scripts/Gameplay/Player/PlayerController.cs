@@ -175,7 +175,7 @@ namespace MossHarbor.Gameplay.Player
             }
         }
 
-        public void ApplyExternalImpulse(Vector3 worldVelocity)
+        public void ApplyExternalImpulse(Vector3 worldVelocity, bool accumulate = true)
         {
             if (worldVelocity.sqrMagnitude <= 0f)
             {
@@ -183,7 +183,11 @@ namespace MossHarbor.Gameplay.Player
             }
 
             var horizontalImpulse = Vector3.ProjectOnPlane(worldVelocity, Vector3.up);
-            if (horizontalImpulse.sqrMagnitude >= _externalVelocity.sqrMagnitude)
+            if (!accumulate)
+            {
+                _externalVelocity = horizontalImpulse;
+            }
+            else if (horizontalImpulse.sqrMagnitude >= _externalVelocity.sqrMagnitude)
             {
                 _externalVelocity = horizontalImpulse;
             }

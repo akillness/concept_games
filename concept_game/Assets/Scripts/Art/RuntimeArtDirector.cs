@@ -212,6 +212,32 @@ namespace MossHarbor.Art
             return instance;
         }
 
+        public static GameObject CreateRouteSignalVisual(Transform parent, string objectName, Vector3 worldPosition, Color tint, float scaleMultiplier, bool elevated)
+        {
+            return CreateGameplayMarkerVisual(
+                parent,
+                objectName,
+                worldPosition + Vector3.up * (elevated ? 1.2f : 1.05f),
+                Color.Lerp(tint, Color.white, 0.3f),
+                0.26f * scaleMultiplier,
+                0.82f * scaleMultiplier,
+                elevated ? 4.8f : 3.8f,
+                elevated ? 1.75f : 1.35f);
+        }
+
+        public static GameObject CreateLandingMarkerVisual(Transform parent, string objectName, Vector3 worldPosition, Color tint, float scaleMultiplier)
+        {
+            return CreateGameplayMarkerVisual(
+                parent,
+                objectName,
+                worldPosition + Vector3.up * 0.08f,
+                Color.Lerp(tint, Color.white, 0.24f),
+                0.42f * scaleMultiplier,
+                1.05f * scaleMultiplier,
+                5.8f,
+                1.65f);
+        }
+
         public static GameObject CreateEnvironmentDecor(Transform parent, string resourcePath, string objectName, Vector3 worldPosition, Vector3 worldEulerAngles, Vector3 localScale)
         {
             if (parent == null || string.IsNullOrWhiteSpace(resourcePath))
@@ -273,6 +299,44 @@ namespace MossHarbor.Art
             DisableColliders(instance);
             StabilizeRigidbodies(instance);
             NormalizeRendererMaterials(instance);
+        }
+
+        private static GameObject CreateGameplayMarkerVisual(Transform parent, string objectName, Vector3 worldPosition, Color tint, float ringRadius, float height, float lightRange, float lightIntensity)
+        {
+            var root = new GameObject(objectName);
+            root.transform.SetParent(parent, false);
+            root.transform.position = worldPosition;
+
+            var ring = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
+            ring.name = "Ring";
+            ring.transform.SetParent(root.transform, false);
+            ring.transform.localPosition = Vector3.zero;
+            ring.transform.localScale = new Vector3(ringRadius, 0.03f, ringRadius);
+            ApplyPrimitiveTint(ring, tint, true);
+
+            var beam = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
+            beam.name = "Beam";
+            beam.transform.SetParent(root.transform, false);
+            beam.transform.localPosition = new Vector3(0f, height * 0.5f, 0f);
+            beam.transform.localScale = new Vector3(ringRadius * 0.16f, height * 0.5f, ringRadius * 0.16f);
+            ApplyPrimitiveTint(beam, tint, true);
+
+            var orb = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+            orb.name = "Orb";
+            orb.transform.SetParent(root.transform, false);
+            orb.transform.localPosition = new Vector3(0f, height, 0f);
+            orb.transform.localScale = Vector3.one * ringRadius * 0.95f;
+            ApplyPrimitiveTint(orb, Color.Lerp(tint, Color.white, 0.28f), true);
+
+            var pointLight = root.AddComponent<Light>();
+            pointLight.type = LightType.Point;
+            pointLight.color = tint;
+            pointLight.range = lightRange;
+            pointLight.intensity = lightIntensity;
+            pointLight.shadows = LightShadows.None;
+
+            DisableColliders(root);
+            return root;
         }
 
         private static void CreateLantern(Transform parent, string objectName, Vector3 localPosition, Color lightColor, float range, float intensity)
@@ -545,6 +609,27 @@ namespace MossHarbor.Art
             }
 
             return material;
+        }
+
+        private static void ApplyPrimitiveTint(GameObject target, Color color, bool emissive)
+        {
+            if (!target.TryGetComponent<Renderer>(out var renderer))
+            {
+                return;
+            }
+
+            var material = new Material(Shader.Find("Standard"))
+            {
+                color = color
+            };
+            material.SetFloat("_Glossiness", emissive ? 0.32f : 0.12f);
+            if (emissive)
+            {
+                material.EnableKeyword("_EMISSION");
+                material.SetColor("_EmissionColor", color * 1.35f);
+            }
+
+            renderer.material = material;
         }
 
         private static Texture FindTexture(Material material, params string[] propertyNames)

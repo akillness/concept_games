@@ -7,17 +7,24 @@ namespace MossHarbor.Expedition
     {
         [SerializeField] private float rotateSpeed = 60f;
         [SerializeField] private float pushStrength = 8f;
-        [SerializeField] private float repulseCooldown = 0.35f;
+        [SerializeField] private float verticalLift = 0.55f;
+        [SerializeField] private float repulseCooldown = 0.65f;
 
         private Transform _pivot;
         private float _nextRepulseTime;
         private ExpeditionDirector _director;
 
-        public void Configure(Transform pivot, float nextRotateSpeed, float nextPushStrength)
+        public float PushStrength => pushStrength;
+        public float VerticalLift => verticalLift;
+        public float RepulseCooldown => repulseCooldown;
+
+        public void Configure(Transform pivot, float nextRotateSpeed, float nextPushStrength, float nextVerticalLift = 0.55f, float nextRepulseCooldown = 0.65f)
         {
             _pivot = pivot;
             rotateSpeed = nextRotateSpeed;
             pushStrength = nextPushStrength;
+            verticalLift = nextVerticalLift;
+            repulseCooldown = nextRepulseCooldown;
         }
 
         private void Update()
@@ -51,7 +58,8 @@ namespace MossHarbor.Expedition
             }
 
             var hazardMultiplier = _director != null ? _director.GetObjectiveReadyHazardMultiplier() : 1f;
-            player.ApplyExternalImpulse(pushDirection.normalized * (pushStrength * hazardMultiplier) + Vector3.up * (1.8f * hazardMultiplier));
+            var impulse = pushDirection.normalized * (pushStrength * hazardMultiplier) + Vector3.up * (verticalLift * hazardMultiplier);
+            player.ApplyExternalImpulse(impulse, accumulate: false);
             _nextRepulseTime = Time.time + repulseCooldown;
         }
     }

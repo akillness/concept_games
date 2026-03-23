@@ -34,10 +34,12 @@ namespace MossHarbor.Expedition
         private ObjectiveBeacon _objectiveBeacon;
         private bool _objectiveReadyCuePlayed;
         private float _objectiveReadyAtSeconds = -1f;
-        [SerializeField] private float objectiveReadyGraceSeconds = 2.25f;
-        [SerializeField] private float objectiveReadyHazardMultiplier = 0.45f;
+        [SerializeField] private float objectiveReadyGraceSeconds = 5f;
+        [SerializeField] private float objectiveReadyHazardMultiplier = 0.35f;
+        [SerializeField] private float beaconCompletionDelaySeconds = 1.15f;
         private bool _beaconCompletionQueued;
         private float _beaconCompletionTime;
+        private Vector3[] _orderedPickupAnchors = System.Array.Empty<Vector3>();
 
         public float RemainingTime => _remainingTime;
         public DistrictContentBundle RuntimeContentBundle => _contentBundle;
@@ -255,7 +257,7 @@ namespace MossHarbor.Expedition
 
             _cameraDirector?.PlayBeaconActivatedCue();
             _beaconCompletionQueued = true;
-            _beaconCompletionTime = Time.time + 0.9f;
+            _beaconCompletionTime = Time.time + beaconCompletionDelaySeconds;
         }
 
         private RunSummary BuildRunSummary(
@@ -415,13 +417,20 @@ namespace MossHarbor.Expedition
             {
                 Destroy(existingRoot);
             }
+
+            _orderedPickupAnchors = System.Array.Empty<Vector3>();
         }
 
         private Vector3 ResolvePickupPosition(int index, int totalPickups)
         {
-            if (_levelLayoutPlan != null && _levelLayoutPlan.pickupAnchors != null && _levelLayoutPlan.pickupAnchors.Length > 0)
+            if (_orderedPickupAnchors.Length == 0)
             {
-                return _levelLayoutPlan.pickupAnchors[index % _levelLayoutPlan.pickupAnchors.Length];
+                _orderedPickupAnchors = ExpeditionPickupSpawnPlanner.BuildOrderedAnchors(_levelLayoutPlan);
+            }
+
+            if (_orderedPickupAnchors.Length > 0)
+            {
+                return _orderedPickupAnchors[index % _orderedPickupAnchors.Length];
             }
 
             var radius = districtDefinition != null ? districtDefinition.pickupSpawnRadius : 8f;
@@ -465,24 +474,13 @@ namespace MossHarbor.Expedition
 
         private void CreatePickupRouteSignal(string objectName, Vector3 position, Color tint, ExpeditionPickupRouteProfile routeProfile)
         {
-            var basePath = routeProfile.IsElevatedRoute ? ArtResourcePaths.EnvironmentVillagePlatform : ArtResourcePaths.EnvironmentRoadWood;
-            var accentPath = routeProfile.IsElevatedRoute ? ArtResourcePaths.EnvironmentMossPatch : ArtResourcePaths.EnvironmentMudPatch;
-
-            RuntimeArtDirector.CreateEnvironmentDecor(
+            RuntimeArtDirector.CreateRouteSignalVisual(
                 _runtimeContentRoot,
-                basePath,
                 objectName,
-                position + Vector3.down * 0.26f,
-                Vector3.zero,
-                (routeProfile.IsElevatedRoute ? Vector3.one * 0.18f : Vector3.one * 0.22f) * routeProfile.SignalScaleMultiplier);
-
-            RuntimeArtDirector.CreateEnvironmentDecor(
-                _runtimeContentRoot,
-                accentPath,
-                $"{objectName}_Accent",
-                position + Vector3.down * 0.34f,
-                new Vector3(0f, routeProfile.IsElevatedRoute ? 35f : 0f, 0f),
-                (routeProfile.IsElevatedRoute ? Vector3.one * 0.24f : Vector3.one * 0.32f) * routeProfile.SignalScaleMultiplier);
+                position,
+                tint,
+                routeProfile.SignalScaleMultiplier,
+                routeProfile.IsElevatedRoute);
         }
 
         private void CreateObjectiveBeacon(Vector3 position)

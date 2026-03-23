@@ -119,8 +119,8 @@ namespace MossHarbor.Expedition
             CreatePerimeterRail(root, "BeaconPlatformEastRail", beaconPlatformPosition + new Vector3((beaconPlatformScale.x * 0.5f) - 0.1f, plan.elevatedHeight + 0.18f, 0f), new Vector3(0.24f, 0.82f, beaconPlatformScale.z * 0.92f), railColor);
             CreatePerimeterRail(root, "BeaconPlatformNorthRail", beaconPlatformPosition + new Vector3(0f, plan.elevatedHeight + 0.18f, (beaconPlatformScale.z * 0.5f) - 0.1f), new Vector3(beaconPlatformScale.x * 0.92f, 0.82f, 0.24f), railColor);
 
-            CreateSweepHazard(root, "CentralSweeper", new Vector3(0f, 0.65f, plan.halfLength * 0.18f), 5.8f, 52f, hazardColor);
-            CreateSweepHazard(root, "BridgeSweeper", new Vector3(0f, plan.elevatedHeight + 0.2f, plan.halfLength * 0.56f), 4.1f, -66f, hazardColor);
+            CreateSweepHazard(root, "CentralSweeper", new Vector3(0f, 0.65f, plan.halfLength * 0.18f), 5.8f, 52f, hazardColor, 4.25f, 0.6f, 0.72f, 6f);
+            CreateSweepHazard(root, "BridgeSweeper", new Vector3(0f, plan.elevatedHeight + 0.2f, plan.halfLength * 0.54f), 2.6f, -54f, hazardColor, 3.25f, 0.35f, 0.8f, 3.5f);
         }
 
         private static void CreateSolidSegment(Transform parent, string name, Vector3 position, Vector3 scale, Color color)
@@ -176,6 +176,7 @@ namespace MossHarbor.Expedition
             CreateAlignedLiftSegment(parent, $"{name}LiftPath", position + facingDirection * 2.2f + Vector3.up * 0.16f, targetPosition + Vector3.up * 0.06f, 2.4f, 0.42f, Color.Lerp(color, Color.white, 0.08f));
             CreateSolidSegment(parent, $"{name}ExitLanding", targetPosition + new Vector3(0f, -0.08f, 0.48f), new Vector3(3.4f, 0.18f, 1.8f), Color.Lerp(color, Color.white, 0.18f));
             CreateBoostPadDecor(parent, name, position, targetPosition, facingDirection);
+            RuntimeArtDirector.CreateLandingMarkerVisual(parent, $"{name}LandingMarker", targetPosition + new Vector3(0f, 0.04f, 0.48f), color, 1f);
 
             var visual = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
             visual.name = $"{name}PulseVisual";
@@ -240,7 +241,7 @@ namespace MossHarbor.Expedition
             ApplyColor(lift, color);
         }
 
-        private static void CreateSweepHazard(Transform parent, string name, Vector3 pivotPosition, float orbitRadius, float rotateSpeed, Color color)
+        private static void CreateSweepHazard(Transform parent, string name, Vector3 pivotPosition, float orbitRadius, float rotateSpeed, Color color, float pushStrength, float verticalLift, float repulseCooldown, float beamLength)
         {
             var pivot = new GameObject($"{name}_Pivot").transform;
             pivot.SetParent(parent, false);
@@ -250,7 +251,7 @@ namespace MossHarbor.Expedition
             beam.name = name;
             beam.transform.SetParent(parent, false);
             beam.transform.position = pivot.position + Vector3.forward * orbitRadius;
-            beam.transform.localScale = new Vector3(0.75f, 1.3f, 6f);
+            beam.transform.localScale = new Vector3(0.75f, 1.3f, beamLength);
             ApplyColor(beam, color);
 
             var rigidbody = beam.AddComponent<Rigidbody>();
@@ -263,7 +264,7 @@ namespace MossHarbor.Expedition
             }
 
             var hazard = beam.AddComponent<SweepHazard>();
-            hazard.Configure(pivot, rotateSpeed, 8f);
+            hazard.Configure(pivot, rotateSpeed, pushStrength, verticalLift, repulseCooldown);
         }
 
         private static void ApplyColor(GameObject go, Color color)

@@ -53,6 +53,7 @@
 - 에디터 UV import guardrail (`Tools/Moss Harbor/Validation/Audit Player UV Guardrail`)
 - Expedition 런타임 레벨 리디자인 (넓은 ground, 고저차 램프, 상층 데크, 비콘 플랫폼)
 - 동적 기믹 (`TraversalBoostPad`, `SweepHazard`)과 이벤트 카메라 (`ExpeditionCameraDirector`)
+- sweep hazard recoverable tuning과 non-stacking obstacle impulse로 수집 루트 통제성 복구
 - 6개 지구별 맵 레이아웃과 기믹 동선 설계 (기획 문서)
 - 10개 시스템 구현 상태 추적 및 기획-코드 매핑 문서
 
