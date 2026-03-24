@@ -33,6 +33,9 @@ namespace MossHarbor.Expedition
                 new(-halfWidth * 0.42f, 0.8f, halfLength * 0.16f),
                 new(halfWidth * 0.44f, 0.8f, halfLength * 0.24f),
                 new(0f, 0.8f, halfLength * 0.08f),
+                new(-halfWidth * 0.24f, 0.8f, halfLength * 0.44f),
+                new(halfWidth * 0.26f, 0.8f, halfLength * 0.48f),
+                new(0f, 0.8f, halfLength * 0.6f),
                 new(-halfWidth * 0.26f, elevatedHeight, halfLength * 0.46f),
                 new(halfWidth * 0.28f, elevatedHeight, halfLength * 0.54f),
                 new(0f, elevatedHeight, halfLength * 0.68f),
@@ -87,12 +90,19 @@ namespace MossHarbor.Expedition
             CreateSolidSegment(root, "BeaconBridge", beaconBridgePosition, beaconBridgeScale, accentColor);
             CreateSolidSegment(root, "BeaconPlatform", beaconPlatformPosition, beaconPlatformScale, Color.Lerp(accentColor, Color.white, 0.12f));
 
-            CreateRamp(root, "WestRamp", new Vector3(-plan.halfWidth * 0.18f, plan.elevatedHeight * 0.32f, plan.halfLength * 0.36f), new Vector3(5.6f, 0.6f, 9.8f), -16f, accentColor);
-            CreateRamp(root, "EastRamp", new Vector3(plan.halfWidth * 0.18f, plan.elevatedHeight * 0.32f, plan.halfLength * 0.4f), new Vector3(5.6f, 0.6f, 9.8f), -16f, accentColor);
-            CreateSolidSegment(root, "WestRampBaseLanding", new Vector3(-plan.halfWidth * 0.18f, 0.14f, plan.halfLength * 0.22f), new Vector3(5.8f, 0.24f, 2.2f), accentColor);
-            CreateSolidSegment(root, "EastRampBaseLanding", new Vector3(plan.halfWidth * 0.18f, 0.14f, plan.halfLength * 0.26f), new Vector3(5.8f, 0.24f, 2.2f), accentColor);
-            CreateSolidSegment(root, "WestRampTopLanding", new Vector3(-plan.halfWidth * 0.18f, plan.elevatedHeight - 0.06f, plan.halfLength * 0.53f), new Vector3(5.8f, 0.18f, 2.6f), accentColor);
-            CreateSolidSegment(root, "EastRampTopLanding", new Vector3(plan.halfWidth * 0.18f, plan.elevatedHeight - 0.06f, plan.halfLength * 0.57f), new Vector3(5.8f, 0.18f, 2.6f), accentColor);
+            var westRampBaseLandingPosition = new Vector3(-plan.halfWidth * 0.18f, 0.14f, plan.halfLength * 0.22f);
+            var eastRampBaseLandingPosition = new Vector3(plan.halfWidth * 0.18f, 0.14f, plan.halfLength * 0.26f);
+            var rampBaseLandingScale = new Vector3(5.8f, 0.24f, 2.2f);
+            var westRampTopLandingPosition = new Vector3(-plan.halfWidth * 0.18f, plan.elevatedHeight - 0.06f, plan.halfLength * 0.53f);
+            var eastRampTopLandingPosition = new Vector3(plan.halfWidth * 0.18f, plan.elevatedHeight - 0.06f, plan.halfLength * 0.57f);
+            var rampTopLandingScale = new Vector3(5.8f, 0.18f, 2.6f);
+
+            CreateSolidSegment(root, "WestRampBaseLanding", westRampBaseLandingPosition, rampBaseLandingScale, accentColor);
+            CreateSolidSegment(root, "EastRampBaseLanding", eastRampBaseLandingPosition, rampBaseLandingScale, accentColor);
+            CreateSolidSegment(root, "WestRampTopLanding", westRampTopLandingPosition, rampTopLandingScale, accentColor);
+            CreateSolidSegment(root, "EastRampTopLanding", eastRampTopLandingPosition, rampTopLandingScale, accentColor);
+            CreateTraversalRamp(root, "WestRamp", westRampBaseLandingPosition, rampBaseLandingScale, westRampTopLandingPosition, rampTopLandingScale, 5.6f, 0.6f, accentColor);
+            CreateTraversalRamp(root, "EastRamp", eastRampBaseLandingPosition, rampBaseLandingScale, eastRampTopLandingPosition, rampTopLandingScale, 5.6f, 0.6f, accentColor);
 
             CreateGuardPillar(root, "WestLookout", new Vector3(-plan.halfWidth * 0.66f, 1.6f, plan.halfLength * 0.64f), districtColor);
             CreateGuardPillar(root, "EastLookout", new Vector3(plan.halfWidth * 0.66f, 1.6f, plan.halfLength * 0.7f), districtColor);
@@ -142,6 +152,39 @@ namespace MossHarbor.Expedition
             go.transform.localEulerAngles = new Vector3(pitchDegrees, 0f, 0f);
             go.transform.localScale = scale;
             ApplyColor(go, color);
+        }
+
+        private static void CreateTraversalRamp(
+            Transform parent,
+            string name,
+            Vector3 baseLandingPosition,
+            Vector3 baseLandingScale,
+            Vector3 topLandingPosition,
+            Vector3 topLandingScale,
+            float width,
+            float height,
+            Color color)
+        {
+            var start = baseLandingPosition
+                        + Vector3.up * (baseLandingScale.y * 0.5f - 0.02f)
+                        + Vector3.forward * (baseLandingScale.z * 0.18f);
+            var end = topLandingPosition
+                      + Vector3.up * (topLandingScale.y * 0.5f - 0.02f)
+                      + Vector3.back * (topLandingScale.z * 0.18f);
+
+            var delta = end - start;
+            if (delta.sqrMagnitude < 0.001f)
+            {
+                return;
+            }
+
+            var ramp = GameObject.CreatePrimitive(PrimitiveType.Cube);
+            ramp.name = name;
+            ramp.transform.SetParent(parent, false);
+            ramp.transform.position = start + delta * 0.5f;
+            ramp.transform.rotation = Quaternion.LookRotation(delta.normalized, Vector3.up);
+            ramp.transform.localScale = new Vector3(width, height, delta.magnitude);
+            ApplyColor(ramp, color);
         }
 
         private static void CreateGuardPillar(Transform parent, string name, Vector3 position, Color color)
@@ -201,17 +244,24 @@ namespace MossHarbor.Expedition
             var relay = trigger.AddComponent<TraversalBoostPadTriggerRelay>();
             relay.Configure(boostPad);
 
-            boostPad.Configure(facingDirection, 23f, 9.5f, visual.transform);
+            boostPad.Configure(facingDirection, 18f, 6.5f, visual.transform);
         }
 
         private static void CreateBoostPadDecor(Transform parent, string name, Vector3 position, Vector3 targetPosition, Vector3 facingDirection)
         {
             var yaw = Quaternion.LookRotation(facingDirection, Vector3.up).eulerAngles;
+            var outward = Vector3.Cross(Vector3.up, facingDirection).normalized;
+            var outwardHint = position.x >= 0f ? Vector3.right : Vector3.left;
+            if (Vector3.Dot(outward, outwardHint) < 0f)
+            {
+                outward = -outward;
+            }
+
             RuntimeArtDirector.CreateEnvironmentDecor(parent, ArtResourcePaths.EnvironmentRoadWood, $"{name}DeckDecor", position + Vector3.up * 0.05f, yaw, Vector3.one * 0.42f);
             RuntimeArtDirector.CreateEnvironmentDecor(parent, ArtResourcePaths.EnvironmentVillagePlatform, $"{name}LiftDecor", Vector3.Lerp(position, targetPosition, 0.48f) + Vector3.up * 0.12f, yaw, new Vector3(0.26f, 0.26f, 0.44f));
             RuntimeArtDirector.CreateEnvironmentDecor(parent, ArtResourcePaths.EnvironmentVillagePlatform, $"{name}ExitDecor", targetPosition + new Vector3(0f, -0.1f, 0.44f), yaw, Vector3.one * 0.24f);
-            RuntimeArtDirector.CreateEnvironmentDecor(parent, ArtResourcePaths.EnvironmentRockCluster, $"{name}RockClusterA", position + Vector3.Cross(Vector3.up, facingDirection) * 2.2f + facingDirection * 1.4f, Vector3.zero, Vector3.one * 0.16f);
-            RuntimeArtDirector.CreateEnvironmentDecor(parent, ArtResourcePaths.EnvironmentRockCluster, $"{name}RockClusterB", position - Vector3.Cross(Vector3.up, facingDirection) * 2f + facingDirection * 3.2f, new Vector3(0f, 130f, 0f), Vector3.one * 0.14f);
+            RuntimeArtDirector.CreateEnvironmentDecor(parent, ArtResourcePaths.EnvironmentRockCluster, $"{name}RockClusterA", position + outward * 2.45f + facingDirection * 1.15f, Vector3.zero, Vector3.one * 0.16f);
+            RuntimeArtDirector.CreateEnvironmentDecor(parent, ArtResourcePaths.EnvironmentRockCluster, $"{name}RockClusterB", position + outward * 2.1f + facingDirection * 3.05f, new Vector3(0f, 130f, 0f), Vector3.one * 0.14f);
         }
 
         private static void CreatePerimeterRail(Transform parent, string name, Vector3 position, Vector3 scale, Color color)

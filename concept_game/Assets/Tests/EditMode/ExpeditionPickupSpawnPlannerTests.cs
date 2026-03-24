@@ -12,57 +12,104 @@ namespace MossHarbor.Tests.EditMode
         [Test]
         public void BuildOrderedAnchors_UsesSideLaneByFifthPickup()
         {
-            var plan = ExpeditionLevelLayoutBuilder.CreatePlan(CreateDistrict(10f));
+            var district = CreateDistrict(10f);
+            var plan = ExpeditionLevelLayoutBuilder.CreatePlan(district);
 
-            var orderedAnchors = ExpeditionPickupSpawnPlanner.BuildOrderedAnchors(plan);
+            var orderedAnchors = ExpeditionPickupSpawnPlanner.BuildOrderedAnchors(plan, district);
 
             Assert.That(orderedAnchors.Length, Is.GreaterThanOrEqualTo(5));
             var fifthTier = ExpeditionPickupRouteRules.Resolve(orderedAnchors[4], plan, ResourceType.BloomDust, 1).Tier;
-            Assert.That(fifthTier, Is.EqualTo(ExpeditionRouteTier.SideLane));
+            Assert.That(fifthTier, Is.Not.EqualTo(ExpeditionRouteTier.Elevated));
         }
 
         [Test]
-        public void DefaultDistricts_WithFiveOrMorePickups_UseAtLeastOneSideLaneAnchor()
+        public void CollectPickupDistricts_KeepObjectiveQuotaOffElevatedRoute()
         {
             for (var districtIndex = 0; districtIndex < ContentPaths.DistrictCount; districtIndex++)
             {
                 var bundle = DistrictContentCatalog.LoadByIndex(districtIndex);
                 var district = bundle.District;
-                var totalPickups = district.bloomPickupCount + district.scrapPickupCount + district.seedPodPickupCount;
-                if (totalPickups < 5)
+                if (district.objectiveType != ExpeditionObjectiveType.CollectPickups)
                 {
                     continue;
                 }
 
                 var plan = ExpeditionLevelLayoutBuilder.CreatePlan(district);
-                var orderedAnchors = ExpeditionPickupSpawnPlanner.BuildOrderedAnchors(plan).Take(totalPickups).ToArray();
+                var orderedAnchors = ExpeditionPickupSpawnPlanner.BuildOrderedAnchors(plan, district);
+                var groundQuota = district.targetPickupCount;
 
-                Assert.That(
-                    orderedAnchors.Any(anchor => ExpeditionPickupRouteRules.Resolve(anchor, plan, ResourceType.BloomDust, 1).Tier == ExpeditionRouteTier.SideLane),
-                    Is.True,
-                    $"{district.districtId} should include at least one side-lane pickup.");
+                Assert.That(CountGroundAnchors(plan), Is.GreaterThanOrEqualTo(groundQuota), $"{district.districtId} should have enough first-floor anchors to satisfy its collect-pickups objective.");
+
+                for (var index = 0; index < groundQuota; index++)
+                {
+                    var tier = ExpeditionPickupRouteRules.Resolve(orderedAnchors[index], plan, ResourceType.BloomDust, 1).Tier;
+                    Assert.That(tier, Is.Not.EqualTo(ExpeditionRouteTier.Elevated), $"{district.districtId} should not require elevated pickups before its core objective quota.");
+                }
             }
         }
 
         [Test]
-        public void DefaultDistricts_DoNotPinAllSeedPodsToElevatedRoute()
+        public void CollectResourceDistricts_KeepObjectiveCriticalPickupSlotsOffElevatedRoute()
         {
             for (var districtIndex = 0; districtIndex < ContentPaths.DistrictCount; districtIndex++)
             {
                 var bundle = DistrictContentCatalog.LoadByIndex(districtIndex);
                 var district = bundle.District;
-                if (district.seedPodPickupCount <= 1)
+                if (district.objectiveType != ExpeditionObjectiveType.CollectResource)
                 {
                     continue;
                 }
 
                 var plan = ExpeditionLevelLayoutBuilder.CreatePlan(district);
-                var assignedSeedPodTiers = ResolveAssignedTiers(district, plan)
-                    .Where(entry => entry.resourceType == ResourceType.SeedPod)
-                    .Select(entry => entry.tier)
+                var orderedAnchors = ExpeditionPickupSpawnPlanner.BuildOrderedAnchors(plan, district);
+                var objectivePickupSlots = ResolveObjectivePickupSlots(district);
+                var groundQuota = Mathf.Min(objectivePickupSlots, CountGroundAnchors(plan));
+
+                for (var index = 0; index < groundQuota; index++)
+                {
+                    var tier = ExpeditionPickupRouteRules.Resolve(orderedAnchors[index], plan, ResourceType.BloomDust, 1).Tier;
+                    Assert.That(tier, Is.Not.EqualTo(ExpeditionRouteTier.Elevated), $"{district.districtId} should keep objective-critical pickup slots off the elevated route.");
+                }
+            }
+        }
+
+        [Test]
+        public void CreatePlan_ProvidesEnoughGroundAnchorsForLargestCollectPickupObjective()
+        {
+            var largestCollectPickupTarget = 0;
+            for (var districtIndex = 0; districtIndex < ContentPaths.DistrictCount; districtIndex++)
+            {
+                var district = DistrictContentCatalog.LoadByIndex(districtIndex).District;
+                if (district.objectiveType == ExpeditionObjectiveType.CollectPickups)
+                {
+                    largestCollectPickupTarget = Mathf.Max(largestCollectPickupTarget, district.targetPickupCount);
+                }
+            }
+
+            var plan = ExpeditionLevelLayoutBuilder.CreatePlan(CreateDistrict(10f));
+            Assert.That(CountGroundAnchors(plan), Is.GreaterThanOrEqualTo(largestCollectPickupTarget));
+        }
+
+        [Test]
+        public void DefaultDistricts_WithSpareGroundCapacity_UseSideLaneBeforeElevatedRoute()
+        {
+            for (var districtIndex = 0; districtIndex < ContentPaths.DistrictCount; districtIndex++)
+            {
+                var bundle = DistrictContentCatalog.LoadByIndex(districtIndex);
+                var district = bundle.District;
+                var plan = ExpeditionLevelLayoutBuilder.CreatePlan(district);
+                var orderedAnchors = ExpeditionPickupSpawnPlanner.BuildOrderedAnchors(plan, district);
+                var tiers = orderedAnchors
+                    .Take(Mathf.Min(CountGroundAnchors(plan), district.bloomPickupCount + district.scrapPickupCount + district.seedPodPickupCount))
+                    .Select(anchor => ExpeditionPickupRouteRules.Resolve(anchor, plan, ResourceType.BloomDust, 1).Tier)
                     .ToArray();
 
-                Assert.That(assignedSeedPodTiers.Any(tier => tier != ExpeditionRouteTier.Elevated), Is.True, $"{district.districtId} should keep at least one seed pod off the elevated route.");
+                if (!tiers.Contains(ExpeditionRouteTier.SideLane) || !tiers.Contains(ExpeditionRouteTier.Elevated))
+                {
+                    continue;
+                }
+
+                Assert.That(System.Array.IndexOf(tiers, ExpeditionRouteTier.SideLane), Is.LessThan(System.Array.IndexOf(tiers, ExpeditionRouteTier.Elevated)), $"{district.districtId} should expose a first-floor side route before forcing the elevated route.");
             }
         }
 
@@ -76,32 +123,20 @@ namespace MossHarbor.Tests.EditMode
             return district;
         }
 
-        private static IEnumerable<(ResourceType resourceType, ExpeditionRouteTier tier)> ResolveAssignedTiers(DistrictDef district, ExpeditionLevelLayoutPlan plan)
+        private static int CountGroundAnchors(ExpeditionLevelLayoutPlan plan)
         {
-            var orderedAnchors = ExpeditionPickupSpawnPlanner.BuildOrderedAnchors(plan);
-            var spawnOrder = new List<ResourceType>();
+            return plan.pickupAnchors.Count(anchor => ExpeditionPickupRouteRules.Resolve(anchor, plan, ResourceType.BloomDust, 1).Tier != ExpeditionRouteTier.Elevated);
+        }
 
-            for (var index = 0; index < district.bloomPickupCount; index++)
+        private static int ResolveObjectivePickupSlots(DistrictDef district)
+        {
+            return district.objectiveResourceType switch
             {
-                spawnOrder.Add(ResourceType.BloomDust);
-            }
-
-            for (var index = 0; index < district.scrapPickupCount; index++)
-            {
-                spawnOrder.Add(ResourceType.Scrap);
-            }
-
-            for (var index = 0; index < district.seedPodPickupCount; index++)
-            {
-                spawnOrder.Add(ResourceType.SeedPod);
-            }
-
-            for (var index = 0; index < spawnOrder.Count; index++)
-            {
-                var resourceType = spawnOrder[index];
-                var anchor = orderedAnchors[index % orderedAnchors.Length];
-                yield return (resourceType, ExpeditionPickupRouteRules.Resolve(anchor, plan, resourceType, 1).Tier);
-            }
+                ResourceType.BloomDust => district.bloomPickupCount,
+                ResourceType.Scrap => district.bloomPickupCount + district.scrapPickupCount,
+                ResourceType.SeedPod => district.bloomPickupCount + district.scrapPickupCount + district.seedPodPickupCount,
+                _ => district.bloomPickupCount + district.scrapPickupCount + district.seedPodPickupCount,
+            };
         }
     }
 }

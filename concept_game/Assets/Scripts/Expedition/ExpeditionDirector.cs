@@ -349,8 +349,8 @@ namespace MossHarbor.Expedition
         {
             ClearSceneRunContent();
             _runtimeContentRoot = new GameObject("GeneratedRunContent").transform;
-            RuntimeArtDirector.DecorateExpedition(_runtimeContentRoot, districtDefinition);
             _levelLayoutPlan = ExpeditionLevelLayoutBuilder.CreatePlan(districtDefinition);
+            RuntimeArtDirector.DecorateExpedition(_runtimeContentRoot, districtDefinition, _levelLayoutPlan);
             ExpeditionLevelLayoutBuilder.Build(_runtimeContentRoot, _levelLayoutPlan, DistrictThemeColor);
             var bloomTint = Color.Lerp(DistrictThemeColor, Color.white, 0.3f);
             var scrapTint = Color.Lerp(DistrictThemeColor, new Color(0.9f, 0.78f, 0.42f, 1f), 0.45f);
@@ -425,7 +425,7 @@ namespace MossHarbor.Expedition
         {
             if (_orderedPickupAnchors.Length == 0)
             {
-                _orderedPickupAnchors = ExpeditionPickupSpawnPlanner.BuildOrderedAnchors(_levelLayoutPlan);
+                _orderedPickupAnchors = ExpeditionPickupSpawnPlanner.BuildOrderedAnchors(_levelLayoutPlan, districtDefinition);
             }
 
             if (_orderedPickupAnchors.Length > 0)

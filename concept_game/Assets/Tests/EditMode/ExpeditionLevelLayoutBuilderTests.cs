@@ -77,7 +77,11 @@ namespace MossHarbor.Tests.EditMode
                 Assert.That(landingMarker, Is.Not.Null);
                 Assert.That(pad.GetComponent<BoxCollider>(), Is.Not.Null);
                 Assert.That(pad.GetComponent<BoxCollider>().isTrigger, Is.False);
-                Assert.That(pad.GetComponent<TraversalBoostPad>(), Is.Not.Null);
+                var boostPad = pad.GetComponent<TraversalBoostPad>();
+                Assert.That(boostPad, Is.Not.Null);
+                Assert.That(boostPad.BoostStrength, Is.LessThanOrEqualTo(18f));
+                Assert.That(boostPad.VerticalLift, Is.LessThanOrEqualTo(6.5f));
+                Assert.That(boostPad.CooldownSeconds, Is.GreaterThanOrEqualTo(0.75f));
                 Assert.That(trigger.GetComponent<BoxCollider>(), Is.Not.Null);
                 Assert.That(trigger.GetComponent<BoxCollider>().isTrigger, Is.True);
                 Assert.That(trigger.GetComponent<Rigidbody>(), Is.Not.Null);
@@ -208,11 +212,91 @@ namespace MossHarbor.Tests.EditMode
             }
         }
 
+        [Test]
+        public void Build_BoostPadRockDecor_StaysOnOuterShoulder()
+        {
+            var root = new GameObject("TestRoot");
+            try
+            {
+                var plan = ExpeditionLevelLayoutBuilder.CreatePlan(CreateDistrict(10f));
+
+                ExpeditionLevelLayoutBuilder.Build(root.transform, plan, Color.cyan);
+
+                var westPad = root.transform.Find("RuntimeLevelLayout/WestBoostPad");
+                var eastPad = root.transform.Find("RuntimeLevelLayout/EastBoostPad");
+                var westRockA = root.transform.Find("RuntimeLevelLayout/WestBoostPadRockClusterA");
+                var westRockB = root.transform.Find("RuntimeLevelLayout/WestBoostPadRockClusterB");
+                var eastRockA = root.transform.Find("RuntimeLevelLayout/EastBoostPadRockClusterA");
+                var eastRockB = root.transform.Find("RuntimeLevelLayout/EastBoostPadRockClusterB");
+
+                Assert.That(westPad, Is.Not.Null);
+                Assert.That(eastPad, Is.Not.Null);
+                Assert.That(westRockA, Is.Not.Null);
+                Assert.That(westRockB, Is.Not.Null);
+                Assert.That(eastRockA, Is.Not.Null);
+                Assert.That(eastRockB, Is.Not.Null);
+                Assert.Less(westRockA.position.x, westPad.position.x);
+                Assert.Less(westRockB.position.x, westPad.position.x);
+                Assert.Greater(eastRockA.position.x, eastPad.position.x);
+                Assert.Greater(eastRockB.position.x, eastPad.position.x);
+            }
+            finally
+            {
+                Object.DestroyImmediate(root);
+            }
+        }
+
+        [Test]
+        public void Build_RampsConnectBaseAndTopLandingsForTwoWayTraversal()
+        {
+            var root = new GameObject("TestRoot");
+            try
+            {
+                var plan = ExpeditionLevelLayoutBuilder.CreatePlan(CreateDistrict(10f));
+
+                ExpeditionLevelLayoutBuilder.Build(root.transform, plan, Color.blue);
+
+                AssertRampConnectsLandings(
+                    root.transform.Find("RuntimeLevelLayout/WestRamp"),
+                    root.transform.Find("RuntimeLevelLayout/WestRampBaseLanding"),
+                    root.transform.Find("RuntimeLevelLayout/WestRampTopLanding"));
+                AssertRampConnectsLandings(
+                    root.transform.Find("RuntimeLevelLayout/EastRamp"),
+                    root.transform.Find("RuntimeLevelLayout/EastRampBaseLanding"),
+                    root.transform.Find("RuntimeLevelLayout/EastRampTopLanding"));
+            }
+            finally
+            {
+                Object.DestroyImmediate(root);
+            }
+        }
+
         private static DistrictDef CreateDistrict(float pickupSpawnRadius)
         {
             var district = ScriptableObject.CreateInstance<DistrictDef>();
             district.pickupSpawnRadius = pickupSpawnRadius;
             return district;
+        }
+
+        private static void AssertRampConnectsLandings(Transform ramp, Transform baseLanding, Transform topLanding)
+        {
+            Assert.That(ramp, Is.Not.Null);
+            Assert.That(baseLanding, Is.Not.Null);
+            Assert.That(topLanding, Is.Not.Null);
+
+            var rampScale = ramp.localScale;
+            var endpointA = ramp.TransformPoint(new Vector3(0f, rampScale.y * 0.5f, rampScale.z * 0.5f));
+            var endpointB = ramp.TransformPoint(new Vector3(0f, rampScale.y * 0.5f, -rampScale.z * 0.5f));
+            var baseTop = baseLanding.position.y + baseLanding.localScale.y * 0.5f;
+            var topTop = topLanding.position.y + topLanding.localScale.y * 0.5f;
+
+            var lowerEndpoint = endpointA.y <= endpointB.y ? endpointA : endpointB;
+            var upperEndpoint = endpointA.y > endpointB.y ? endpointA : endpointB;
+
+            Assert.That(Mathf.Abs(lowerEndpoint.y - baseTop), Is.LessThanOrEqualTo(0.28f));
+            Assert.That(Mathf.Abs(upperEndpoint.y - topTop), Is.LessThanOrEqualTo(0.28f));
+            Assert.That(lowerEndpoint.z, Is.LessThan(topLanding.position.z));
+            Assert.That(upperEndpoint.z, Is.GreaterThan(baseLanding.position.z));
         }
     }
 }

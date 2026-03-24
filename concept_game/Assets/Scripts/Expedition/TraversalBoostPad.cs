@@ -17,6 +17,10 @@ namespace MossHarbor.Expedition
         private float _nextTriggerTime;
         private ExpeditionDirector _director;
 
+        public float BoostStrength => boostStrength;
+        public float VerticalLift => verticalLift;
+        public float CooldownSeconds => cooldownSeconds;
+
         public void Configure(Vector3 direction, float strength, float lift, Transform visual = null)
         {
             boostDirection = direction;

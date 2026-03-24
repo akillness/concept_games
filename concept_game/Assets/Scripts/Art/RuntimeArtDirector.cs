@@ -1,5 +1,6 @@
 using MossHarbor.Core;
 using MossHarbor.Data;
+using MossHarbor.Expedition;
 using UnityEngine;
 using Object = UnityEngine.Object;
 
@@ -103,12 +104,52 @@ namespace MossHarbor.Art
             }
         }
 
+        private readonly struct ExpeditionBackdropProfile
+        {
+            public ExpeditionBackdropProfile(
+                string primaryBackdrop,
+                string secondaryBackdrop,
+                string entryPath,
+                string patchPrimary,
+                string patchSecondary,
+                float primaryScale,
+                float secondaryScale,
+                float patchScale,
+                Color signalTint)
+            {
+                PrimaryBackdrop = primaryBackdrop;
+                SecondaryBackdrop = secondaryBackdrop;
+                EntryPath = entryPath;
+                PatchPrimary = patchPrimary;
+                PatchSecondary = patchSecondary;
+                PrimaryScale = primaryScale;
+                SecondaryScale = secondaryScale;
+                PatchScale = patchScale;
+                SignalTint = signalTint;
+            }
+
+            public string PrimaryBackdrop { get; }
+            public string SecondaryBackdrop { get; }
+            public string EntryPath { get; }
+            public string PatchPrimary { get; }
+            public string PatchSecondary { get; }
+            public float PrimaryScale { get; }
+            public float SecondaryScale { get; }
+            public float PatchScale { get; }
+            public Color SignalTint { get; }
+        }
+
         public static void DecorateExpedition(Transform parent)
         {
-            DecorateExpedition(parent, null);
+            DecorateExpedition(parent, null, null);
         }
 
         public static void DecorateExpedition(Transform parent, MossHarbor.Data.DistrictDef district)
+        {
+            DecorateExpedition(parent, district, null);
+        }
+
+        public static void DecorateExpedition(Transform parent, MossHarbor.Data.DistrictDef district, ExpeditionLevelLayoutPlan layoutPlan)
         {
             if (parent == null)
             {
@@ -119,22 +160,8 @@ namespace MossHarbor.Art
             ClearChildren(root);
             ApplyExpeditionAtmosphere(district);
 
-            SpawnDecor(root, ArtResourcePaths.EnvironmentVillagePlatform, "ExpeditionBase", new Vector3(0f, -0.04f, 5.4f), new Vector3(0f, 0f, 0f), Vector3.one * 1.18f);
-            SpawnDecor(root, ArtResourcePaths.EnvironmentRoadWood, "ExpeditionPathEntry", new Vector3(0f, -0.02f, -7.5f), new Vector3(0f, 0f, 0f), Vector3.one * 1.2f);
-            SpawnDecor(root, ArtResourcePaths.EnvironmentRoadWood, "ExpeditionPathMid", new Vector3(0f, -0.02f, -2.5f), new Vector3(0f, 0f, 0f), Vector3.one * 1.18f);
-            SpawnDecor(root, ArtResourcePaths.EnvironmentRoadCobble, "ExpeditionBrokenRoadA", new Vector3(0.8f, -0.02f, 3.4f), new Vector3(0f, 12f, 0f), Vector3.one * 1.05f);
-            SpawnDecor(root, ArtResourcePaths.EnvironmentRoadCobble, "ExpeditionBrokenRoadB", new Vector3(1.2f, -0.02f, 8.4f), new Vector3(0f, -10f, 0f), Vector3.one * 0.82f);
-            SpawnDecor(root, ArtResourcePaths.EnvironmentMudPatch, "ExpeditionMudA", new Vector3(6.1f, -0.02f, 3.8f), new Vector3(0f, 20f, 0f), Vector3.one * 1f);
-            SpawnDecor(root, ArtResourcePaths.EnvironmentMudPatch, "ExpeditionMudB", new Vector3(-5.6f, -0.02f, 3.1f), new Vector3(0f, -24f, 0f), Vector3.one * 0.96f);
-            SpawnDecor(root, ArtResourcePaths.EnvironmentMudPatch, "ExpeditionMudC", new Vector3(4.8f, -0.02f, 10.2f), new Vector3(0f, 42f, 0f), Vector3.one * 0.72f);
-            SpawnDecor(root, ArtResourcePaths.EnvironmentPier, "ExpeditionPier", new Vector3(-9.6f, -0.02f, 11.2f), new Vector3(0f, 32f, 0f), Vector3.one * 0.56f);
-            SpawnDecor(root, ArtResourcePaths.EnvironmentHubIsland, "ExpeditionIsland", new Vector3(9.8f, -0.05f, 10.8f), new Vector3(0f, -18f, 0f), Vector3.one * 0.24f);
-            SpawnDecor(root, ArtResourcePaths.EnvironmentRockCluster, "ExpeditionRockClusterA", new Vector3(7.1f, 0f, 6.2f), new Vector3(0f, -42f, 0f), Vector3.one * 0.28f);
-            SpawnDecor(root, ArtResourcePaths.EnvironmentRockCluster, "ExpeditionRockClusterB", new Vector3(-9.4f, 0f, 8.8f), new Vector3(0f, 68f, 0f), Vector3.one * 0.2f);
-            SpawnDecor(root, ArtResourcePaths.EnvironmentMossPatch, "ExpeditionMossPatchA", new Vector3(3.6f, 0.02f, 11.2f), new Vector3(0f, 0f, 0f), Vector3.one * 0.68f);
-            SpawnDecor(root, ArtResourcePaths.EnvironmentMossPatch, "ExpeditionMossPatchB", new Vector3(-4.2f, 0.02f, 7.8f), new Vector3(0f, 75f, 0f), Vector3.one * 0.58f);
-            CreateLantern(root, "ExpeditionSignalA", new Vector3(-2.4f, 0f, 2.4f), new Color(0.52f, 0.92f, 0.8f, 1f), 5.6f, 1.8f);
-            CreateLantern(root, "ExpeditionSignalB", new Vector3(3.8f, 0f, 10.6f), new Color(0.38f, 0.74f, 0.66f, 1f), 4.8f, 1.6f);
+            layoutPlan ??= ExpeditionLevelLayoutBuilder.CreatePlan(district);
+            DecorateExpeditionBackdrop(root, district, layoutPlan);
             StyleGroundPlane(new Color(0.22f, 0.33f, 0.31f, 1f), new Vector3(2.35f, 1f, 2.65f));
         }
 
@@ -260,6 +287,107 @@ namespace MossHarbor.Art
             StabilizeRigidbodies(instance);
             NormalizeRendererMaterials(instance);
             return instance;
+        }
+
+        private static void DecorateExpeditionBackdrop(Transform root, DistrictDef district, ExpeditionLevelLayoutPlan layoutPlan)
+        {
+            if (root == null || layoutPlan == null)
+            {
+                return;
+            }
+
+            var profile = ResolveExpeditionBackdropProfile(district);
+            var shoulderX = layoutPlan.halfWidth * 0.74f;
+            var edgeX = layoutPlan.halfWidth * 0.9f;
+            var southZ = -layoutPlan.halfLength * 0.34f;
+            var lowerMidZ = layoutPlan.halfLength * 0.04f;
+            var upperMidZ = layoutPlan.halfLength * 0.44f;
+            var northZ = layoutPlan.halfLength * 0.76f;
+            var backdropZ = layoutPlan.beaconPosition.z + 3.2f;
+
+            SpawnDecor(root, profile.EntryPath, "ExpeditionShoulderEntryWest", new Vector3(-shoulderX, -0.02f, southZ), new Vector3(0f, 12f, 0f), new Vector3(0.82f, 0.82f, 0.9f));
+            SpawnDecor(root, profile.EntryPath, "ExpeditionShoulderEntryEast", new Vector3(shoulderX, -0.02f, southZ + 1.5f), new Vector3(0f, -14f, 0f), new Vector3(0.84f, 0.84f, 0.94f));
+            SpawnDecor(root, profile.PatchPrimary, "ExpeditionShoulderPatchWest", new Vector3(-edgeX, -0.02f, lowerMidZ), new Vector3(0f, 38f, 0f), Vector3.one * profile.PatchScale);
+            SpawnDecor(root, profile.PatchPrimary, "ExpeditionShoulderPatchEast", new Vector3(edgeX, -0.02f, upperMidZ), new Vector3(0f, -28f, 0f), Vector3.one * (profile.PatchScale * 0.92f));
+            SpawnDecor(root, profile.PatchSecondary, "ExpeditionFlankAccentWest", new Vector3(-shoulderX, 0f, northZ), new Vector3(0f, 132f, 0f), Vector3.one * (profile.PatchScale * 0.66f));
+            SpawnDecor(root, profile.PatchSecondary, "ExpeditionFlankAccentEast", new Vector3(shoulderX, 0f, northZ - 1.8f), new Vector3(0f, -114f, 0f), Vector3.one * (profile.PatchScale * 0.62f));
+            SpawnDecor(root, profile.PrimaryBackdrop, "ExpeditionBackdropWest", new Vector3(-edgeX, -0.05f, backdropZ), new Vector3(0f, 24f, 0f), Vector3.one * profile.PrimaryScale);
+            SpawnDecor(root, profile.PrimaryBackdrop, "ExpeditionBackdropEast", new Vector3(edgeX, -0.05f, backdropZ - 1.6f), new Vector3(0f, -32f, 0f), Vector3.one * (profile.PrimaryScale * 0.96f));
+            SpawnDecor(root, profile.SecondaryBackdrop, "ExpeditionBackdropCenterLeft", new Vector3(-shoulderX * 0.56f, -0.04f, backdropZ + 1.3f), new Vector3(0f, -8f, 0f), Vector3.one * profile.SecondaryScale);
+            SpawnDecor(root, profile.SecondaryBackdrop, "ExpeditionBackdropCenterRight", new Vector3(shoulderX * 0.56f, -0.04f, backdropZ + 0.4f), new Vector3(0f, 16f, 0f), Vector3.one * (profile.SecondaryScale * 0.94f));
+
+            CreateLantern(root, "ExpeditionSignalWest", new Vector3(-shoulderX, 0f, layoutPlan.halfLength * 0.18f), profile.SignalTint, 4.8f, 1.55f);
+            CreateLantern(root, "ExpeditionSignalEast", new Vector3(shoulderX, 0f, layoutPlan.halfLength * 0.58f), Color.Lerp(profile.SignalTint, Color.white, 0.12f), 4.8f, 1.5f);
+            CreateLantern(root, "ExpeditionSignalNorthWest", new Vector3(-edgeX * 0.88f, 0f, northZ + 1f), Color.Lerp(profile.SignalTint, district != null ? district.districtColor : ExpeditionSunColor, 0.35f), 4.2f, 1.35f);
+            CreateLantern(root, "ExpeditionSignalNorthEast", new Vector3(edgeX * 0.88f, 0f, northZ - 0.2f), Color.Lerp(profile.SignalTint, district != null ? district.districtColor : ExpeditionSunColor, 0.28f), 4.2f, 1.35f);
+        }
+
+        private static ExpeditionBackdropProfile ResolveExpeditionBackdropProfile(DistrictDef district)
+        {
+            var districtId = district != null ? district.districtId : string.Empty;
+            return districtId switch
+            {
+                "reed_fields" => new ExpeditionBackdropProfile(
+                    ArtResourcePaths.EnvironmentMossPatch,
+                    ArtResourcePaths.EnvironmentPier,
+                    ArtResourcePaths.EnvironmentRoadWood,
+                    ArtResourcePaths.EnvironmentMossPatch,
+                    ArtResourcePaths.EnvironmentMudPatch,
+                    0.92f,
+                    0.56f,
+                    0.88f,
+                    new Color(0.54f, 0.88f, 0.58f, 1f)),
+                "tidal_vault" => new ExpeditionBackdropProfile(
+                    ArtResourcePaths.EnvironmentVillagePlatform,
+                    ArtResourcePaths.EnvironmentHubIsland,
+                    ArtResourcePaths.EnvironmentRoadCobble,
+                    ArtResourcePaths.EnvironmentRockCluster,
+                    ArtResourcePaths.EnvironmentMossPatch,
+                    0.72f,
+                    0.38f,
+                    0.52f,
+                    new Color(0.42f, 0.72f, 0.94f, 1f)),
+                "glass_narrows" => new ExpeditionBackdropProfile(
+                    ArtResourcePaths.EnvironmentRockCluster,
+                    ArtResourcePaths.EnvironmentHubIsland,
+                    ArtResourcePaths.EnvironmentRoadCobble,
+                    ArtResourcePaths.EnvironmentRockCluster,
+                    ArtResourcePaths.EnvironmentMossPatch,
+                    0.56f,
+                    0.28f,
+                    0.44f,
+                    new Color(0.76f, 0.88f, 0.96f, 1f)),
+                "sunken_arcade" => new ExpeditionBackdropProfile(
+                    ArtResourcePaths.EnvironmentVillagePlatform,
+                    ArtResourcePaths.EnvironmentRoadCobble,
+                    ArtResourcePaths.EnvironmentRoadCobble,
+                    ArtResourcePaths.EnvironmentMudPatch,
+                    ArtResourcePaths.EnvironmentRockCluster,
+                    0.62f,
+                    0.74f,
+                    0.56f,
+                    new Color(0.94f, 0.72f, 0.38f, 1f)),
+                "lighthouse_crown" => new ExpeditionBackdropProfile(
+                    ArtResourcePaths.EnvironmentPier,
+                    ArtResourcePaths.EnvironmentVillagePlatform,
+                    ArtResourcePaths.EnvironmentRoadWood,
+                    ArtResourcePaths.EnvironmentRockCluster,
+                    ArtResourcePaths.EnvironmentMossPatch,
+                    0.86f,
+                    0.46f,
+                    0.52f,
+                    new Color(0.96f, 0.9f, 0.68f, 1f)),
+                _ => new ExpeditionBackdropProfile(
+                    ArtResourcePaths.EnvironmentPier,
+                    ArtResourcePaths.EnvironmentVillagePlatform,
+                    ArtResourcePaths.EnvironmentRoadWood,
+                    ArtResourcePaths.EnvironmentMudPatch,
+                    ArtResourcePaths.EnvironmentRockCluster,
+                    0.82f,
+                    0.44f,
+                    0.54f,
+                    new Color(0.52f, 0.92f, 0.8f, 1f)),
+            };
         }
 
         private static Transform EnsureChildRoot(Transform parent, string childName)

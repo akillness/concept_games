@@ -42,8 +42,10 @@ namespace MossHarbor.Tests.PlayMode
                 Assert.That(boosted, Is.True);
                 var verticalSpeed = (float)GetPrivateField(playerController, "_verticalSpeed");
                 var externalVelocity = (Vector3)GetPrivateField(playerController, "_externalVelocity");
-                Assert.GreaterOrEqual(verticalSpeed, 9.5f);
-                Assert.Greater(externalVelocity.z, 20f);
+                Assert.GreaterOrEqual(verticalSpeed, 6.5f);
+                Assert.LessOrEqual(verticalSpeed, 6.7f);
+                Assert.GreaterOrEqual(externalVelocity.z, 18f);
+                Assert.LessOrEqual(externalVelocity.z, 18.2f);
             }
             finally
             {
@@ -86,7 +88,8 @@ namespace MossHarbor.Tests.PlayMode
                 yield return null;
 
                 var externalVelocity = (Vector3)GetPrivateField(playerController, "_externalVelocity");
-                Assert.Greater(externalVelocity.z, 15f);
+                Assert.GreaterOrEqual(externalVelocity.z, 18f);
+                Assert.LessOrEqual(externalVelocity.z, 18.2f);
                 Assert.Greater(landing.position.z, startPosition.z + 6f);
                 Assert.Greater(landingMarker.position.y, landing.position.y);
             }
